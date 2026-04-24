@@ -4,4 +4,4 @@ PHP library for integrating [Nexi XPay](https://developer.nexigroup.com/) via th
 
 ## License
 
-MIT
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
