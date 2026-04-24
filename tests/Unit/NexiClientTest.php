@@ -7,6 +7,7 @@ use Hval\Nexi\NexiClient;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Webhook\WebhookHandler;
+use InvalidArgumentException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -46,17 +47,17 @@ class NexiClientTest extends TestCase
         $this->assertInstanceOf(WebhookHandler::class, $this->client->webhooks());
     }
 
-    public function testUnknownEnvironmentFallsBackToProduction(): void
+    public function testUnknownEnvironmentThrowsInvalidArgumentException(): void
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $psr17 = new Psr17Factory();
-        $client = new NexiClient(
+        new NexiClient(
             'test-api-key',
             'unknown-env',
             $this->createMock(ClientInterface::class),
             new HttpFactory($psr17, $psr17)
         );
-
-        $this->assertInstanceOf(NexiClient::class, $client);
     }
 
     public function testSandboxAndProductionAreDistinctEnvironments(): void

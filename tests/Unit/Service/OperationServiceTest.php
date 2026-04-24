@@ -52,7 +52,7 @@ class OperationServiceTest extends TestCase
             ->willReturn($this->makeSuccessResponse('REFUNDED'))
         ;
 
-        $response = $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR'));
+        $response = $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
 
         $this->assertInstanceOf(OperationResponse::class, $response);
         $this->assertSame('REFUNDED', $response->getOperationResult());
@@ -67,14 +67,14 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $data = json_decode((string) $request->getBody(), true);
 
-                return $data['amount'] === 500
+                return $data['amount'] === '500'
                     && $data['currency'] === 'EUR'
                     && $data['description'] === 'Reso';
             }))
             ->willReturn($this->makeSuccessResponse('REFUNDED'))
         ;
 
-        $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR', 'Reso'));
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR', 'Reso'));
     }
 
     public function testCaptureCallsCorrectEndpoint(): void
@@ -88,7 +88,7 @@ class OperationServiceTest extends TestCase
             ->willReturn($this->makeSuccessResponse('EXECUTED'))
         ;
 
-        $response = $this->service->capture(self::OPERATION_ID, new CaptureRequest(3545, 'EUR'));
+        $response = $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'));
 
         $this->assertSame('EXECUTED', $response->getOperationResult());
         $this->assertTrue($response->isSuccessful());
@@ -120,7 +120,7 @@ class OperationServiceTest extends TestCase
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR'));
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
 
     public function testRefundThrowsApiExceptionOn500(): void
@@ -135,7 +135,7 @@ class OperationServiceTest extends TestCase
         $this->expectException(ApiException::class);
         $this->expectExceptionCode(500);
 
-        $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR'));
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
 
     public function testRefundThrowsApiExceptionOn500WithoutErrorsKey(): void
@@ -147,7 +147,7 @@ class OperationServiceTest extends TestCase
 
         $this->expectException(\Hval\Nexi\Exception\ApiException::class);
 
-        $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR'));
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
 
     public function testRefundThrowsInvalidRequestExceptionOn400WithoutErrorsKey(): void
@@ -159,7 +159,7 @@ class OperationServiceTest extends TestCase
 
         $this->expectException(\Hval\Nexi\Exception\InvalidRequestException::class);
 
-        $this->service->refund(self::OPERATION_ID, new RefundRequest(500, 'EUR'));
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
 
     public function testOperationIdIsUrlEncoded(): void
@@ -175,7 +175,7 @@ class OperationServiceTest extends TestCase
             ->willReturn($this->makeSuccessResponse('REFUNDED'))
         ;
 
-        $this->service->refund($operationId, new RefundRequest(500, 'EUR'));
+        $this->service->refund($operationId, new RefundRequest('500', 'EUR'));
     }
 
     private function makeSuccessResponse(string $result): Response

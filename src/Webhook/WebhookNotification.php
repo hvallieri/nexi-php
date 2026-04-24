@@ -71,6 +71,11 @@ class WebhookNotification
         return $this->operationResult === 'AUTHORIZED';
     }
 
+    public function isExecuted(): bool
+    {
+        return $this->operationResult === 'EXECUTED';
+    }
+
     /**
      * @return array<string, mixed>
      */

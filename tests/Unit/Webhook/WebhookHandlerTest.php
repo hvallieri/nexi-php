@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
  */
 class WebhookHandlerTest extends TestCase
 {
-    private const API_KEY = 'test-api-key-uuid';
     private const TOKEN = 'securetoken123abc';
 
     /** @var WebhookHandler */
@@ -22,7 +21,7 @@ class WebhookHandlerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->handler = new WebhookHandler(self::API_KEY);
+        $this->handler = new WebhookHandler();
     }
 
     public function testHandleReturnsNotificationWhenTokenMatches(): void
@@ -85,6 +84,37 @@ class WebhookHandlerTest extends TestCase
             'operationId' => 'OP-999',
             'operationType' => 'AUTHORIZATION',
             'operationResult' => 'DECLINED',
+            'securityToken' => self::TOKEN,
+        ]);
+
+        $notification = $this->handler->handle($payload, self::TOKEN);
+
+        $this->assertFalse($notification->isAuthorized());
+    }
+
+    public function testIsExecutedReturnsTrueForExecuted(): void
+    {
+        $payload = json_encode([
+            'orderId' => 'ORD-001',
+            'operationId' => 'OP-999',
+            'operationType' => 'PAYMENT',
+            'operationResult' => 'EXECUTED',
+            'securityToken' => self::TOKEN,
+        ]);
+
+        $notification = $this->handler->handle($payload, self::TOKEN);
+
+        $this->assertTrue($notification->isExecuted());
+        $this->assertFalse($notification->isAuthorized());
+    }
+
+    public function testIsAuthorizedReturnsFalseForExecuted(): void
+    {
+        $payload = json_encode([
+            'orderId' => 'ORD-001',
+            'operationId' => 'OP-999',
+            'operationType' => 'PAYMENT',
+            'operationResult' => 'EXECUTED',
             'securityToken' => self::TOKEN,
         ]);
 

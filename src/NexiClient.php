@@ -6,6 +6,7 @@ use Hval\Nexi\Http\HttpFactoryInterface;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Webhook\WebhookHandler;
+use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
 
 class NexiClient
@@ -33,11 +34,13 @@ class NexiClient
         ClientInterface $httpClient,
         HttpFactoryInterface $factory
     ) {
-        $baseUrl = self::BASE_URLS[$environment] ?? self::BASE_URLS[self::ENV_PRODUCTION];
+        if (isset(self::BASE_URLS[$environment]) === false) {
+            throw new InvalidArgumentException($environment . ' is not a valid Environment');
+        }
 
-        $this->orders = new OrderService($httpClient, $factory, $apiKey, $baseUrl);
-        $this->operations = new OperationService($httpClient, $factory, $apiKey, $baseUrl);
-        $this->webhookHandler = new WebhookHandler($apiKey);
+        $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->operations = new OperationService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->webhookHandler = new WebhookHandler();
     }
 
     public function orders(): OrderService

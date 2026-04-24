@@ -43,8 +43,12 @@ class OrderResponse implements ResponseModelInterface
 
     public function isAuthorized(): bool
     {
-        return $this->status === self::ORDER_STATUS_AUTHORIZED
-            || $this->status === self::ORDER_STATUS_EXECUTED;
+        return $this->status === self::ORDER_STATUS_AUTHORIZED;
+    }
+
+    public function isExecuted(): bool
+    {
+        return $this->status === self::ORDER_STATUS_EXECUTED;
     }
 
     /**

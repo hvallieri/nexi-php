@@ -6,7 +6,7 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class CaptureRequest implements RequestModelInterface
 {
-    /** @var int */
+    /** @var string */
     private $amount;
 
     /** @var string */
@@ -15,7 +15,7 @@ class CaptureRequest implements RequestModelInterface
     /** @var string|null */
     private $description;
 
-    public function __construct(int $amount, string $currency, ?string $description = null)
+    public function __construct(string $amount, string $currency, ?string $description = null)
     {
         $this->amount = $amount;
         $this->currency = $currency;

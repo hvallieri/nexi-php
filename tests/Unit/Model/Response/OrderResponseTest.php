@@ -33,11 +33,25 @@ class OrderResponseTest extends TestCase
         $this->assertTrue($response->isAuthorized());
     }
 
-    public function testIsAuthorizedWithExecutedStatus(): void
+    public function testIsAuthorizedReturnsFalseForExecuted(): void
     {
         $response = OrderResponse::fromArray(['orderId' => 'X', 'orderStatus' => 'EXECUTED']);
 
-        $this->assertTrue($response->isAuthorized());
+        $this->assertFalse($response->isAuthorized());
+    }
+
+    public function testIsExecutedWithExecutedStatus(): void
+    {
+        $response = OrderResponse::fromArray(['orderId' => 'X', 'orderStatus' => 'EXECUTED']);
+
+        $this->assertTrue($response->isExecuted());
+    }
+
+    public function testIsExecutedReturnsFalseForAuthorized(): void
+    {
+        $response = OrderResponse::fromArray(['orderId' => 'X', 'orderStatus' => 'AUTHORIZED']);
+
+        $this->assertFalse($response->isExecuted());
     }
 
     public function testIsAuthorizedWithDeclinedStatus(): void

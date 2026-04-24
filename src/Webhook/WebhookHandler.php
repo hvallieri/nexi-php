@@ -6,14 +6,6 @@ use Hval\Nexi\Exception\WebhookSignatureException;
 
 class WebhookHandler
 {
-    /** @var string */
-    private $apiKey;
-
-    public function __construct(string $apiKey)
-    {
-        $this->apiKey = $apiKey;
-    }
-
     /**
      * Validates and decodes an incoming webhook notification from Nexi.
      *

@@ -63,6 +63,7 @@ class OperationService extends AbstractService
      * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
      *
      * @throws NexiException
+     * @throws ClientExceptionInterface
      */
     public function cancel(string $operationId, CancelRequest $request): OperationResponse
     {
