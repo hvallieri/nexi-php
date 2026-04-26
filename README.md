@@ -114,15 +114,48 @@ $nexi->operations()->capture('OPERATION-ID', new CaptureRequest(1000, 'EUR'));
 $nexi->operations()->cancel('OPERATION-ID', new CancelRequest());
 ```
 
+### 5. Recurring payments
+
+Pass a `Recurrence` object as the last argument of `PaymentSession` to set up recurring payments:
+
+```php
+use Hval\Nexi\Model\Request\PaymentSession;
+use Hval\Nexi\Model\Request\Recurrence;
+
+$recurrence = new Recurrence(
+    Recurrence::ACTION_CONTRACT_CREATION,
+    null,
+    Recurrence::CONTRACT_TYPE_MIT_SCHEDULED
+);
+
+$session = new PaymentSession(
+    PaymentSession::ACTION_PAY,
+    '1000',
+    'ita',
+    'https://yoursite.com/payment/result',
+    'https://yoursite.com/payment/cancel',
+    null,
+    null,
+    null,
+    null,
+    $recurrence
+);
+```
+
+Available actions: `ACTION_NO_RECURRING`, `ACTION_SUBSEQUENT_PAYMENT`, `ACTION_CONTRACT_CREATION`, `ACTION_CARD_SUBSTITUTION`.
+
+Available contract types: `CONTRACT_TYPE_MIT_UNSCHEDULED`, `CONTRACT_TYPE_MIT_SCHEDULED`, `CONTRACT_TYPE_CIT`.
+
 ## Exceptions
 
-| Exception | HTTP Status |
+All exceptions extend `NexiException`, which can be used as a catch-all.
+
+| Exception | When |
 |---|---|
-| `AuthenticationException` | 401 |
-| `InvalidRequestException` | 400 |
-| `ApiException` | 4xx (other than 400 and 401), 5xx |
-| `WebhookSignatureException` | — (token mismatch) |
-| `NexiException` | Base class |
+| `AuthenticationException` | 401 — invalid API key |
+| `InvalidRequestException` | 400 — malformed request |
+| `ApiException` | other 4xx / 5xx responses |
+| `WebhookSignatureException` | security token mismatch |
 
 ## Running Tests
 
