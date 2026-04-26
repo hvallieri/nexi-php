@@ -13,10 +13,21 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
+      - name: Determine PHP version from tag
+        id: php-version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          MAJOR=$(echo "$TAG" | sed 's/^v//' | cut -d. -f1)
+          if [ "$MAJOR" = "1" ]; then
+            echo "version=7.2" >> $GITHUB_OUTPUT
+          else
+            echo "version=8.2" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: ${{ steps.php-version.outputs.version }}
           extensions: curl, json
           coverage: none
 
