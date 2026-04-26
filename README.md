@@ -8,6 +8,22 @@ PHP library for integrating [Nexi XPay](https://developer.nexigroup.com/) via th
 - Any PSR-18 compatible HTTP client (e.g. `guzzlehttp/guzzle`, `symfony/http-client`)
 - A PSR-7 / PSR-17 implementation (e.g. `nyholm/psr7`, `guzzlehttp/psr7`)
 
+## Installation
+
+```bash
+composer require hval/nexi-php
+```
+
+Install a PSR-18 client if you don't already have one:
+
+```bash
+# Guzzle
+composer require guzzlehttp/guzzle
+
+# Symfony HttpClient
+composer require symfony/http-client nyholm/psr7
+```
+
 ## Quick Start
 
 ### 1. Instantiate the client
