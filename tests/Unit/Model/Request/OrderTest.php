@@ -51,6 +51,8 @@ class OrderTest extends TestCase
         $this->assertArrayNotHasKey('description', $result);
         $this->assertArrayNotHasKey('customField', $result);
         $this->assertArrayNotHasKey('customerInfo', $result);
+        $this->assertArrayNotHasKey('termsAndConditionsIds', $result);
+        $this->assertArrayNotHasKey('transactionSummary', $result);
     }
 
     public function testToArrayIncludesCustomerInfo(): void
@@ -62,5 +64,24 @@ class OrderTest extends TestCase
 
         $this->assertArrayHasKey('customerInfo', $result);
         $this->assertSame('Mario Rossi', $result['customerInfo']['cardHolderName']);
+    }
+
+    public function testToArrayWithTermsAndConditionsIds(): void
+    {
+        $ids = ['uuid-1111', 'uuid-2222'];
+        $order = new Order('ORD-001', '1000', 'EUR', null, null, null, null, $ids);
+
+        $result = $order->toArray();
+
+        $this->assertSame($ids, $result['termsAndConditionsIds']);
+    }
+
+    public function testToArrayWithTransactionSummary(): void
+    {
+        $order = new Order('ORD-001', '1000', 'EUR', null, null, null, null, null, 'Acquisto prodotto XYZ');
+
+        $result = $order->toArray();
+
+        $this->assertSame('Acquisto prodotto XYZ', $result['transactionSummary']);
     }
 }
