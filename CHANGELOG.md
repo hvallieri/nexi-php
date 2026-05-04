@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-05-05
+
+### Added
+
+- `CustomerInfo`: added `mobilePhoneCountryCode`, `mobilePhone`, `homePhone` and `workPhone` fields
+- `Order`: added `termsAndConditionsIds` (list of accepted T&C UUIDs) and `transactionSummary`
+- `RefundRequest`: `amount` and `currency` are now optional — omitting both triggers a full refund on the Nexi side
+- `CaptureRequest`: `amount` and `currency` are now optional — omitting both triggers a full capture on the Nexi side
+
 ## [1.0.1] - 2026-05-05
 
 ### Fixed
