@@ -22,11 +22,11 @@ class HppResponseTest extends TestCase
         $this->assertSame('a1b2c3d4e5f6', $response->getSecurityToken());
     }
 
-    public function testFromArrayWithMissingKeysFallsBackToEmptyString(): void
+    public function testFromArrayWithMissingKeysReturnsNulls(): void
     {
         $response = HppResponse::fromArray([]);
 
-        $this->assertSame('', $response->getHostedPage());
-        $this->assertSame('', $response->getSecurityToken());
+        $this->assertNull($response->getHostedPage());
+        $this->assertNull($response->getSecurityToken());
     }
 }

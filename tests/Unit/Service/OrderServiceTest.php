@@ -177,7 +177,24 @@ class OrderServiceTest extends TestCase
                     && $request->getHeaderLine('X-Api-Key') === self::API_KEY;
             }))
             ->willReturn(new Response(200, [], json_encode([
-                'orderId' => 'ORD-001', 'orderStatus' => 'AUTHORIZED',
+                'orderStatus' => [
+                    'order' => [
+                        'orderId' => 'ORD-001',
+                        'authorizedAmount' => '1000',
+                        'capturedAmount' => '0',
+                        'lastOperationType' => 'AUTHORIZATION',
+                        'lastOperationTime' => '2024-01-01T12:00:00.000Z',
+                        'operations' => [
+                            [
+                                'operationId' => 'OP-001',
+                                'operationType' => 'AUTHORIZATION',
+                                'operationResult' => 'AUTHORIZED',
+                                'operationTime' => '2024-01-01T12:00:00.000Z',
+                            ],
+                        ],
+                    ],
+                    'warnings' => [],
+                ],
             ])))
         ;
 
@@ -218,6 +235,33 @@ class OrderServiceTest extends TestCase
         $this->service->createHpp($order, $session);
     }
 
+    public function testFindThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->find('ORD-001');
+    }
+
+    public function testFindThrowsApiExceptionOn500(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(500, [], json_encode([
+                'errors' => [['code' => 'GW0001', 'description' => 'Internal server error']],
+            ])))
+        ;
+
+        $this->expectException(\Hval\Nexi\Exception\ApiException::class);
+        $this->expectExceptionCode(500);
+
+        $this->service->find('ORD-001');
+    }
+
     public function testFindUrlEncodesOrderId(): void
     {
         $this->httpClient
@@ -227,7 +271,7 @@ class OrderServiceTest extends TestCase
                 return strpos((string) $request->getUri(), '/orders/ORD%2F001') !== false;
             }))
             ->willReturn(new Response(200, [], json_encode([
-                'orderId' => 'ORD/001', 'orderStatus' => 'AUTHORIZED',
+                'orderStatus' => ['order' => ['orderId' => 'ORD/001', 'operations' => []]],
             ])))
         ;
 
