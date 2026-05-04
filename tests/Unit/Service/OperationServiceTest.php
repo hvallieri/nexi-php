@@ -49,14 +49,14 @@ class OperationServiceTest extends TestCase
                 return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/refunds') !== false
                     && $request->getHeaderLine('X-Api-Key') === self::API_KEY;
             }))
-            ->willReturn($this->makeSuccessResponse('REFUNDED'))
+            ->willReturn($this->makeSuccessResponse())
         ;
 
         $response = $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
 
         $this->assertInstanceOf(OperationResponse::class, $response);
-        $this->assertSame('REFUNDED', $response->getOperationResult());
-        $this->assertTrue($response->isSuccessful());
+        $this->assertSame(self::OPERATION_ID, $response->getOperationId());
+        $this->assertNotNull($response->getOperationTime());
     }
 
     public function testRefundSendsCorrectBody(): void
@@ -71,7 +71,7 @@ class OperationServiceTest extends TestCase
                     && $data['currency'] === 'EUR'
                     && $data['description'] === 'Reso';
             }))
-            ->willReturn($this->makeSuccessResponse('REFUNDED'))
+            ->willReturn($this->makeSuccessResponse())
         ;
 
         $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR', 'Reso'));
@@ -85,13 +85,13 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/captures') !== false;
             }))
-            ->willReturn($this->makeSuccessResponse('EXECUTED'))
+            ->willReturn($this->makeSuccessResponse())
         ;
 
         $response = $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'));
 
-        $this->assertSame('EXECUTED', $response->getOperationResult());
-        $this->assertTrue($response->isSuccessful());
+        $this->assertSame(self::OPERATION_ID, $response->getOperationId());
+        $this->assertNotNull($response->getOperationTime());
     }
 
     public function testCancelCallsCorrectEndpoint(): void
@@ -102,13 +102,47 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/cancels') !== false;
             }))
-            ->willReturn($this->makeSuccessResponse('VOIDED'))
+            ->willReturn($this->makeSuccessResponse())
         ;
 
         $response = $this->service->cancel(self::OPERATION_ID, new CancelRequest());
 
-        $this->assertSame('VOIDED', $response->getOperationResult());
-        $this->assertTrue($response->isSuccessful());
+        $this->assertSame(self::OPERATION_ID, $response->getOperationId());
+        $this->assertNotNull($response->getOperationTime());
+    }
+
+    public function testCaptureSendsCorrectBody(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $data = json_decode((string) $request->getBody(), true);
+
+                return $data['amount'] === '3545'
+                    && $data['currency'] === 'EUR'
+                    && $data['description'] === 'Cattura ordine';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR', 'Cattura ordine'));
+    }
+
+    public function testCancelSendsCorrectBody(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $data = json_decode((string) $request->getBody(), true);
+
+                return $data['description'] === 'Annullato dal cliente';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest('Annullato dal cliente'));
     }
 
     public function testRefundThrowsAuthenticationExceptionOn401(): void
@@ -136,6 +170,60 @@ class OperationServiceTest extends TestCase
         $this->expectExceptionCode(500);
 
         $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
+    }
+
+    public function testCaptureThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'));
+    }
+
+    public function testCaptureThrowsApiExceptionOn500(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(500, [], json_encode([
+                'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
+            ])))
+        ;
+
+        $this->expectException(ApiException::class);
+        $this->expectExceptionCode(500);
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'));
+    }
+
+    public function testCancelThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest());
+    }
+
+    public function testCancelThrowsApiExceptionOn500(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(500, [], json_encode([
+                'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
+            ])))
+        ;
+
+        $this->expectException(ApiException::class);
+        $this->expectExceptionCode(500);
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest());
     }
 
     public function testRefundThrowsApiExceptionOn500WithoutErrorsKey(): void
@@ -172,18 +260,17 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 return strpos((string) $request->getUri(), '/operations/OP%2F12%20345/refunds') !== false;
             }))
-            ->willReturn($this->makeSuccessResponse('REFUNDED'))
+            ->willReturn($this->makeSuccessResponse())
         ;
 
         $this->service->refund($operationId, new RefundRequest('500', 'EUR'));
     }
 
-    private function makeSuccessResponse(string $result): Response
+    private function makeSuccessResponse(): Response
     {
         return new Response(200, [], json_encode([
             'operationId' => self::OPERATION_ID,
-            'operationType' => 'REFUND',
-            'operationResult' => $result,
+            'operationTime' => '2024-01-01T12:00:00.001Z',
         ]));
     }
 }
