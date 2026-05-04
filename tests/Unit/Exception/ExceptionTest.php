@@ -3,6 +3,7 @@
 namespace Hval\Nexi\Tests\Unit\Exception;
 
 use Hval\Nexi\Exception\ApiException;
+use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Exception\WebhookSignatureException;
@@ -11,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  * @covers ApiException
+ * @covers AuthenticationException
  * @covers InvalidRequestException
  * @covers WebhookSignatureException
  */
@@ -97,6 +99,21 @@ class ExceptionTest extends TestCase
 
         $this->assertStringContainsString('[GW0001]', $e->getMessage());
         $this->assertStringContainsString('Invalid merchant URL', $e->getMessage());
+    }
+
+    public function testAuthenticationExceptionExtendsNexiException(): void
+    {
+        $e = new AuthenticationException('Invalid API key.', 401);
+
+        $this->assertInstanceOf(NexiException::class, $e);
+    }
+
+    public function testAuthenticationExceptionCarriesMessageAndCode(): void
+    {
+        $e = new AuthenticationException('Invalid API key.', 401);
+
+        $this->assertSame('Invalid API key.', $e->getMessage());
+        $this->assertSame(401, $e->getCode());
     }
 
     public function testWebhookSignatureExceptionExtendsNexiException(): void

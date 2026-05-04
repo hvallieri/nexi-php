@@ -91,10 +91,15 @@ $savedToken = '...'; // retrieved from your DB
 try {
     $notification = $nexi->webhooks()->handle($payload, $savedToken);
 
-    $order = $nexi->orders()->find($notification->getOrderId());
+    // Quick check directly on the notification
+    if ($notification->isAuthorized()) {
+        // Fetch the full order to confirm server-side
+        $order = $nexi->orders()->find($notification->getOrderId());
 
-    if ($order->isAuthorized()) {
-        // Order paid
+        if ($order->isAuthorized()) {
+            // Order confirmed — use $notification->getOperationId() for
+            // subsequent refund / capture operations
+        }
     }
 } catch (WebhookSignatureException $e) {
     http_response_code(400);
@@ -104,14 +109,22 @@ try {
 
 ### 4. Refund, capture, cancel
 
+Pass the `operationId` from the webhook notification (or from `OrderResponse::getOperations()`):
+
 ```php
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
 use Hval\Nexi\Model\Request\RefundRequest;
 
-$nexi->operations()->refund('OPERATION-ID', new RefundRequest(1000, 'EUR'));
-$nexi->operations()->capture('OPERATION-ID', new CaptureRequest(1000, 'EUR'));
-$nexi->operations()->cancel('OPERATION-ID', new CancelRequest());
+$operationId = $notification->getOperationId();
+
+$result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'));
+$result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'));
+$result = $nexi->operations()->cancel($operationId, new CancelRequest());
+
+// OperationResponse
+$result->getOperationId();   // ?string
+$result->getOperationTime(); // ?string
 ```
 
 ### 5. Recurring payments
@@ -146,16 +159,77 @@ Available actions: `ACTION_NO_RECURRING`, `ACTION_SUBSEQUENT_PAYMENT`, `ACTION_C
 
 Available contract types: `CONTRACT_TYPE_MIT_UNSCHEDULED`, `CONTRACT_TYPE_MIT_SCHEDULED`, `CONTRACT_TYPE_CIT`.
 
+## Response objects
+
+### `HppResponse` — `orders()->createHpp()`
+
+| Method               | Returns   |
+|----------------------|-----------|
+| `getHostedPage()`    | `?string` |
+| `getSecurityToken()` | `?string` |
+
+### `WebhookNotification` — `webhooks()->handle()`
+
+| Method                   | Returns                                     |
+|--------------------------|---------------------------------------------|
+| `getEventId()`           | `?string`                                   |
+| `getEventTime()`         | `?string`                                   |
+| `getSecurityToken()`     | `?string`                                   |
+| `getOrderId()`           | `?string`                                   |
+| `getOperationId()`       | `?string`                                   |
+| `getChannel()`           | `?string`                                   |
+| `getOperationType()`     | `?string`                                   |
+| `getOperationResult()`   | `?string`                                   |
+| `getOperationTime()`     | `?string`                                   |
+| `getPaymentMethod()`     | `?string`                                   |
+| `getPaymentCircuit()`    | `?string`                                   |
+| `getOperationAmount()`   | `?string`                                   |
+| `getOperationCurrency()` | `?string`                                   |
+| `isAuthorized()`         | `bool` — `operationResult === 'AUTHORIZED'` |
+| `isExecuted()`           | `bool` — `operationResult === 'EXECUTED'`   |
+| `getRaw()`               | `array`                                     |
+
+### `OrderResponse` — `orders()->find()`
+
+| Method                     | Returns                                        |
+|----------------------------|------------------------------------------------|
+| `getOrderId()`             | `?string`                                      |
+| `getLastOperationResult()` | `?string`                                      |
+| `getAuthorizedAmount()`    | `?string`                                      |
+| `getCapturedAmount()`      | `?string`                                      |
+| `getLastOperationType()`   | `?string`                                      |
+| `getLastOperationTime()`   | `?string`                                      |
+| `getOperations()`          | `array` — raw operation list from the API      |
+| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED` |
+| `isExecuted()`             | `bool` — last operation result is `EXECUTED`   |
+| `getRaw()`                 | `array`                                        |
+
+Available `operationResult` values as constants on `OrderResponse`:
+
+```
+OPERATION_RESULT_PENDING · AUTHORIZED · EXECUTED · DECLINED
+OPERATION_RESULT_DENIED_BY_RISK · THREEDS_VALIDATED · THREEDS_FAILED
+OPERATION_RESULT_CANCELED · VOIDED · REFUNDED · FAILED
+```
+
+### `OperationResponse` — `operations()->refund()` / `capture()` / `cancel()`
+
+| Method               | Returns   |
+|----------------------|-----------|
+| `getOperationId()`   | `?string` |
+| `getOperationTime()` | `?string` |
+| `getRaw()`           | `array`   |
+
 ## Exceptions
 
 All exceptions extend `NexiException`, which can be used as a catch-all.
 
-| Exception | When |
-|---|---|
-| `AuthenticationException` | 401 — invalid API key |
-| `InvalidRequestException` | 400 — malformed request |
-| `ApiException` | other 4xx / 5xx responses |
-| `WebhookSignatureException` | security token mismatch |
+| Exception                   | When                      |
+|-----------------------------|---------------------------|
+| `AuthenticationException`   | 401 — invalid API key     |
+| `InvalidRequestException`   | 400 — malformed request   |
+| `ApiException`              | other 4xx / 5xx responses |
+| `WebhookSignatureException` | security token mismatch   |
 
 ## Running Tests
 

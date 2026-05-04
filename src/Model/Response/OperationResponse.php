@@ -6,21 +6,11 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class OperationResponse implements ResponseModelInterface
 {
-    const RESULT_AUTHORIZED = 'AUTHORIZED';
-    const RESULT_EXECUTED = 'EXECUTED';
-    const RESULT_DECLINED = 'DECLINED';
-    const RESULT_CANCELED = 'CANCELED';
-    const RESULT_VOIDED = 'VOIDED';
-    const RESULT_REFUNDED = 'REFUNDED';
-
-    /** @var string */
+    /** @var string|null */
     private $operationId;
 
-    /** @var string */
-    private $operationType;
-
-    /** @var string */
-    private $operationResult;
+    /** @var string|null */
+    private $operationTime;
 
     /** @var array<string, mixed> */
     private $raw;
@@ -28,39 +18,21 @@ class OperationResponse implements ResponseModelInterface
     /**
      * @param array<string, mixed> $raw
      */
-    public function __construct(
-        string $operationId,
-        string $operationType,
-        string $operationResult,
-        array $raw
-    ) {
+    public function __construct(?string $operationId, ?string $operationTime, array $raw)
+    {
         $this->operationId = $operationId;
-        $this->operationType = $operationType;
-        $this->operationResult = $operationResult;
+        $this->operationTime = $operationTime;
         $this->raw = $raw;
     }
 
-    public function getOperationId(): string
+    public function getOperationId(): ?string
     {
         return $this->operationId;
     }
 
-    public function getOperationType(): string
+    public function getOperationTime(): ?string
     {
-        return $this->operationType;
-    }
-
-    public function getOperationResult(): string
-    {
-        return $this->operationResult;
-    }
-
-    public function isSuccessful(): bool
-    {
-        return $this->operationResult === self::RESULT_AUTHORIZED
-            || $this->operationResult === self::RESULT_EXECUTED
-            || $this->operationResult === self::RESULT_REFUNDED
-            || $this->operationResult === self::RESULT_VOIDED;
+        return $this->operationTime;
     }
 
     /**
@@ -77,9 +49,8 @@ class OperationResponse implements ResponseModelInterface
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) ($data['operationId'] ?? ''),
-            (string) ($data['operationType'] ?? ''),
-            (string) ($data['operationResult'] ?? ''),
+            $data['operationId'] ?? null,
+            $data['operationTime'] ?? null,
             $data
         );
     }
