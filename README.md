@@ -80,6 +80,27 @@ $_SESSION['nexi_token'] = $response->getSecurityToken();
 header('Location: ' . $response->getHostedPage());
 ```
 
+To attach customer details, pass a `CustomerInfo` object:
+
+```php
+use Hval\Nexi\Model\Request\Address;
+use Hval\Nexi\Model\Request\CustomerInfo;
+use Hval\Nexi\Model\Request\Order;
+
+$billing = new Address('Mario Rossi', 'Via Roma 1', 'Milano', '20100', 'ITA');
+
+$customerInfo = new CustomerInfo(
+    'Mario Rossi',    // cardHolderName
+    'mario@example.com', // cardHolderEmail
+    $billing,         // billingAddress
+    null,             // shippingAddress
+    '39',             // mobilePhoneCountryCode
+    '3331234567'      // mobilePhone
+);
+
+$order = new Order('ORDER-001', '1000', 'EUR', null, null, null, $customerInfo);
+```
+
 ### 3. Handle the webhook
 
 ```php
@@ -118,8 +139,14 @@ use Hval\Nexi\Model\Request\RefundRequest;
 
 $operationId = $notification->getOperationId();
 
+// Partial refund / capture — amount in cents as string, currency required
 $result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'));
 $result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'));
+
+// Full refund / capture — omit amount and currency
+$result = $nexi->operations()->refund($operationId, new RefundRequest());
+$result = $nexi->operations()->capture($operationId, new CaptureRequest());
+
 $result = $nexi->operations()->cancel($operationId, new CancelRequest());
 
 // OperationResponse
