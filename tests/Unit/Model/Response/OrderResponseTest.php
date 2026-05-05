@@ -18,20 +18,19 @@ class OrderResponseTest extends TestCase
             'orderStatus' => [
                 'order' => [
                     'orderId' => $orderId,
-                    'authorizedAmount' => '1000',
-                    'capturedAmount' => '0',
-                    'lastOperationType' => 'AUTHORIZATION',
-                    'lastOperationTime' => '2024-01-01T12:00:00.000Z',
-                    'operations' => [
-                        [
-                            'operationId' => 'OP-001',
-                            'operationType' => 'AUTHORIZATION',
-                            'operationResult' => $operationResult,
-                            'operationTime' => '2024-01-01T12:00:00.000Z',
-                        ],
-                    ],
                 ],
-                'warnings' => [],
+                'authorizedAmount' => '1000',
+                'capturedAmount' => '0',
+                'lastOperationType' => 'AUTHORIZATION',
+                'lastOperationTime' => '2024-01-01T12:00:00.000Z',
+            ],
+            'operations' => [
+                [
+                    'operationId' => 'OP-001',
+                    'operationType' => 'AUTHORIZATION',
+                    'operationResult' => $operationResult,
+                    'operationTime' => '2024-01-01T12:00:00.000Z',
+                ],
             ],
         ];
     }
@@ -121,9 +120,9 @@ class OrderResponseTest extends TestCase
             'orderStatus' => [
                 'order' => [
                     'orderId' => 'ORD-001',
-                    'operations' => [],
                 ],
             ],
+            'operations' => [],
         ];
 
         $response = OrderResponse::fromArray($data);
@@ -152,11 +151,11 @@ class OrderResponseTest extends TestCase
             'orderStatus' => [
                 'order' => [
                     'orderId' => 'ORD-001',
-                    'operations' => [
-                        ['operationResult' => 'AUTHORIZED'],
-                        ['operationResult' => 'PENDING'],
-                    ],
                 ],
+            ],
+            'operations' => [
+                ['operationResult' => 'AUTHORIZED'],
+                ['operationResult' => 'PENDING'],
             ],
         ];
 

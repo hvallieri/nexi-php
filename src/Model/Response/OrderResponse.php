@@ -129,16 +129,16 @@ class OrderResponse implements ResponseModelInterface
     {
         $orderStatus = isset($data['orderStatus']) && is_array($data['orderStatus']) ? $data['orderStatus'] : [];
         $order = isset($orderStatus['order']) && is_array($orderStatus['order']) ? $orderStatus['order'] : [];
-        $operations = isset($order['operations']) && is_array($order['operations']) ? $order['operations'] : [];
+        $operations = isset($data['operations']) && is_array($data['operations']) ? $data['operations'] : [];
         $lastOperation = isset($operations[0]) && is_array($operations[0]) ? $operations[0] : [];
 
         return new self(
             $order['orderId'] ?? null,
             $lastOperation['operationResult'] ?? null,
-            $order['authorizedAmount'] ?? null,
-            $order['capturedAmount'] ?? null,
-            $order['lastOperationType'] ?? null,
-            $order['lastOperationTime'] ?? null,
+            $orderStatus['authorizedAmount'] ?? null,
+            $orderStatus['capturedAmount'] ?? null,
+            $orderStatus['lastOperationType'] ?? null,
+            $orderStatus['lastOperationTime'] ?? null,
             $operations,
             $data
         );
