@@ -271,7 +271,8 @@ class OrderServiceTest extends TestCase
                 return strpos((string) $request->getUri(), '/orders/ORD%2F001') !== false;
             }))
             ->willReturn(new Response(200, [], json_encode([
-                'orderStatus' => ['order' => ['orderId' => 'ORD/001', 'operations' => []]],
+                'orderStatus' => ['order' => ['orderId' => 'ORD/001']],
+                'operations' => [],
             ])))
         ;
 
