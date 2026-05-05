@@ -36,4 +36,22 @@ class CaptureRequestTest extends TestCase
 
         $this->assertArrayNotHasKey('description', $request->toArray());
     }
+
+    public function testToArrayWithNoArgumentsProducesEmptyArray(): void
+    {
+        $request = new CaptureRequest();
+
+        $this->assertSame([], $request->toArray());
+    }
+
+    public function testToArrayOmitsNullAmountAndCurrency(): void
+    {
+        $request = new CaptureRequest(null, null, 'Cattura totale');
+
+        $result = $request->toArray();
+
+        $this->assertArrayNotHasKey('amount', $result);
+        $this->assertArrayNotHasKey('currency', $result);
+        $this->assertSame('Cattura totale', $result['description']);
+    }
 }

@@ -36,4 +36,22 @@ class RefundRequestTest extends TestCase
 
         $this->assertArrayNotHasKey('description', $request->toArray());
     }
+
+    public function testToArrayWithNoArgumentsProducesEmptyArray(): void
+    {
+        $request = new RefundRequest();
+
+        $this->assertSame([], $request->toArray());
+    }
+
+    public function testToArrayOmitsNullAmountAndCurrency(): void
+    {
+        $request = new RefundRequest(null, null, 'Reso totale');
+
+        $result = $request->toArray();
+
+        $this->assertArrayNotHasKey('amount', $result);
+        $this->assertArrayNotHasKey('currency', $result);
+        $this->assertSame('Reso totale', $result['description']);
+    }
 }

@@ -28,7 +28,11 @@ class CustomerInfoTest extends TestCase
             'Mario Rossi',
             'mario@example.com',
             $billing,
-            $shipping
+            $shipping,
+            '39',
+            '3331234567',
+            '0212345678',
+            '0298765432'
         );
 
         $result = $info->toArray();
@@ -39,6 +43,10 @@ class CustomerInfoTest extends TestCase
         $this->assertArrayHasKey('shippingAddress', $result);
         $this->assertSame('Via Roma 1', $result['billingAddress']['street']);
         $this->assertSame('Via Torino 2', $result['shippingAddress']['street']);
+        $this->assertSame('39', $result['mobilePhoneCountryCode']);
+        $this->assertSame('3331234567', $result['mobilePhone']);
+        $this->assertSame('0212345678', $result['homePhone']);
+        $this->assertSame('0298765432', $result['workPhone']);
     }
 
     public function testToArrayOmitsNullFields(): void
@@ -51,5 +59,21 @@ class CustomerInfoTest extends TestCase
         $this->assertArrayNotHasKey('cardHolderEmail', $result);
         $this->assertArrayNotHasKey('billingAddress', $result);
         $this->assertArrayNotHasKey('shippingAddress', $result);
+        $this->assertArrayNotHasKey('mobilePhoneCountryCode', $result);
+        $this->assertArrayNotHasKey('mobilePhone', $result);
+        $this->assertArrayNotHasKey('homePhone', $result);
+        $this->assertArrayNotHasKey('workPhone', $result);
+    }
+
+    public function testToArrayWithPhoneFieldsOnly(): void
+    {
+        $info = new CustomerInfo(null, null, null, null, '39', '3339876543');
+
+        $result = $info->toArray();
+
+        $this->assertSame('39', $result['mobilePhoneCountryCode']);
+        $this->assertSame('3339876543', $result['mobilePhone']);
+        $this->assertArrayNotHasKey('homePhone', $result);
+        $this->assertArrayNotHasKey('workPhone', $result);
     }
 }

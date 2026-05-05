@@ -6,17 +6,26 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class RefundRequest implements RequestModelInterface
 {
-    /** @var string */
+    /** @var string|null */
     private $amount;
 
-    /** @var string */
+    /** @var string|null */
     private $currency;
 
     /** @var string|null */
     private $description;
 
-    public function __construct(string $amount, string $currency, ?string $description = null)
-    {
+    /**
+     * Omitting both amount and currency triggers a full refund on the Nexi side.
+     * If amount is provided, currency must be provided as well.
+     *
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-refunds
+     */
+    public function __construct(
+        ?string $amount = null,
+        ?string $currency = null,
+        ?string $description = null
+    ) {
         $this->amount = $amount;
         $this->currency = $currency;
         $this->description = $description;
@@ -27,10 +36,15 @@ class RefundRequest implements RequestModelInterface
      */
     public function toArray(): array
     {
-        $data = [
-            'amount' => $this->amount,
-            'currency' => $this->currency,
-        ];
+        $data = [];
+
+        if ($this->amount !== null) {
+            $data['amount'] = $this->amount;
+        }
+
+        if ($this->currency !== null) {
+            $data['currency'] = $this->currency;
+        }
 
         if ($this->description !== null) {
             $data['description'] = $this->description;
