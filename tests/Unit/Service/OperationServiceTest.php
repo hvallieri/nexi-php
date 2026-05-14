@@ -250,6 +250,84 @@ class OperationServiceTest extends TestCase
         $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
 
+    public function testRefundSendsIdempotencyKeyHeader(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $key = $request->getHeaderLine('Idempotency-Key');
+
+                return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $key) === 1;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
+    }
+
+    public function testRefundUsesProvidedIdempotencyKey(): void
+    {
+        $key = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request) use ($key): bool {
+                return $request->getHeaderLine('Idempotency-Key') === $key;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'), $key);
+    }
+
+    public function testCaptureSendsIdempotencyKeyHeader(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $key = $request->getHeaderLine('Idempotency-Key');
+
+                return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $key) === 1;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'));
+    }
+
+    public function testCaptureUsesProvidedIdempotencyKey(): void
+    {
+        $key = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request) use ($key): bool {
+                return $request->getHeaderLine('Idempotency-Key') === $key;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR'), $key);
+    }
+
+    public function testCancelDoesNotSendIdempotencyKeyHeader(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return $request->getHeaderLine('Idempotency-Key') === '';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest());
+    }
+
     public function testOperationIdIsUrlEncoded(): void
     {
         $operationId = 'OP/12 345';

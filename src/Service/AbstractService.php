@@ -59,19 +59,26 @@ abstract class AbstractService
         );
     }
 
+    protected function generateIdempotencyKey(): string
+    {
+        return $this->generateCorrelationId();
+    }
+
     /**
+     * @param array<string, string> $extraHeaders
+     *
      * @throws ClientExceptionInterface
      *
      * @return array{status: int, body: string}
      */
-    protected function post(string $url, string $body): array
+    protected function post(string $url, string $body, array $extraHeaders = []): array
     {
         $request = $this->factory
             ->createRequest('POST', $url)
             ->withBody($this->factory->createStream($body))
         ;
 
-        foreach ($this->buildHeaders() as $name => $value) {
+        foreach (array_merge($this->buildHeaders(), $extraHeaders) as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
 
