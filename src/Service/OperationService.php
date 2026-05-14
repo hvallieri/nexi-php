@@ -16,10 +16,12 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
      *
+     * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
-    public function refund(string $operationId, RefundRequest $request): OperationResponse
+    public function refund(string $operationId, RefundRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
         $body = json_encode($request->toArray());
 
@@ -28,7 +30,11 @@ class OperationService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/refunds', $body)
+            $this->post(
+                $this->baseUrl . '/operations/' . rawurlencode($operationId) . '/refunds',
+                $body,
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
+            )
         );
 
         return OperationResponse::fromArray($data);
@@ -39,10 +45,12 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
      *
+     * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
-    public function capture(string $operationId, CaptureRequest $request): OperationResponse
+    public function capture(string $operationId, CaptureRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
         $body = json_encode($request->toArray());
 
@@ -51,7 +59,11 @@ class OperationService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/captures', $body)
+            $this->post(
+                $this->baseUrl . '/operations/' . rawurlencode($operationId) . '/captures',
+                $body,
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
+            )
         );
 
         return OperationResponse::fromArray($data);
