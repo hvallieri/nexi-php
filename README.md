@@ -149,6 +149,11 @@ $result = $nexi->operations()->capture($operationId, new CaptureRequest());
 
 $result = $nexi->operations()->cancel($operationId, new CancelRequest());
 
+// Optionally pass your own idempotency key to make retries safe.
+// If omitted, a UUID is generated automatically.
+$result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'), 'your-uuid-v4');
+$result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'), 'your-uuid-v4');
+
 // OperationResponse
 $result->getOperationId();   // ?string
 $result->getOperationTime(); // ?string
