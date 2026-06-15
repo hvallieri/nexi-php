@@ -53,6 +53,8 @@ class OrderTest extends TestCase
         $this->assertArrayNotHasKey('customerInfo', $result);
         $this->assertArrayNotHasKey('termsAndConditionsIds', $result);
         $this->assertArrayNotHasKey('transactionSummary', $result);
+        $this->assertArrayNotHasKey('installments', $result);
+        $this->assertArrayNotHasKey('installmentQty', $result);
     }
 
     public function testToArrayIncludesCustomerInfo(): void
@@ -83,5 +85,37 @@ class OrderTest extends TestCase
         $result = $order->toArray();
 
         $this->assertSame('Acquisto prodotto XYZ', $result['transactionSummary']);
+    }
+
+    public function testToArrayWithInstallments(): void
+    {
+        $installments = [['count' => 3], ['count' => 6]];
+        $order = new Order('ORD-001', '1000', 'EUR', null, null, null, null, null, null, $installments);
+
+        $result = $order->toArray();
+
+        $this->assertSame($installments, $result['installments']);
+        $this->assertArrayNotHasKey('installmentQty', $result);
+    }
+
+    public function testToArrayWithInstallmentQty(): void
+    {
+        $order = new Order('ORD-001', '1000', 'EUR', null, null, null, null, null, null, null, 3);
+
+        $result = $order->toArray();
+
+        $this->assertSame(3, $result['installmentQty']);
+        $this->assertArrayNotHasKey('installments', $result);
+    }
+
+    public function testToArrayWithInstallmentsAndInstallmentQty(): void
+    {
+        $installments = [['count' => 3]];
+        $order = new Order('ORD-001', '1000', 'EUR', null, null, null, null, null, null, $installments, 3);
+
+        $result = $order->toArray();
+
+        $this->assertSame($installments, $result['installments']);
+        $this->assertSame(3, $result['installmentQty']);
     }
 }

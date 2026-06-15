@@ -33,6 +33,12 @@ class Order implements RequestModelInterface
     /** @var string|null */
     private $transactionSummary;
 
+    /** @var array<int, mixed>|null */
+    private $installments;
+
+    /** @var int|null */
+    private $installmentQty;
+
     public function __construct(
         string $orderId,
         string $amount,
@@ -42,7 +48,9 @@ class Order implements RequestModelInterface
         ?string $customField = null,
         ?CustomerInfo $customerInfo = null,
         ?array $termsAndConditionsIds = null,
-        ?string $transactionSummary = null
+        ?string $transactionSummary = null,
+        ?array $installments = null,
+        ?int $installmentQty = null
     ) {
         $this->orderId = $orderId;
         $this->amount = $amount;
@@ -53,6 +61,8 @@ class Order implements RequestModelInterface
         $this->customerInfo = $customerInfo;
         $this->termsAndConditionsIds = $termsAndConditionsIds;
         $this->transactionSummary = $transactionSummary;
+        $this->installments = $installments;
+        $this->installmentQty = $installmentQty;
     }
 
     /**
@@ -88,6 +98,14 @@ class Order implements RequestModelInterface
 
         if ($this->transactionSummary !== null) {
             $data['transactionSummary'] = $this->transactionSummary;
+        }
+
+        if ($this->installments !== null) {
+            $data['installments'] = $this->installments;
+        }
+
+        if ($this->installmentQty !== null) {
+            $data['installmentQty'] = $this->installmentQty;
         }
 
         return $data;
