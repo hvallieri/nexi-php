@@ -152,6 +152,115 @@ class WebhookHandlerTest extends TestCase
         $this->assertSame('extra-data', $notification->getRaw()['customField']);
     }
 
+    public function testRootLevelFieldsAreParsed(): void
+    {
+        $data = $this->makePayload('AUTHORIZED');
+        $data['paymentId'] = 'PAY-001';
+        $data['result'] = 'AUTHORIZED';
+        $data['paymentMethod'] = 'CARD';
+        $data['paymentInstrumentInfo'] = 'VISA ****1234';
+        $data['orderAmount'] = '1000';
+        $data['currency'] = 'EUR';
+        $data['customerId'] = 'CUST-001';
+        $data['description'] = 'Ordine test';
+        $data['customField'] = 'promo2024';
+        $data['orderTime'] = '2024-01-01T12:00:00.000Z';
+        $data['eventType'] = 'PAYMENT_RESULT';
+        $data['errorCode'] = null;
+        $data['errorMessage'] = null;
+
+        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+
+        $this->assertSame('PAY-001', $notification->getPaymentId());
+        $this->assertSame('AUTHORIZED', $notification->getResult());
+        $this->assertSame('CARD', $notification->getRootPaymentMethod());
+        $this->assertSame('VISA ****1234', $notification->getRootPaymentInstrumentInfo());
+        $this->assertSame('1000', $notification->getOrderAmount());
+        $this->assertSame('EUR', $notification->getCurrency());
+        $this->assertSame('CUST-001', $notification->getCustomerId());
+        $this->assertSame('Ordine test', $notification->getDescription());
+        $this->assertSame('promo2024', $notification->getCustomField());
+        $this->assertSame('2024-01-01T12:00:00.000Z', $notification->getOrderTime());
+        $this->assertSame('PAYMENT_RESULT', $notification->getEventType());
+        $this->assertNull($notification->getErrorCode());
+        $this->assertNull($notification->getErrorMessage());
+    }
+
+    public function testOperationExtendedFieldsAreParsed(): void
+    {
+        $data = $this->makePayload('AUTHORIZED');
+        $data['operation']['paymentInstrumentInfo'] = 'VISA ****1234';
+        $data['operation']['paymentEndToEndId'] = 'E2E-001';
+        $data['operation']['cancelledOperationId'] = null;
+        $data['operation']['warnings'] = [['code' => 'WARN01', 'description' => 'test']];
+        $data['operation']['paymentLinkId'] = 'LINK-001';
+        $data['operation']['terminalId'] = 'TERM-001';
+
+        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+
+        $this->assertSame('VISA ****1234', $notification->getPaymentInstrumentInfo());
+        $this->assertSame('E2E-001', $notification->getPaymentEndToEndId());
+        $this->assertNull($notification->getCancelledOperationId());
+        $this->assertCount(1, $notification->getWarnings());
+        $this->assertSame('LINK-001', $notification->getPaymentLinkId());
+        $this->assertSame('TERM-001', $notification->getTerminalId());
+    }
+
+    public function testWarningsDefaultsToEmptyArray(): void
+    {
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+
+        $this->assertSame([], $notification->getWarnings());
+    }
+
+    public function testAdditionalDataIsParsedWhenPresent(): void
+    {
+        $data = $this->makePayload('AUTHORIZED');
+        $data['additionalData'] = [
+            'status' => 'AUTHORIZED',
+            'authorizationCode' => 'AUTH123',
+            'maskedPan' => '************1234',
+            'threeDS' => 'FULL_SECURE',
+            'schemaTID' => 'TID789',
+        ];
+
+        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+
+        $additional = $notification->getAdditionalData();
+        $this->assertNotNull($additional);
+        $this->assertSame('AUTHORIZED', $additional->getStatus());
+        $this->assertSame('AUTH123', $additional->getAuthorizationCode());
+        $this->assertSame('************1234', $additional->getMaskedPan());
+        $this->assertSame('FULL_SECURE', $additional->getThreeDS());
+        $this->assertSame('TID789', $additional->getSchemaTID());
+    }
+
+    public function testAdditionalDataIsNullWhenAbsent(): void
+    {
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+
+        $this->assertNull($notification->getAdditionalData());
+    }
+
+    public function testNewRootFieldsReturnNullWhenAbsent(): void
+    {
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+
+        $this->assertNull($notification->getPaymentId());
+        $this->assertNull($notification->getResult());
+        $this->assertNull($notification->getRootPaymentMethod());
+        $this->assertNull($notification->getRootPaymentInstrumentInfo());
+        $this->assertNull($notification->getOrderAmount());
+        $this->assertNull($notification->getCurrency());
+        $this->assertNull($notification->getCustomerId());
+        $this->assertNull($notification->getDescription());
+        $this->assertNull($notification->getCustomField());
+        $this->assertNull($notification->getOrderTime());
+        $this->assertNull($notification->getEventType());
+        $this->assertNull($notification->getErrorCode());
+        $this->assertNull($notification->getErrorMessage());
+    }
+
     public function testMissingOperationFieldsReturnNull(): void
     {
         $payload = json_encode([

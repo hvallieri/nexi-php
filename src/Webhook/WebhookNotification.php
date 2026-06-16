@@ -2,6 +2,8 @@
 
 namespace Hval\Nexi\Webhook;
 
+use Hval\Nexi\Model\Response\WebhookAdditionalData;
+
 class WebhookNotification
 {
     /** @var string|null */
@@ -45,6 +47,66 @@ class WebhookNotification
 
     /** @var array<string, mixed> */
     private $raw;
+
+    /** @var string|null */
+    private $paymentId;
+
+    /** @var string|null */
+    private $result;
+
+    /** @var string|null */
+    private $rootPaymentMethod;
+
+    /** @var string|null */
+    private $rootPaymentInstrumentInfo;
+
+    /** @var string|null */
+    private $orderAmount;
+
+    /** @var string|null */
+    private $currency;
+
+    /** @var string|null */
+    private $customerId;
+
+    /** @var string|null */
+    private $description;
+
+    /** @var string|null */
+    private $customField;
+
+    /** @var string|null */
+    private $orderTime;
+
+    /** @var string|null */
+    private $eventType;
+
+    /** @var string|null */
+    private $errorCode;
+
+    /** @var string|null */
+    private $errorMessage;
+
+    /** @var WebhookAdditionalData|null */
+    private $additionalData;
+
+    /** @var string|null */
+    private $paymentInstrumentInfo;
+
+    /** @var string|null */
+    private $paymentEndToEndId;
+
+    /** @var string|null */
+    private $cancelledOperationId;
+
+    /** @var array<int, mixed> */
+    private $warnings = [];
+
+    /** @var string|null */
+    private $paymentLinkId;
+
+    /** @var string|null */
+    private $terminalId;
 
     /**
      * @param array<string, mixed> $raw
@@ -164,14 +226,118 @@ class WebhookNotification
         return $this->raw;
     }
 
+    public function getPaymentId(): ?string
+    {
+        return $this->paymentId;
+    }
+
+    public function getResult(): ?string
+    {
+        return $this->result;
+    }
+
+    public function getRootPaymentMethod(): ?string
+    {
+        return $this->rootPaymentMethod;
+    }
+
+    public function getRootPaymentInstrumentInfo(): ?string
+    {
+        return $this->rootPaymentInstrumentInfo;
+    }
+
+    public function getOrderAmount(): ?string
+    {
+        return $this->orderAmount;
+    }
+
+    public function getCurrency(): ?string
+    {
+        return $this->currency;
+    }
+
+    public function getCustomerId(): ?string
+    {
+        return $this->customerId;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getCustomField(): ?string
+    {
+        return $this->customField;
+    }
+
+    public function getOrderTime(): ?string
+    {
+        return $this->orderTime;
+    }
+
+    public function getEventType(): ?string
+    {
+        return $this->eventType;
+    }
+
+    public function getErrorCode(): ?string
+    {
+        return $this->errorCode;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        return $this->errorMessage;
+    }
+
+    public function getAdditionalData(): ?WebhookAdditionalData
+    {
+        return $this->additionalData;
+    }
+
+    public function getPaymentInstrumentInfo(): ?string
+    {
+        return $this->paymentInstrumentInfo;
+    }
+
+    public function getPaymentEndToEndId(): ?string
+    {
+        return $this->paymentEndToEndId;
+    }
+
+    public function getCancelledOperationId(): ?string
+    {
+        return $this->cancelledOperationId;
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    public function getWarnings(): array
+    {
+        return $this->warnings;
+    }
+
+    public function getPaymentLinkId(): ?string
+    {
+        return $this->paymentLinkId;
+    }
+
+    public function getTerminalId(): ?string
+    {
+        return $this->terminalId;
+    }
+
     /**
      * @param array<string, mixed> $data
      */
     public static function fromArray(array $data): self
     {
         $operation = isset($data['operation']) && is_array($data['operation']) ? $data['operation'] : [];
+        $rawAdditionalData = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : null;
 
-        return new self(
+        $instance = new self(
             $data['eventId'] ?? null,
             $data['eventTime'] ?? null,
             $data['securityToken'] ?? null,
@@ -187,5 +353,29 @@ class WebhookNotification
             $operation['operationCurrency'] ?? null,
             $data
         );
+
+        $instance->paymentId = $data['paymentId'] ?? null;
+        $instance->result = $data['result'] ?? null;
+        $instance->rootPaymentMethod = $data['paymentMethod'] ?? null;
+        $instance->rootPaymentInstrumentInfo = $data['paymentInstrumentInfo'] ?? null;
+        $instance->orderAmount = $data['orderAmount'] ?? null;
+        $instance->currency = $data['currency'] ?? null;
+        $instance->customerId = $data['customerId'] ?? null;
+        $instance->description = $data['description'] ?? null;
+        $instance->customField = $data['customField'] ?? null;
+        $instance->orderTime = $data['orderTime'] ?? null;
+        $instance->eventType = $data['eventType'] ?? null;
+        $instance->errorCode = $data['errorCode'] ?? null;
+        $instance->errorMessage = $data['errorMessage'] ?? null;
+        $instance->additionalData = $rawAdditionalData !== null ? WebhookAdditionalData::fromArray($rawAdditionalData) : null;
+
+        $instance->paymentInstrumentInfo = $operation['paymentInstrumentInfo'] ?? null;
+        $instance->paymentEndToEndId = $operation['paymentEndToEndId'] ?? null;
+        $instance->cancelledOperationId = $operation['cancelledOperationId'] ?? null;
+        $instance->warnings = isset($operation['warnings']) && is_array($operation['warnings']) ? $operation['warnings'] : [];
+        $instance->paymentLinkId = $operation['paymentLinkId'] ?? null;
+        $instance->terminalId = $operation['terminalId'] ?? null;
+
+        return $instance;
     }
 }
