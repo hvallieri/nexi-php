@@ -9,6 +9,7 @@ use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\HppResponse;
 use Hval\Nexi\Model\Response\OrderResponse;
+use Hval\Nexi\Model\Response\OrderSummary;
 use Hval\Nexi\Service\OrderService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
@@ -260,6 +261,85 @@ class OrderServiceTest extends TestCase
         $this->expectExceptionCode(500);
 
         $this->service->find('ORD-001');
+    }
+
+    public function testFindAllReturnsArrayOfOrderSummary(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([
+                ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
+                ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
+            ])))
+        ;
+
+        $result = $this->service->findAll();
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(OrderSummary::class, $result[0]);
+        $this->assertSame('ORD-001', $result[0]->getOrderId());
+        $this->assertSame('ORD-002', $result[1]->getOrderId());
+    }
+
+    public function testFindAllWithFiltersBuildsQueryString(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'fromTime=2024-01-01') !== false
+                    && strpos($uri, 'toTime=2024-01-31') !== false
+                    && strpos($uri, 'maxRecords=10') !== false
+                    && strpos($uri, 'customField=promo') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll('2024-01-01', '2024-01-31', 10, 'promo');
+    }
+
+    public function testFindAllOmitsNullParams(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'maxRecords=5') !== false
+                    && strpos($uri, 'fromTime') === false
+                    && strpos($uri, 'toTime') === false
+                    && strpos($uri, 'customField') === false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll(null, null, 5, null);
+    }
+
+    public function testFindAllReturnsEmptyArrayWhenResponseIsEmpty(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->assertSame([], $this->service->findAll());
+    }
+
+    public function testFindAllThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->findAll();
     }
 
     public function testFindUrlEncodesOrderId(): void
