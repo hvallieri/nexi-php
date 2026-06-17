@@ -7,6 +7,7 @@ use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\HppResponse;
 use Hval\Nexi\Model\Response\OrderResponse;
+use Hval\Nexi\Model\Response\OrderSummary;
 use Psr\Http\Client\ClientExceptionInterface;
 
 class OrderService extends AbstractService
@@ -35,6 +36,57 @@ class OrderService extends AbstractService
         );
 
         return HppResponse::fromArray($data);
+    }
+
+    /**
+     * Retrieves a list of orders, optionally filtered by time range and custom field.
+     * Date parameters must be in ISO 8601 format (e.g. 2022-01-01T13:10:00.000Z).
+     * The API enforces a maximum interval of one month between fromTime and toTime.
+     *
+     * @see https://developer.nexi.it/en/api/get-orders
+     *
+     * @return array<int, OrderSummary>
+     *
+     * @throws NexiException
+     * @throws ClientExceptionInterface
+     */
+    public function findAll(
+        ?string $fromTime = null,
+        ?string $toTime = null,
+        ?int $maxRecords = null,
+        ?string $customField = null
+    ): array {
+        $params = [];
+
+        if ($fromTime !== null) {
+            $params['fromTime'] = $fromTime;
+        }
+
+        if ($toTime !== null) {
+            $params['toTime'] = $toTime;
+        }
+
+        if ($maxRecords !== null) {
+            $params['maxRecords'] = $maxRecords;
+        }
+
+        if ($customField !== null) {
+            $params['customField'] = $customField;
+        }
+
+        $data = $this->parseResponse(
+            $this->get($this->baseUrl . '/orders', $params)
+        );
+
+        $result = [];
+
+        foreach ($data as $item) {
+            if (is_array($item) === true) {
+                $result[] = OrderSummary::fromArray($item);
+            }
+        }
+
+        return $result;
     }
 
     /**
