@@ -13,10 +13,10 @@ class PaymentMethodService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-payment_methods
      *
-     * @return array<int, PaymentMethod>
-     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return array<int, PaymentMethod>
      */
     public function listAll(): array
     {

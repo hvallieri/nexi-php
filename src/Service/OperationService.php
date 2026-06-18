@@ -19,10 +19,10 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-operations
      *
-     * @return array<int, OperationDetails>
-     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return array<int, OperationDetails>
      */
     public function findAll(
         ?string $fromTime = null,
