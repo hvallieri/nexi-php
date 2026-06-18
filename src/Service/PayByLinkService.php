@@ -18,13 +18,10 @@ class PayByLinkService extends AbstractService
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
-    public function create(Order $order, PaymentSession $session, ?string $expirationDate = null): PayByLinkResponse
+    public function create(Order $order, PaymentSession $session, string $expirationDate): PayByLinkResponse
     {
         $sessionData = $session->toArray();
-
-        if ($expirationDate !== null) {
-            $sessionData['expirationDate'] = $expirationDate;
-        }
+        $sessionData['expirationDate'] = $expirationDate;
 
         $body = json_encode([
             'order' => $order->toArray(),
