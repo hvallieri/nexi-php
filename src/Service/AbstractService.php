@@ -91,12 +91,19 @@ abstract class AbstractService
     }
 
     /**
+     * @param string $url
+     * @param array<string, mixed> $queryParams
+     *
      * @throws ClientExceptionInterface
      *
      * @return array{status: int, body: string}
      */
-    protected function get(string $url): array
+    protected function get(string $url, array $queryParams = []): array
     {
+        if (empty($queryParams) === false) {
+            $url .= '?' . http_build_query($queryParams);
+        }
+
         $request = $this->factory->createRequest('GET', $url);
 
         foreach ($this->buildHeaders() as $name => $value) {

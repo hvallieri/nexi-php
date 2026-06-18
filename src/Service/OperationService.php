@@ -6,11 +6,92 @@ use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
 use Hval\Nexi\Model\Request\RefundRequest;
+use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OperationResponse;
 use Psr\Http\Client\ClientExceptionInterface;
 
 class OperationService extends AbstractService
 {
+    /**
+     * Retrieves a list of operations, optionally filtered by time range, channel, type and custom field.
+     * Date parameters must be in ISO 8601 format (e.g. 2022-01-01T13:10:00.000Z).
+     * The API enforces a maximum interval of one month between fromTime and toTime.
+     *
+     * @see https://developer.nexi.it/en/api/get-operations
+     *
+     * @throws NexiException
+     * @throws ClientExceptionInterface
+     *
+     * @return array<int, OperationDetails>
+     */
+    public function findAll(
+        ?string $fromTime = null,
+        ?string $toTime = null,
+        ?int $maxRecords = null,
+        ?string $channel = null,
+        ?string $operationType = null,
+        ?string $customField = null
+    ): array {
+        $params = [];
+
+        if ($fromTime !== null) {
+            $params['fromTime'] = $fromTime;
+        }
+
+        if ($toTime !== null) {
+            $params['toTime'] = $toTime;
+        }
+
+        if ($maxRecords !== null) {
+            $params['maxRecords'] = $maxRecords;
+        }
+
+        if ($channel !== null) {
+            $params['channel'] = $channel;
+        }
+
+        if ($operationType !== null) {
+            $params['operationType'] = $operationType;
+        }
+
+        if ($customField !== null) {
+            $params['customField'] = $customField;
+        }
+
+        $data = $this->parseResponse(
+            $this->get($this->baseUrl . '/operations', $params)
+        );
+
+        $items = isset($data['operations']) && is_array($data['operations']) ? $data['operations'] : [];
+
+        $result = [];
+
+        foreach ($items as $item) {
+            if (is_array($item) === true) {
+                $result[] = OperationDetails::fromArray($item);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Retrieves the details of a single operation by its operationId.
+     *
+     * @see https://developer.nexi.it/en/api/get-operations-operationid
+     *
+     * @throws NexiException
+     * @throws ClientExceptionInterface
+     */
+    public function find(string $operationId): OperationDetails
+    {
+        $data = $this->parseResponse(
+            $this->get($this->baseUrl . '/operations/' . rawurlencode($operationId))
+        );
+
+        return OperationDetails::fromArray($data);
+    }
+
     /**
      * Refunds a completed operation, either fully or partially.
      *

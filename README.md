@@ -1,6 +1,6 @@
 # hval/nexi-php
 
-PHP library for integrating [Nexi XPay](https://developer.nexigroup.com/) via the Hosted Payment Page (HPP) flow.
+Unofficial PHP library for the [Nexi XPay](https://developer.nexigroup.com/) payment gateway: Hosted Payment Page (HPP), Pay-by-Link, recurring contracts, operations and webhooks.
 
 ## Requirements
 
@@ -90,12 +90,12 @@ use Hval\Nexi\Model\Request\Order;
 $billing = new Address('Mario Rossi', 'Via Roma 1', 'Milano', '20100', 'ITA');
 
 $customerInfo = new CustomerInfo(
-    'Mario Rossi',    // cardHolderName
-    'mario@example.com', // cardHolderEmail
-    $billing,         // billingAddress
-    null,             // shippingAddress
-    '39',             // mobilePhoneCountryCode
-    '3331234567'      // mobilePhone
+    'Mario Rossi',
+    'mario@example.com',
+    $billing,
+    null,   // shippingAddress
+    '39',   // mobilePhoneCountryCode
+    '3331234567'
 );
 
 $order = new Order('ORDER-001', '1000', 'EUR', null, null, null, $customerInfo);
@@ -112,7 +112,6 @@ $savedToken = '...'; // retrieved from your DB
 try {
     $notification = $nexi->webhooks()->handle($payload, $savedToken);
 
-    // Quick check directly on the notification
     if ($notification->isAuthorized()) {
         // Fetch the full order to confirm server-side
         $order = $nexi->orders()->find($notification->getOrderId());
@@ -152,14 +151,101 @@ $result = $nexi->operations()->cancel($operationId, new CancelRequest());
 // Optionally pass your own idempotency key to make retries safe.
 // If omitted, a UUID is generated automatically.
 $result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'), 'your-uuid-v4');
-$result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'), 'your-uuid-v4');
-
-// OperationResponse
-$result->getOperationId();   // ?string
-$result->getOperationTime(); // ?string
 ```
 
-### 5. Recurring payments
+### 5. List orders and operations
+
+```php
+// List orders — all parameters are optional
+$orders = $nexi->orders()->findAll(
+    '2024-01-01T00:00:00.000Z',  // fromTime (ISO 8601)
+    '2024-01-31T23:59:59.000Z',  // toTime   (ISO 8601, max 30-day range)
+    50,                          // maxRecords (default 20, max 500)
+    'promo2024'                  // customField
+);
+
+foreach ($orders as $order) {       // array<int, OrderSummary>
+    $order->getOrderId();           // ?string
+    $order->getAmount();            // ?string
+    $order->getLastOperationType(); // ?string
+}
+
+// List operations — filter by channel or type
+$operations = $nexi->operations()->findAll(
+    fromTime: null,
+    toTime: null,
+    maxRecords: null,
+    channel: 'ECOMMERCE',           // ECOMMERCE, POS, BACKOFFICE
+    operationType: 'AUTHORIZATION'
+);
+
+// Retrieve a single operation
+$operation = $nexi->operations()->find('operation-id');
+$operation->getOperationResult(); // ?string
+$operation->getWarnings();        // array
+```
+
+### 6. Payment methods
+
+```php
+$methods = $nexi->paymentMethods()->listAll();
+
+foreach ($methods as $method) {       // array<int, PaymentMethod>
+    $method->getMethodType();         // 'CARD' or 'APM'
+    $method->getCircuit();            // 'VISA', 'MC', 'PAYPAL', ...
+    $method->getImageLink();          // SVG logo URL
+    $method->isRecurringSupported();  // ?bool
+    $method->isOneClickSupported();   // ?bool
+}
+```
+
+### 7. Pay-by-Link
+
+```php
+use Hval\Nexi\Model\Request\Order;
+use Hval\Nexi\Model\Request\PaymentSession;
+
+$order   = new Order('ORDER-001', '1000', 'EUR');
+$session = new PaymentSession(
+    PaymentSession::ACTION_PAY,
+    '1000',
+    'ita',
+    'https://yoursite.com/payment/result',
+    'https://yoursite.com/payment/cancel'
+);
+
+// expirationDate is required (max 90 days, YYYY-MM-DD)
+$response = $nexi->payByLink()->create($order, $session, '2024-12-31');
+
+$link = $response->getPaymentLink();
+$link->getLinkId();        // ?string — use to cancel the link
+$link->getLink();          // ?string — send this URL to the customer
+$link->getSecurityToken(); // ?string — save in DB for webhook verification
+
+// Cancel an active link
+$nexi->payByLink()->cancel($link->getLinkId());
+```
+
+### 8. Recurring contracts
+
+```php
+// Retrieve all contracts for a customer
+$response = $nexi->contracts()->findByCustomer('customer-id');
+
+$response->getCustomerId(); // ?string
+
+foreach ($response->getContracts() as $contract) { // array<int, ContractSummary>
+    $contract->getContractId();            // ?string
+    $contract->getContractType();          // MIT_UNSCHEDULED, MIT_SCHEDULED, CIT
+    $contract->getPaymentCircuit();        // ?string
+    $contract->getPaymentInstrumentInfo(); // ?string
+}
+
+// Deactivate a contract
+$nexi->contracts()->deactivate('contract-id');
+```
+
+### 9. Recurring payments
 
 Pass a `Recurrence` object as the last argument of `PaymentSession` to set up recurring payments:
 
@@ -193,64 +279,7 @@ Available contract types: `CONTRACT_TYPE_MIT_UNSCHEDULED`, `CONTRACT_TYPE_MIT_SC
 
 ## Response objects
 
-### `HppResponse` — `orders()->createHpp()`
-
-| Method               | Returns   |
-|----------------------|-----------|
-| `getHostedPage()`    | `?string` |
-| `getSecurityToken()` | `?string` |
-
-### `WebhookNotification` — `webhooks()->handle()`
-
-| Method                   | Returns                                     |
-|--------------------------|---------------------------------------------|
-| `getEventId()`           | `?string`                                   |
-| `getEventTime()`         | `?string`                                   |
-| `getSecurityToken()`     | `?string`                                   |
-| `getOrderId()`           | `?string`                                   |
-| `getOperationId()`       | `?string`                                   |
-| `getChannel()`           | `?string`                                   |
-| `getOperationType()`     | `?string`                                   |
-| `getOperationResult()`   | `?string`                                   |
-| `getOperationTime()`     | `?string`                                   |
-| `getPaymentMethod()`     | `?string`                                   |
-| `getPaymentCircuit()`    | `?string`                                   |
-| `getOperationAmount()`   | `?string`                                   |
-| `getOperationCurrency()` | `?string`                                   |
-| `isAuthorized()`         | `bool` — `operationResult === 'AUTHORIZED'` |
-| `isExecuted()`           | `bool` — `operationResult === 'EXECUTED'`   |
-| `getRaw()`               | `array`                                     |
-
-### `OrderResponse` — `orders()->find()`
-
-| Method                     | Returns                                        |
-|----------------------------|------------------------------------------------|
-| `getOrderId()`             | `?string`                                      |
-| `getLastOperationResult()` | `?string`                                      |
-| `getAuthorizedAmount()`    | `?string`                                      |
-| `getCapturedAmount()`      | `?string`                                      |
-| `getLastOperationType()`   | `?string`                                      |
-| `getLastOperationTime()`   | `?string`                                      |
-| `getOperations()`          | `array` — raw operation list from the API      |
-| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED` |
-| `isExecuted()`             | `bool` — last operation result is `EXECUTED`   |
-| `getRaw()`                 | `array`                                        |
-
-Available `operationResult` values as constants on `OrderResponse`:
-
-```
-OPERATION_RESULT_PENDING · AUTHORIZED · EXECUTED · DECLINED
-OPERATION_RESULT_DENIED_BY_RISK · THREEDS_VALIDATED · THREEDS_FAILED
-OPERATION_RESULT_CANCELED · VOIDED · REFUNDED · FAILED
-```
-
-### `OperationResponse` — `operations()->refund()` / `capture()` / `cancel()`
-
-| Method               | Returns   |
-|----------------------|-----------|
-| `getOperationId()`   | `?string` |
-| `getOperationTime()` | `?string` |
-| `getRaw()`           | `array`   |
+For the full list of available getters on each response model, see [docs/response-objects.md](docs/response-objects.md).
 
 ## Exceptions
 
