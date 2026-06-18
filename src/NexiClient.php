@@ -5,6 +5,7 @@ namespace Hval\Nexi;
 use Hval\Nexi\Http\HttpFactoryInterface;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
+use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
@@ -25,6 +26,9 @@ class NexiClient
     /** @var OperationService */
     private $operations;
 
+    /** @var PaymentMethodService */
+    private $paymentMethods;
+
     /** @var WebhookHandler */
     private $webhookHandler;
 
@@ -40,6 +44,7 @@ class NexiClient
 
         $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->operations = new OperationService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->paymentMethods = new PaymentMethodService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->webhookHandler = new WebhookHandler();
     }
 
@@ -64,6 +69,16 @@ class NexiClient
     public function operations(): OperationService
     {
         return $this->operations;
+    }
+
+    /**
+     * Payment methods supported by the merchant's contract.
+     *
+     * @see https://developer.nexi.it/en/api/get-payment_methods
+     */
+    public function paymentMethods(): PaymentMethodService
+    {
+        return $this->paymentMethods;
     }
 
     /**
