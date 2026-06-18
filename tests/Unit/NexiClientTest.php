@@ -6,6 +6,7 @@ use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\NexiClient;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
+use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
 use InvalidArgumentException;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -40,6 +41,11 @@ class NexiClientTest extends TestCase
     public function testOperationsReturnsOperationService(): void
     {
         $this->assertInstanceOf(OperationService::class, $this->client->operations());
+    }
+
+    public function testPaymentMethodsReturnsPaymentMethodService(): void
+    {
+        $this->assertInstanceOf(PaymentMethodService::class, $this->client->paymentMethods());
     }
 
     public function testWebhooksReturnsWebhookHandler(): void
