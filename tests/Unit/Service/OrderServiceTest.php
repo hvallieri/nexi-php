@@ -269,8 +269,10 @@ class OrderServiceTest extends TestCase
             ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([
-                ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
-                ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
+                'orders' => [
+                    ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
+                    ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
+                ],
             ])))
         ;
 
@@ -320,7 +322,7 @@ class OrderServiceTest extends TestCase
         $this->service->findAll(null, null, 5, null);
     }
 
-    public function testFindAllReturnsEmptyArrayWhenResponseIsEmpty(): void
+    public function testFindAllReturnsEmptyArrayWhenOrdersKeyMissing(): void
     {
         $this->httpClient
             ->method('sendRequest')
