@@ -68,7 +68,7 @@ class PayByLinkServiceTest extends TestCase
             ->willReturn($this->makeSuccessResponse())
         ;
 
-        $response = $this->service->create($this->makeOrder(), $this->makeSession());
+        $response = $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
 
         $this->assertInstanceOf(PayByLinkResponse::class, $response);
         $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
@@ -87,7 +87,7 @@ class PayByLinkServiceTest extends TestCase
             ->willReturn($this->makeSuccessResponse())
         ;
 
-        $this->service->create($this->makeOrder(), $this->makeSession());
+        $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
     }
 
     public function testCreateInjectsExpirationDateIntoSession(): void
@@ -107,22 +107,6 @@ class PayByLinkServiceTest extends TestCase
         $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
     }
 
-    public function testCreateWithoutExpirationDateOmitsField(): void
-    {
-        $this->httpClient
-            ->expects($this->once())
-            ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                $data = json_decode((string) $request->getBody(), true);
-
-                return isset($data['paymentSession']) && array_key_exists('expirationDate', $data['paymentSession']) === false;
-            }))
-            ->willReturn($this->makeSuccessResponse())
-        ;
-
-        $this->service->create($this->makeOrder(), $this->makeSession());
-    }
-
     public function testCreateThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
@@ -132,7 +116,7 @@ class PayByLinkServiceTest extends TestCase
 
         $this->expectException(AuthenticationException::class);
 
-        $this->service->create($this->makeOrder(), $this->makeSession());
+        $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
     }
 
     public function testCancelCallsCorrectEndpoint(): void
