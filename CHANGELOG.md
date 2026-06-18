@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-06-18
+
+### Added
+
+- `OrderService::findAll()`: retrieve a list of orders with optional filters (`fromTime`, `toTime`, `maxRecords`, `customField`); returns an array of `OrderSummary` objects
+- `OperationService::findAll()`: retrieve a list of operations with optional filters (`fromTime`, `toTime`, `maxRecords`, `channel`, `operationType`, `customField`); returns an array of `OperationDetails` objects
+- `OperationService::find()`: retrieve a single operation by `operationId`; returns an `OperationDetails` object
+- New `PaymentMethodService` (via `NexiClient::paymentMethods()`): retrieve the list of payment methods enabled on the merchant contract (`listAll()`)
+- New `PayByLinkService` (via `NexiClient::payByLink()`): create a Pay-by-Link (`create()`) and cancel an active link (`cancel()`)
+- New `ContractService` (via `NexiClient::contracts()`): retrieve recurring contracts by customer (`findByCustomer()`) and deactivate a contract (`deactivate()`)
+- New response models: `OrderSummary`, `OperationDetails`, `PaymentMethod`, `PayByLinkResponse`, `PaymentLink`, `ContractsByCustomerResponse`, `ContractSummary`, `WebhookAdditionalData`
+- `Order`: added `installments` and `installmentQty` optional fields
+- `WebhookNotification`: added 13 root-level getters (`getPaymentId()`, `getResult()`, `getRootPaymentMethod()`, `getRootPaymentInstrumentInfo()`, `getOrderAmount()`, `getCurrency()`, `getCustomerId()`, `getDescription()`, `getCustomField()`, `getOrderTime()`, `getEventType()`, `getErrorCode()`, `getErrorMessage()`), 6 operation-level getters (`getPaymentInstrumentInfo()`, `getPaymentEndToEndId()`, `getCancelledOperationId()`, `getWarnings()`, `getPaymentLinkId()`, `getTerminalId()`), and `getAdditionalData()` returning a `WebhookAdditionalData` object
+
 ## [1.1.2] - 2026-05-14
 
 ### Fixed

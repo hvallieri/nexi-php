@@ -3,8 +3,11 @@
 namespace Hval\Nexi;
 
 use Hval\Nexi\Http\HttpFactoryInterface;
+use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
+use Hval\Nexi\Service\PayByLinkService;
+use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
 use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
@@ -25,6 +28,15 @@ class NexiClient
     /** @var OperationService */
     private $operations;
 
+    /** @var ContractService */
+    private $contracts;
+
+    /** @var PayByLinkService */
+    private $payByLink;
+
+    /** @var PaymentMethodService */
+    private $paymentMethods;
+
     /** @var WebhookHandler */
     private $webhookHandler;
 
@@ -40,14 +52,17 @@ class NexiClient
 
         $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->operations = new OperationService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->contracts = new ContractService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->payByLink = new PayByLinkService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->paymentMethods = new PaymentMethodService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->webhookHandler = new WebhookHandler();
     }
 
     /**
      * Order creation (HPP) and retrieval.
      *
-     * @see https://developer.nexi.it/it/api/post-orders-hpp
-     * @see https://developer.nexi.it/it/api/get-orders-orderId
+     * @see https://developer.nexi.it/en/api/post-orders-hpp
+     * @see https://developer.nexi.it/en/api/get-orders-orderid
      */
     public function orders(): OrderService
     {
@@ -57,9 +72,9 @@ class NexiClient
     /**
      * Post-payment operations: refund, capture, cancel.
      *
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-refunds
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-captures
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-cancels
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
      */
     public function operations(): OperationService
     {
@@ -67,9 +82,39 @@ class NexiClient
     }
 
     /**
+     * Recurring contract retrieval and deactivation.
+     *
+     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerid
+     */
+    public function contracts(): ContractService
+    {
+        return $this->contracts;
+    }
+
+    /**
+     * Pay-by-Link creation and cancellation.
+     *
+     * @see https://developer.nexi.it/en/api/post-orders-paybylink
+     */
+    public function payByLink(): PayByLinkService
+    {
+        return $this->payByLink;
+    }
+
+    /**
+     * Payment methods supported by the merchant's contract.
+     *
+     * @see https://developer.nexi.it/en/api/get-payment_methods
+     */
+    public function paymentMethods(): PaymentMethodService
+    {
+        return $this->paymentMethods;
+    }
+
+    /**
      * Incoming webhook verification and parsing.
      *
-     * @see https://developer.nexi.it/it/api/notifica
+     * @see https://developer.nexi.it/en/api/notifica
      */
     public function webhooks(): WebhookHandler
     {

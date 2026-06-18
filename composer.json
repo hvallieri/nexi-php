@@ -1,9 +1,9 @@
 {
     "name": "hval/nexi-php",
-    "description": "PHP library for Nexi XPay payment gateway (Hosted Payment Page)",
+    "description": "Unofficial PHP library for the Nexi XPay payment gateway: HPP, Pay-by-Link, recurring contracts, operations and webhooks",
     "type": "library",
     "license": "MIT",
-    "keywords": ["nexi", "xpay", "payment", "gateway", "hpp", "hosted-payment-page"],
+    "keywords": ["nexi", "xpay", "payment", "gateway", "hpp", "hosted-payment-page", "pay-by-link", "recurring", "contracts", "webhooks"],
     "authors": [
         {
             "name": "Hermann Vallieri",
