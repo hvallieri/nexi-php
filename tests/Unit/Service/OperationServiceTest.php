@@ -8,6 +8,7 @@ use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
 use Hval\Nexi\Model\Request\RefundRequest;
+use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OperationResponse;
 use Hval\Nexi\Service\OperationService;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -342,6 +343,139 @@ class OperationServiceTest extends TestCase
         ;
 
         $this->service->refund($operationId, new RefundRequest('500', 'EUR'));
+    }
+
+    public function testFindAllReturnsArrayOfOperationDetails(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([
+                'operations' => [
+                    ['operationId' => 'OP-001', 'orderId' => 'ORD-001', 'operationResult' => 'AUTHORIZED'],
+                    ['operationId' => 'OP-002', 'orderId' => 'ORD-002', 'operationResult' => 'EXECUTED'],
+                ],
+            ])))
+        ;
+
+        $result = $this->service->findAll();
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(OperationDetails::class, $result[0]);
+        $this->assertSame('OP-001', $result[0]->getOperationId());
+        $this->assertSame('OP-002', $result[1]->getOperationId());
+    }
+
+    public function testFindAllWithFiltersBuildsQueryString(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'fromTime=2024-01-01') !== false
+                    && strpos($uri, 'toTime=2024-01-31') !== false
+                    && strpos($uri, 'channel=ECOMMERCE') !== false
+                    && strpos($uri, 'operationType=AUTHORIZATION') !== false
+                    && strpos($uri, 'maxRecords=10') !== false
+                    && strpos($uri, 'customField=promo') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode(['operations' => []])))
+        ;
+
+        $this->service->findAll('2024-01-01', '2024-01-31', 10, 'ECOMMERCE', 'AUTHORIZATION', 'promo');
+    }
+
+    public function testFindAllOmitsNullParams(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'channel=ECOMMERCE') !== false
+                    && strpos($uri, 'fromTime') === false
+                    && strpos($uri, 'toTime') === false
+                    && strpos($uri, 'operationType') === false;
+            }))
+            ->willReturn(new Response(200, [], json_encode(['operations' => []])))
+        ;
+
+        $this->service->findAll(null, null, null, 'ECOMMERCE', null, null);
+    }
+
+    public function testFindAllReturnsEmptyArrayWhenOperationsKeyMissing(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->assertSame([], $this->service->findAll());
+    }
+
+    public function testFindAllThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->findAll();
+    }
+
+    public function testFindReturnsOperationDetails(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/operations/OP-001') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([
+                'operationId' => 'OP-001',
+                'orderId' => 'ORD-001',
+                'operationResult' => 'AUTHORIZED',
+                'channel' => 'ECOMMERCE',
+            ])))
+        ;
+
+        $details = $this->service->find('OP-001');
+
+        $this->assertInstanceOf(OperationDetails::class, $details);
+        $this->assertSame('OP-001', $details->getOperationId());
+        $this->assertSame('AUTHORIZED', $details->getOperationResult());
+        $this->assertSame('ECOMMERCE', $details->getChannel());
+    }
+
+    public function testFindUrlEncodesOperationId(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/operations/OP%2F001') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode(['operationId' => 'OP/001'])))
+        ;
+
+        $this->service->find('OP/001');
+    }
+
+    public function testFindThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->find('OP-001');
     }
 
     private function makeSuccessResponse(): Response
