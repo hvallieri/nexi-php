@@ -50,7 +50,7 @@ class PayByLinkService extends AbstractService
     public function cancel(string $linkId): void
     {
         $this->parseResponse(
-            $this->post($this->baseUrl . '/paybylink/' . rawurlencode($linkId) . '/cancels', '{}')
+            $this->post($this->baseUrl . '/paybylink/' . rawurlencode($linkId) . '/cancels', '')
         );
     }
 }

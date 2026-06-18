@@ -61,8 +61,8 @@ class NexiClient
     /**
      * Order creation (HPP) and retrieval.
      *
-     * @see https://developer.nexi.it/it/api/post-orders-hpp
-     * @see https://developer.nexi.it/it/api/get-orders-orderId
+     * @see https://developer.nexi.it/en/api/post-orders-hpp
+     * @see https://developer.nexi.it/en/api/get-orders-orderid
      */
     public function orders(): OrderService
     {
@@ -72,9 +72,9 @@ class NexiClient
     /**
      * Post-payment operations: refund, capture, cancel.
      *
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-refunds
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-captures
-     * @see https://developer.nexi.it/it/api/post-operations-operationId-cancels
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
+     * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
      */
     public function operations(): OperationService
     {
@@ -114,7 +114,7 @@ class NexiClient
     /**
      * Incoming webhook verification and parsing.
      *
-     * @see https://developer.nexi.it/it/api/notifica
+     * @see https://developer.nexi.it/en/api/notifica
      */
     public function webhooks(): WebhookHandler
     {

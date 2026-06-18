@@ -78,9 +78,11 @@ class OrderService extends AbstractService
             $this->get($this->baseUrl . '/orders', $params)
         );
 
+        $items = isset($data['orders']) && is_array($data['orders']) ? $data['orders'] : [];
+
         $result = [];
 
-        foreach ($data as $item) {
+        foreach ($items as $item) {
             if (is_array($item) === true) {
                 $result[] = OrderSummary::fromArray($item);
             }
