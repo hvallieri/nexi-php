@@ -4,6 +4,7 @@ namespace Hval\Nexi\Tests\Unit;
 
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\NexiClient;
+use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Service\PayByLinkService;
@@ -42,6 +43,11 @@ class NexiClientTest extends TestCase
     public function testOperationsReturnsOperationService(): void
     {
         $this->assertInstanceOf(OperationService::class, $this->client->operations());
+    }
+
+    public function testContractsReturnsContractService(): void
+    {
+        $this->assertInstanceOf(ContractService::class, $this->client->contracts());
     }
 
     public function testPayByLinkReturnsPayByLinkService(): void

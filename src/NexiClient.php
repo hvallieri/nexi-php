@@ -3,6 +3,7 @@
 namespace Hval\Nexi;
 
 use Hval\Nexi\Http\HttpFactoryInterface;
+use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Service\PayByLinkService;
@@ -27,6 +28,9 @@ class NexiClient
     /** @var OperationService */
     private $operations;
 
+    /** @var ContractService */
+    private $contracts;
+
     /** @var PayByLinkService */
     private $payByLink;
 
@@ -48,6 +52,7 @@ class NexiClient
 
         $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->operations = new OperationService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->contracts = new ContractService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->payByLink = new PayByLinkService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->paymentMethods = new PaymentMethodService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
         $this->webhookHandler = new WebhookHandler();
@@ -74,6 +79,16 @@ class NexiClient
     public function operations(): OperationService
     {
         return $this->operations;
+    }
+
+    /**
+     * Recurring contract retrieval and deactivation.
+     *
+     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerid
+     */
+    public function contracts(): ContractService
+    {
+        return $this->contracts;
     }
 
     /**
