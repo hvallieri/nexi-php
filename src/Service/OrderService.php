@@ -45,10 +45,10 @@ class OrderService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-orders
      *
-     * @return array<int, OrderSummary>
-     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return array<int, OrderSummary>
      */
     public function findAll(
         ?string $fromTime = null,

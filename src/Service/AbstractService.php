@@ -94,8 +94,9 @@ abstract class AbstractService
      * @param string $url
      * @param array<string, mixed> $queryParams
      *
-     * @return array{status: int, body: string}
      * @throws ClientExceptionInterface
+     *
+     * @return array{status: int, body: string}
      */
     protected function get(string $url, array $queryParams = []): array
     {
