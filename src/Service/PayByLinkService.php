@@ -97,6 +97,23 @@ class PayByLinkService extends AbstractService
     }
 
     /**
+     * Retrieves a Pay-by-Link payment link by its linkId.
+     *
+     * @see https://developer.nexi.it/en/api/get-orders-paybylink-linkid
+     *
+     * @throws NexiException
+     * @throws ClientExceptionInterface
+     */
+    public function find(string $linkId): PayByLinkResponse
+    {
+        $data = $this->parseResponse(
+            $this->get($this->baseUrl . '/orders/paybylink/' . rawurlencode($linkId))
+        );
+
+        return PayByLinkResponse::fromArray($data);
+    }
+
+    /**
      * Renews an existing Pay-by-Link payment link, optionally with a new expiration date
      * (maximum 90 days after the creation of the original link).
      *
