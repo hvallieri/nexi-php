@@ -31,6 +31,8 @@ class OperationDetailsTest extends TestCase
             'paymentLinkId' => null,
             'terminalId' => 'TERM-001',
             'warnings' => [['code' => 'W01', 'description' => 'test']],
+            'customerInfo' => ['cardHolderName' => 'Mario Rossi'],
+            'additionalData' => ['authorizationCode' => 'ABC123', 'cardCountry' => 'ITA'],
         ]);
 
         $this->assertSame('ORD-001', $details->getOrderId());
@@ -50,6 +52,8 @@ class OperationDetailsTest extends TestCase
         $this->assertNull($details->getPaymentLinkId());
         $this->assertSame('TERM-001', $details->getTerminalId());
         $this->assertCount(1, $details->getWarnings());
+        $this->assertSame(['cardHolderName' => 'Mario Rossi'], $details->getCustomerInfo());
+        $this->assertSame('ABC123', $details->getAdditionalData()['authorizationCode']);
     }
 
     public function testFromArrayWithMissingFieldsReturnsNulls(): void
@@ -73,6 +77,8 @@ class OperationDetailsTest extends TestCase
         $this->assertNull($details->getPaymentLinkId());
         $this->assertNull($details->getTerminalId());
         $this->assertSame([], $details->getWarnings());
+        $this->assertSame([], $details->getCustomerInfo());
+        $this->assertSame([], $details->getAdditionalData());
     }
 
     public function testConstants(): void
@@ -85,5 +91,9 @@ class OperationDetailsTest extends TestCase
         $this->assertSame('VOID', OperationDetails::OPERATION_TYPE_VOID);
         $this->assertSame('REFUND', OperationDetails::OPERATION_TYPE_REFUND);
         $this->assertSame('CANCEL', OperationDetails::OPERATION_TYPE_CANCEL);
+        $this->assertSame('CARD_VERIFICATION', OperationDetails::OPERATION_TYPE_CARD_VERIFICATION);
+        $this->assertSame('NOSHOW', OperationDetails::OPERATION_TYPE_NOSHOW);
+        $this->assertSame('INCREMENTAL', OperationDetails::OPERATION_TYPE_INCREMENTAL);
+        $this->assertSame('DELAY_CHARGE', OperationDetails::OPERATION_TYPE_DELAY_CHARGE);
     }
 }
