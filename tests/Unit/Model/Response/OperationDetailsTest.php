@@ -31,6 +31,8 @@ class OperationDetailsTest extends TestCase
             'paymentLinkId' => null,
             'terminalId' => 'TERM-001',
             'warnings' => [['code' => 'W01', 'description' => 'test']],
+            'customerInfo' => ['cardHolderName' => 'Mario Rossi'],
+            'additionalData' => ['authorizationCode' => 'ABC123', 'cardCountry' => 'ITA'],
         ]);
 
         $this->assertSame('ORD-001', $details->getOrderId());
@@ -50,6 +52,8 @@ class OperationDetailsTest extends TestCase
         $this->assertNull($details->getPaymentLinkId());
         $this->assertSame('TERM-001', $details->getTerminalId());
         $this->assertCount(1, $details->getWarnings());
+        $this->assertSame(['cardHolderName' => 'Mario Rossi'], $details->getCustomerInfo());
+        $this->assertSame('ABC123', $details->getAdditionalData()['authorizationCode']);
     }
 
     public function testFromArrayWithMissingFieldsReturnsNulls(): void
@@ -73,6 +77,8 @@ class OperationDetailsTest extends TestCase
         $this->assertNull($details->getPaymentLinkId());
         $this->assertNull($details->getTerminalId());
         $this->assertSame([], $details->getWarnings());
+        $this->assertSame([], $details->getCustomerInfo());
+        $this->assertSame([], $details->getAdditionalData());
     }
 
     public function testConstants(): void
