@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-09
+
+### Added
+
+- `OrderService::createMit()`: charge a previously created recurring contract (MIT — Merchant Initiated Transaction) via `POST /orders/mit`, completing the recurring flow (create contract → charge → manage); sends the mandatory `Idempotency-Key` header (auto-generated, or supplied by the caller for safe retries) and an optional `captureType`; returns an `OperationDetails` object
+- `OrderService::findAll()`: added optional filters `orderId`, `amountType`, `minAmount`, `maxAmount` and `orderState`, with new `AMOUNT_TYPE_*` and `ORDER_STATE_*` constants
+- `PayByLinkService::findAll()`: retrieve a list of Pay-by-Link links with optional filters (`fromTime`, `toTime`, `maxRecords`, `status`); returns an array of `PaymentLink` objects (list items do not carry a `securityToken`)
+- `PayByLinkService::find()`: retrieve a single Pay-by-Link link by `linkId`, including its `securityToken`
+- `PayByLinkService::renew()`: renew an existing Pay-by-Link link (`POST /orders/paybylink/{linkId}/renewals`), optionally with a new expiration date
+- `PaymentLink`: added `STATUS_ACTIVE`, `STATUS_DELETED`, `STATUS_EXPIRED` and `STATUS_INACTIVE` constants
+- `OperationDetails`: added `OPERATION_TYPE_CARD_VERIFICATION`, `OPERATION_TYPE_NOSHOW`, `OPERATION_TYPE_INCREMENTAL` and `OPERATION_TYPE_DELAY_CHARGE` constants
+- `OperationDetails`: added `getCustomerInfo()` and `getAdditionalData()` getters
+
+### Fixed
+
+- README: replaced PHP 8 named-arguments syntax with positional arguments in the operations example (the library supports PHP >= 7.2)
+
 ## [1.2.0] - 2026-06-18
 
 ### Added

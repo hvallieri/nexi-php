@@ -156,6 +156,8 @@ $result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'E
 ### 5. List orders and operations
 
 ```php
+use Hval\Nexi\Service\OrderService;
+
 // List orders — all parameters are optional
 $orders = $nexi->orders()->findAll(
     '2024-01-01T00:00:00.000Z',  // fromTime (ISO 8601)
@@ -170,13 +172,26 @@ foreach ($orders as $order) {       // array<int, OrderSummary>
     $order->getLastOperationType(); // ?string
 }
 
+// Additional filters: orderId, amount range and order state
+$orders = $nexi->orders()->findAll(
+    null,                                    // fromTime
+    null,                                    // toTime
+    null,                                    // maxRecords
+    null,                                    // customField
+    null,                                    // orderId
+    OrderService::AMOUNT_TYPE_ORDER_AMOUNT,  // amountType — requires minAmount and maxAmount
+    '500',                                   // minAmount
+    '2000',                                  // maxAmount
+    OrderService::ORDER_STATE_CAPTURED       // orderState — TO_CAPTURE or CAPTURED
+);
+
 // List operations — filter by channel or type
 $operations = $nexi->operations()->findAll(
-    fromTime: null,
-    toTime: null,
-    maxRecords: null,
-    channel: 'ECOMMERCE',           // ECOMMERCE, POS, BACKOFFICE
-    operationType: 'AUTHORIZATION'
+    null,            // fromTime
+    null,            // toTime
+    null,            // maxRecords
+    'ECOMMERCE',     // channel — ECOMMERCE, POS, BACKOFFICE
+    'AUTHORIZATION'  // operationType
 );
 
 // Retrieve a single operation
@@ -224,6 +239,32 @@ $link->getSecurityToken(); // ?string — save in DB for webhook verification
 
 // Cancel an active link
 $nexi->payByLink()->cancel($link->getLinkId());
+```
+
+Retrieve, list and renew links:
+
+```php
+use Hval\Nexi\Model\Response\PaymentLink;
+
+// Retrieve a single link (includes the securityToken)
+$response = $nexi->payByLink()->find('link-id');
+
+// List links — all parameters are optional; list items do not carry a securityToken
+$links = $nexi->payByLink()->findAll(
+    '2024-01-01T00:00:00.000Z',  // fromTime (ISO 8601)
+    '2024-01-31T23:59:59.000Z',  // toTime   (ISO 8601, max 1-month range)
+    50,                          // maxRecords
+    PaymentLink::STATUS_ACTIVE   // status — ACTIVE, DELETED, EXPIRED, INACTIVE
+);
+
+foreach ($links as $link) { // array<int, PaymentLink>
+    $link->getLinkId();     // ?string
+    $link->getStatus();     // ?string
+}
+
+// Renew a link, optionally with a new expiration date
+// (max 90 days after the creation of the original link)
+$response = $nexi->payByLink()->renew('link-id', '2025-01-31');
 ```
 
 ### 8. Recurring contracts
@@ -276,6 +317,29 @@ $session = new PaymentSession(
 Available actions: `ACTION_NO_RECURRING`, `ACTION_SUBSEQUENT_PAYMENT`, `ACTION_CONTRACT_CREATION`, `ACTION_CARD_SUBSTITUTION`.
 
 Available contract types: `CONTRACT_TYPE_MIT_UNSCHEDULED`, `CONTRACT_TYPE_MIT_SCHEDULED`, `CONTRACT_TYPE_CIT`.
+
+Once the contract is created, charge it with a MIT (Merchant Initiated Transaction):
+
+```php
+use Hval\Nexi\Model\Request\Order;
+use Hval\Nexi\Model\Request\PaymentSession;
+
+$order  = new Order('ORDER-002', '1000', 'EUR');
+$result = $nexi->orders()->createMit($order, 'contract-id');
+
+$result->getOperationId();     // ?string
+$result->getOperationResult(); // ?string — e.g. EXECUTED
+$result->getAdditionalData();  // array — payment-method specific (authorizationCode, ...)
+
+// Optionally overwrite the terminal capture default and/or
+// pass your own idempotency key to make retries safe
+$result = $nexi->orders()->createMit(
+    $order,
+    'contract-id',
+    PaymentSession::CAPTURE_EXPLICIT,
+    'your-uuid-v4'
+);
+```
 
 ## Response objects
 

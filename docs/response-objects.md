@@ -48,7 +48,7 @@ OPERATION_RESULT_DENIED_BY_RISK · THREEDS_VALIDATED · THREEDS_FAILED
 OPERATION_RESULT_CANCELED · VOIDED · REFUNDED · FAILED
 ```
 
-## `OperationDetails` — `operations()->findAll()` / `find()`
+## `OperationDetails` — `operations()->findAll()` / `find()`, `orders()->createMit()`
 
 | Method                       | Returns   |
 |------------------------------|-----------|
@@ -69,12 +69,15 @@ OPERATION_RESULT_CANCELED · VOIDED · REFUNDED · FAILED
 | `getPaymentLinkId()`         | `?string` |
 | `getTerminalId()`            | `?string` |
 | `getWarnings()`              | `array`   |
+| `getCustomerInfo()`          | `array`   |
+| `getAdditionalData()`        | `array`   |
 
 Available constants on `OperationDetails`:
 
 ```
 CHANNEL_ECOMMERCE · CHANNEL_POS · CHANNEL_BACKOFFICE
 OPERATION_TYPE_AUTHORIZATION · CAPTURE · VOID · REFUND · CANCEL
+OPERATION_TYPE_CARD_VERIFICATION · NOSHOW · INCREMENTAL · DELAY_CHARGE
 ```
 
 ## `OperationResponse` — `operations()->refund()` / `capture()` / `cancel()`
@@ -95,9 +98,10 @@ OPERATION_TYPE_AUTHORIZATION · CAPTURE · VOID · REFUND · CANCEL
 | `isRecurringSupported()` | `?bool`                     |
 | `isOneClickSupported()`  | `?bool`                     |
 
-## `PayByLinkResponse` / `PaymentLink` — `payByLink()->create()`
+## `PayByLinkResponse` / `PaymentLink` — `payByLink()->create()` / `find()` / `findAll()` / `renew()`
 
-`PayByLinkResponse::getPaymentLink()` returns a `PaymentLink` object:
+`PayByLinkResponse::getPaymentLink()` returns a `PaymentLink` object (`findAll()` returns an
+array of `PaymentLink` directly; list items do not carry a `securityToken`):
 
 | Method                   | Returns                                                |
 |--------------------------|--------------------------------------------------------|
@@ -108,6 +112,12 @@ OPERATION_TYPE_AUTHORIZATION · CAPTURE · VOID · REFUND · CANCEL
 | `getPaidByOperationId()` | `?string`                                              |
 | `getStatus()`            | `?string` — `ACTIVE`, `DELETED`, `EXPIRED`, `INACTIVE` |
 | `getSecurityToken()`     | `?string`                                              |
+
+Available constants on `PaymentLink`:
+
+```
+STATUS_ACTIVE · STATUS_DELETED · STATUS_EXPIRED · STATUS_INACTIVE
+```
 
 ## `ContractsByCustomerResponse` / `ContractSummary` — `contracts()->findByCustomer()`
 
