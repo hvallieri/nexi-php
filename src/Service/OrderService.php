@@ -6,6 +6,7 @@ use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\HppResponse;
+use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OrderResponse;
 use Hval\Nexi\Model\Response\OrderSummary;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -43,6 +44,52 @@ class OrderService extends AbstractService
         );
 
         return HppResponse::fromArray($data);
+    }
+
+    /**
+     * Charges a previously created recurring contract (MIT — Merchant Initiated Transaction),
+     * used for subscription-like services.
+     *
+     * @see https://developer.nexi.it/en/api/post-orders-mit
+     *
+     * @param string|null $captureType one of the PaymentSession::CAPTURE_* constants; overwrites the terminal default
+     * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
+     *
+     * @throws NexiException
+     * @throws ClientExceptionInterface
+     */
+    public function createMit(
+        Order $order,
+        string $contractId,
+        ?string $captureType = null,
+        ?string $idempotencyKey = null
+    ): OperationDetails {
+        $payload = [
+            'order' => $order->toArray(),
+            'contractId' => $contractId,
+        ];
+
+        if ($captureType !== null) {
+            $payload['captureType'] = $captureType;
+        }
+
+        $body = json_encode($payload);
+
+        if ($body === false) {
+            throw new NexiException('Failed to encode MIT request body.');
+        }
+
+        $data = $this->parseResponse(
+            $this->post(
+                $this->baseUrl . '/orders/mit',
+                $body,
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
+            )
+        );
+
+        $operation = isset($data['operation']) && is_array($data['operation']) ? $data['operation'] : [];
+
+        return OperationDetails::fromArray($operation);
     }
 
     /**
