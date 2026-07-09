@@ -8,6 +8,7 @@ use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\HppResponse;
+use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OrderResponse;
 use Hval\Nexi\Model\Response\OrderSummary;
 use Hval\Nexi\Service\OrderService;
@@ -38,6 +39,134 @@ class OrderServiceTest extends TestCase
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
         $this->service = new OrderService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+    }
+
+    private function makeMitSuccessResponse(): Response
+    {
+        return new Response(200, [], json_encode([
+            'operation' => [
+                'orderId' => 'ORD-001',
+                'operationId' => 'OP-001',
+                'channel' => 'ECOMMERCE',
+                'channelDetail' => 'MERCHANT_INITIATED_TRANSACTION',
+                'operationType' => 'AUTHORIZATION',
+                'operationResult' => 'EXECUTED',
+                'operationAmount' => '1000',
+                'operationCurrency' => 'EUR',
+                'additionalData' => ['authorizationCode' => 'ABC123'],
+            ],
+        ]));
+    }
+
+    public function testCreateMitReturnsOperationDetails(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $result = $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
+
+        $this->assertInstanceOf(OperationDetails::class, $result);
+        $this->assertSame('ORD-001', $result->getOrderId());
+        $this->assertSame('OP-001', $result->getOperationId());
+        $this->assertSame('MERCHANT_INITIATED_TRANSACTION', $result->getChannelDetail());
+        $this->assertSame('EXECUTED', $result->getOperationResult());
+        $this->assertSame('ABC123', $result->getAdditionalData()['authorizationCode']);
+    }
+
+    public function testCreateMitCallsCorrectEndpoint(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/mit') !== false
+                    && $request->getMethod() === 'POST';
+            }))
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
+    }
+
+    public function testCreateMitSendsOrderAndContractIdInBody(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $data = json_decode((string) $request->getBody(), true);
+
+                return isset($data['order'])
+                    && $data['order']['orderId'] === 'ORD-001'
+                    && $data['contractId'] === 'CONTRACT-001'
+                    && isset($data['captureType']) === false;
+            }))
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
+    }
+
+    public function testCreateMitSendsCaptureTypeWhenProvided(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $data = json_decode((string) $request->getBody(), true);
+
+                return $data['captureType'] === 'EXPLICIT';
+            }))
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $this->service->createMit(
+            new Order('ORD-001', '1000', 'EUR'),
+            'CONTRACT-001',
+            PaymentSession::CAPTURE_EXPLICIT
+        );
+    }
+
+    public function testCreateMitSendsGeneratedIdempotencyKeyHeader(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return $request->getHeaderLine('Idempotency-Key') !== '';
+            }))
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
+    }
+
+    public function testCreateMitSendsCustomIdempotencyKeyHeader(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return $request->getHeaderLine('Idempotency-Key') === 'my-custom-key';
+            }))
+            ->willReturn($this->makeMitSuccessResponse())
+        ;
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001', null, 'my-custom-key');
+    }
+
+    public function testCreateMitThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
     }
 
     public function testCreateHppReturnsHppResponse(): void
@@ -320,6 +449,65 @@ class OrderServiceTest extends TestCase
         ;
 
         $this->service->findAll(null, null, 5, null);
+    }
+
+    public function testFindAllWithAmountFiltersBuildsQueryString(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'orderId=ORD-001') !== false
+                    && strpos($uri, 'amountType=AUTHORIZED_AMOUNT') !== false
+                    && strpos($uri, 'minAmount=500') !== false
+                    && strpos($uri, 'maxAmount=2000') !== false
+                    && strpos($uri, 'orderState=TO_CAPTURE') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll(
+            null,
+            null,
+            null,
+            null,
+            'ORD-001',
+            OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT,
+            '500',
+            '2000',
+            OrderService::ORDER_STATE_TO_CAPTURE
+        );
+    }
+
+    public function testFindAllOmitsNullAmountFilters(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'orderId') === false
+                    && strpos($uri, 'amountType') === false
+                    && strpos($uri, 'minAmount') === false
+                    && strpos($uri, 'maxAmount') === false
+                    && strpos($uri, 'orderState') === false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll('2024-01-01', '2024-01-31');
+    }
+
+    public function testConstants(): void
+    {
+        $this->assertSame('ORDER_AMOUNT', OrderService::AMOUNT_TYPE_ORDER_AMOUNT);
+        $this->assertSame('AUTHORIZED_AMOUNT', OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT);
+        $this->assertSame('CAPTURED_AMOUNT', OrderService::AMOUNT_TYPE_CAPTURED_AMOUNT);
+        $this->assertSame('TO_CAPTURE', OrderService::ORDER_STATE_TO_CAPTURE);
+        $this->assertSame('CAPTURED', OrderService::ORDER_STATE_CAPTURED);
     }
 
     public function testFindAllReturnsEmptyArrayWhenOrdersKeyMissing(): void

@@ -15,6 +15,10 @@ class OperationDetails implements ResponseModelInterface
     const OPERATION_TYPE_VOID = 'VOID';
     const OPERATION_TYPE_REFUND = 'REFUND';
     const OPERATION_TYPE_CANCEL = 'CANCEL';
+    const OPERATION_TYPE_CARD_VERIFICATION = 'CARD_VERIFICATION';
+    const OPERATION_TYPE_NOSHOW = 'NOSHOW';
+    const OPERATION_TYPE_INCREMENTAL = 'INCREMENTAL';
+    const OPERATION_TYPE_DELAY_CHARGE = 'DELAY_CHARGE';
 
     /** @var string|null */
     private $orderId;
@@ -67,8 +71,16 @@ class OperationDetails implements ResponseModelInterface
     /** @var array<int, mixed> */
     private $warnings;
 
+    /** @var array<string, mixed> */
+    private $customerInfo;
+
+    /** @var array<string, mixed> */
+    private $additionalData;
+
     /**
      * @param array<int, mixed> $warnings
+     * @param array<string, mixed> $customerInfo
+     * @param array<string, mixed> $additionalData
      */
     public function __construct(
         ?string $orderId,
@@ -87,7 +99,9 @@ class OperationDetails implements ResponseModelInterface
         ?string $operationCurrency,
         ?string $paymentLinkId,
         ?string $terminalId,
-        array $warnings
+        array $warnings,
+        array $customerInfo = [],
+        array $additionalData = []
     ) {
         $this->orderId = $orderId;
         $this->operationId = $operationId;
@@ -106,6 +120,8 @@ class OperationDetails implements ResponseModelInterface
         $this->paymentLinkId = $paymentLinkId;
         $this->terminalId = $terminalId;
         $this->warnings = $warnings;
+        $this->customerInfo = $customerInfo;
+        $this->additionalData = $additionalData;
     }
 
     public function getOrderId(): ?string
@@ -197,6 +213,25 @@ class OperationDetails implements ResponseModelInterface
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function getCustomerInfo(): array
+    {
+        return $this->customerInfo;
+    }
+
+    /**
+     * Map of additional fields specific to the payment method
+     * (e.g. authorizationCode, cardCountry, threeDS).
+     *
+     * @return array<string, mixed>
+     */
+    public function getAdditionalData(): array
+    {
+        return $this->additionalData;
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public static function fromArray(array $data): self
@@ -218,7 +253,9 @@ class OperationDetails implements ResponseModelInterface
             $data['operationCurrency'] ?? null,
             $data['paymentLinkId'] ?? null,
             $data['terminalId'] ?? null,
-            isset($data['warnings']) && is_array($data['warnings']) ? $data['warnings'] : []
+            isset($data['warnings']) && is_array($data['warnings']) ? $data['warnings'] : [],
+            isset($data['customerInfo']) && is_array($data['customerInfo']) ? $data['customerInfo'] : [],
+            isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : []
         );
     }
 }

@@ -7,6 +7,7 @@ use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\PayByLinkResponse;
+use Hval\Nexi\Model\Response\PaymentLink;
 use Hval\Nexi\Service\PayByLinkService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
@@ -117,6 +118,244 @@ class PayByLinkServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
+    }
+
+    public function testFindAllReturnsArrayOfPaymentLink(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([
+                'paymentLinks' => [
+                    ['linkId' => 'LINK-001', 'amount' => '1000', 'status' => 'ACTIVE'],
+                    ['linkId' => 'LINK-002', 'amount' => '2000', 'status' => 'EXPIRED'],
+                ],
+            ])))
+        ;
+
+        $result = $this->service->findAll();
+
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(PaymentLink::class, $result[0]);
+        $this->assertSame('LINK-001', $result[0]->getLinkId());
+        $this->assertSame('LINK-002', $result[1]->getLinkId());
+        $this->assertNull($result[0]->getSecurityToken());
+    }
+
+    public function testFindAllCallsCorrectEndpoint(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink') !== false
+                    && $request->getMethod() === 'GET';
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll();
+    }
+
+    public function testFindAllWithFiltersBuildsQueryString(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'fromTime=2024-01-01') !== false
+                    && strpos($uri, 'toTime=2024-01-31') !== false
+                    && strpos($uri, 'maxRecords=10') !== false
+                    && strpos($uri, 'status=ACTIVE') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll('2024-01-01', '2024-01-31', 10, PaymentLink::STATUS_ACTIVE);
+    }
+
+    public function testFindAllOmitsNullParams(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'status=EXPIRED') !== false
+                    && strpos($uri, 'fromTime') === false
+                    && strpos($uri, 'toTime') === false
+                    && strpos($uri, 'maxRecords') === false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll(null, null, null, PaymentLink::STATUS_EXPIRED);
+    }
+
+    public function testFindAllReturnsEmptyArrayWhenPaymentLinksKeyMissing(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->assertSame([], $this->service->findAll());
+    }
+
+    public function testFindAllThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->findAll();
+    }
+
+    public function testFindReturnsPayByLinkResponse(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $response = $this->service->find('LINK-001');
+
+        $this->assertInstanceOf(PayByLinkResponse::class, $response);
+        $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
+        $this->assertSame('tok_abc123', $response->getPaymentLink()->getSecurityToken());
+    }
+
+    public function testFindCallsCorrectEndpoint(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK-001') !== false
+                    && $request->getMethod() === 'GET';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->find('LINK-001');
+    }
+
+    public function testFindUrlEncodesLinkId(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK%2F001') !== false;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->find('LINK/001');
+    }
+
+    public function testFindThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->find('LINK-001');
+    }
+
+    public function testRenewReturnsPayByLinkResponse(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $response = $this->service->renew('LINK-001', '2024-12-31');
+
+        $this->assertInstanceOf(PayByLinkResponse::class, $response);
+        $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
+        $this->assertSame('tok_abc123', $response->getPaymentLink()->getSecurityToken());
+    }
+
+    public function testRenewCallsCorrectEndpoint(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK-001/renewals') !== false
+                    && $request->getMethod() === 'POST';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->renew('LINK-001');
+    }
+
+    public function testRenewSendsExpirationDateInBody(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $data = json_decode((string) $request->getBody(), true);
+
+                return isset($data['expirationDate'])
+                    && $data['expirationDate'] === '2024-12-31';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->renew('LINK-001', '2024-12-31');
+    }
+
+    public function testRenewSendsEmptyObjectBodyWithoutExpirationDate(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return (string) $request->getBody() === '{}';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->renew('LINK-001');
+    }
+
+    public function testRenewUrlEncodesLinkId(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK%2F001/renewals') !== false;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->renew('LINK/001');
+    }
+
+    public function testRenewThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->renew('LINK-001');
     }
 
     public function testCancelCallsCorrectEndpoint(): void
