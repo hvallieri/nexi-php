@@ -15,6 +15,10 @@ class OperationDetails implements ResponseModelInterface
     const OPERATION_TYPE_VOID = 'VOID';
     const OPERATION_TYPE_REFUND = 'REFUND';
     const OPERATION_TYPE_CANCEL = 'CANCEL';
+    const OPERATION_TYPE_CARD_VERIFICATION = 'CARD_VERIFICATION';
+    const OPERATION_TYPE_NOSHOW = 'NOSHOW';
+    const OPERATION_TYPE_INCREMENTAL = 'INCREMENTAL';
+    const OPERATION_TYPE_DELAY_CHARGE = 'DELAY_CHARGE';
 
     /** @var string|null */
     private $orderId;

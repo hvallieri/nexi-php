@@ -85,5 +85,9 @@ class OperationDetailsTest extends TestCase
         $this->assertSame('VOID', OperationDetails::OPERATION_TYPE_VOID);
         $this->assertSame('REFUND', OperationDetails::OPERATION_TYPE_REFUND);
         $this->assertSame('CANCEL', OperationDetails::OPERATION_TYPE_CANCEL);
+        $this->assertSame('CARD_VERIFICATION', OperationDetails::OPERATION_TYPE_CARD_VERIFICATION);
+        $this->assertSame('NOSHOW', OperationDetails::OPERATION_TYPE_NOSHOW);
+        $this->assertSame('INCREMENTAL', OperationDetails::OPERATION_TYPE_INCREMENTAL);
+        $this->assertSame('DELAY_CHARGE', OperationDetails::OPERATION_TYPE_DELAY_CHARGE);
     }
 }
