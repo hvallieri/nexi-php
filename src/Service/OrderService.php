@@ -12,6 +12,13 @@ use Psr\Http\Client\ClientExceptionInterface;
 
 class OrderService extends AbstractService
 {
+    const AMOUNT_TYPE_ORDER_AMOUNT = 'ORDER_AMOUNT';
+    const AMOUNT_TYPE_AUTHORIZED_AMOUNT = 'AUTHORIZED_AMOUNT';
+    const AMOUNT_TYPE_CAPTURED_AMOUNT = 'CAPTURED_AMOUNT';
+
+    const ORDER_STATE_TO_CAPTURE = 'TO_CAPTURE';
+    const ORDER_STATE_CAPTURED = 'CAPTURED';
+
     /**
      * Creates an order and returns the Hosted Payment Page URL.
      *
@@ -39,11 +46,17 @@ class OrderService extends AbstractService
     }
 
     /**
-     * Retrieves a list of orders, optionally filtered by time range and custom field.
+     * Retrieves a list of orders, optionally filtered by time range, custom field,
+     * orderId, amount range and order state.
      * Date parameters must be in ISO 8601 format (e.g. 2022-01-01T13:10:00.000Z).
      * The API enforces a maximum interval of one month between fromTime and toTime.
+     * When amountType is specified (see the AMOUNT_TYPE_* constants), the API requires
+     * both minAmount and maxAmount.
      *
      * @see https://developer.nexi.it/en/api/get-orders
+     *
+     * @param string|null $amountType one of the AMOUNT_TYPE_* constants
+     * @param string|null $orderState one of the ORDER_STATE_* constants
      *
      * @throws NexiException
      * @throws ClientExceptionInterface
@@ -54,7 +67,12 @@ class OrderService extends AbstractService
         ?string $fromTime = null,
         ?string $toTime = null,
         ?int $maxRecords = null,
-        ?string $customField = null
+        ?string $customField = null,
+        ?string $orderId = null,
+        ?string $amountType = null,
+        ?string $minAmount = null,
+        ?string $maxAmount = null,
+        ?string $orderState = null
     ): array {
         $params = [];
 
@@ -72,6 +90,26 @@ class OrderService extends AbstractService
 
         if ($customField !== null) {
             $params['customField'] = $customField;
+        }
+
+        if ($orderId !== null) {
+            $params['orderId'] = $orderId;
+        }
+
+        if ($amountType !== null) {
+            $params['amountType'] = $amountType;
+        }
+
+        if ($minAmount !== null) {
+            $params['minAmount'] = $minAmount;
+        }
+
+        if ($maxAmount !== null) {
+            $params['maxAmount'] = $maxAmount;
+        }
+
+        if ($orderState !== null) {
+            $params['orderState'] = $orderState;
         }
 
         $data = $this->parseResponse(

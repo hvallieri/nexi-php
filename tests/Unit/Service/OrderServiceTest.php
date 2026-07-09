@@ -322,6 +322,65 @@ class OrderServiceTest extends TestCase
         $this->service->findAll(null, null, 5, null);
     }
 
+    public function testFindAllWithAmountFiltersBuildsQueryString(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'orderId=ORD-001') !== false
+                    && strpos($uri, 'amountType=AUTHORIZED_AMOUNT') !== false
+                    && strpos($uri, 'minAmount=500') !== false
+                    && strpos($uri, 'maxAmount=2000') !== false
+                    && strpos($uri, 'orderState=TO_CAPTURE') !== false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll(
+            null,
+            null,
+            null,
+            null,
+            'ORD-001',
+            OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT,
+            '500',
+            '2000',
+            OrderService::ORDER_STATE_TO_CAPTURE
+        );
+    }
+
+    public function testFindAllOmitsNullAmountFilters(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                $uri = (string) $request->getUri();
+
+                return strpos($uri, 'orderId') === false
+                    && strpos($uri, 'amountType') === false
+                    && strpos($uri, 'minAmount') === false
+                    && strpos($uri, 'maxAmount') === false
+                    && strpos($uri, 'orderState') === false;
+            }))
+            ->willReturn(new Response(200, [], json_encode([])))
+        ;
+
+        $this->service->findAll('2024-01-01', '2024-01-31');
+    }
+
+    public function testConstants(): void
+    {
+        $this->assertSame('ORDER_AMOUNT', OrderService::AMOUNT_TYPE_ORDER_AMOUNT);
+        $this->assertSame('AUTHORIZED_AMOUNT', OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT);
+        $this->assertSame('CAPTURED_AMOUNT', OrderService::AMOUNT_TYPE_CAPTURED_AMOUNT);
+        $this->assertSame('TO_CAPTURE', OrderService::ORDER_STATE_TO_CAPTURE);
+        $this->assertSame('CAPTURED', OrderService::ORDER_STATE_CAPTURED);
+    }
+
     public function testFindAllReturnsEmptyArrayWhenOrdersKeyMissing(): void
     {
         $this->httpClient
