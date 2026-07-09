@@ -217,6 +217,61 @@ class PayByLinkServiceTest extends TestCase
         $this->service->findAll();
     }
 
+    public function testFindReturnsPayByLinkResponse(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $response = $this->service->find('LINK-001');
+
+        $this->assertInstanceOf(PayByLinkResponse::class, $response);
+        $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
+        $this->assertSame('tok_abc123', $response->getPaymentLink()->getSecurityToken());
+    }
+
+    public function testFindCallsCorrectEndpoint(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK-001') !== false
+                    && $request->getMethod() === 'GET';
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->find('LINK-001');
+    }
+
+    public function testFindUrlEncodesLinkId(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(function (RequestInterface $request): bool {
+                return strpos((string) $request->getUri(), '/orders/paybylink/LINK%2F001') !== false;
+            }))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->find('LINK/001');
+    }
+
+    public function testFindThrowsAuthenticationExceptionOn401(): void
+    {
+        $this->httpClient
+            ->method('sendRequest')
+            ->willReturn(new Response(401))
+        ;
+
+        $this->expectException(AuthenticationException::class);
+
+        $this->service->find('LINK-001');
+    }
+
     public function testRenewReturnsPayByLinkResponse(): void
     {
         $this->httpClient
