@@ -57,4 +57,12 @@ class PayByLinkResponseTest extends TestCase
         $this->assertNull($link->getStatus());
         $this->assertNull($link->getSecurityToken());
     }
+
+    public function testPaymentLinkConstants(): void
+    {
+        $this->assertSame('ACTIVE', PaymentLink::STATUS_ACTIVE);
+        $this->assertSame('DELETED', PaymentLink::STATUS_DELETED);
+        $this->assertSame('EXPIRED', PaymentLink::STATUS_EXPIRED);
+        $this->assertSame('INACTIVE', PaymentLink::STATUS_INACTIVE);
+    }
 }
