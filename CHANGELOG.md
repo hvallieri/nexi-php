@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-11-24
+
+### Changed
+
+- Development and documentation files (`tests/`, `docs/`, `.github/`, `phpunit.xml`, `.php-cs-fixer.php`, `.gitignore`, `.gitattributes`) are no longer included in the distribution archive (`export-ignore` in `.gitattributes`)
+- Test suite: `@covers` annotations now use fully qualified class names, so code coverage is measured correctly; added the missing tests to reach 100% line coverage
+
 ## [1.2.0] - 2026-06-18
 
 ### Added
@@ -18,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New response models: `OrderSummary`, `OperationDetails`, `PaymentMethod`, `PayByLinkResponse`, `PaymentLink`, `ContractsByCustomerResponse`, `ContractSummary`, `WebhookAdditionalData`
 - `Order`: added `installments` and `installmentQty` optional fields
 - `WebhookNotification`: added 13 root-level getters (`getPaymentId()`, `getResult()`, `getRootPaymentMethod()`, `getRootPaymentInstrumentInfo()`, `getOrderAmount()`, `getCurrency()`, `getCustomerId()`, `getDescription()`, `getCustomField()`, `getOrderTime()`, `getEventType()`, `getErrorCode()`, `getErrorMessage()`), 6 operation-level getters (`getPaymentInstrumentInfo()`, `getPaymentEndToEndId()`, `getCancelledOperationId()`, `getWarnings()`, `getPaymentLinkId()`, `getTerminalId()`), and `getAdditionalData()` returning a `WebhookAdditionalData` object
+
+## [1.1.3] - 2026-11-24
+
+### Changed
+
+- Development files (`tests/`, `.github/`, `phpunit.xml`, `.php-cs-fixer.php`, `.gitignore`, `.gitattributes`) are no longer included in the distribution archive (`export-ignore` in `.gitattributes`)
+- Test suite: `@covers` annotations now use fully qualified class names, so code coverage is measured correctly; added the missing tests to reach 100% line coverage
 
 ## [1.1.2] - 2026-05-14
 
@@ -39,6 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Order`: added `termsAndConditionsIds` (list of accepted T&C UUIDs) and `transactionSummary`
 - `RefundRequest`: `amount` and `currency` are now optional — omitting both triggers a full refund on the Nexi side
 - `CaptureRequest`: `amount` and `currency` are now optional — omitting both triggers a full capture on the Nexi side
+
+## [1.0.4] - 2026-11-24
+
+### Changed
+
+- Development files (`tests/`, `.github/`, `phpunit.xml`, `.php-cs-fixer.php`, `.gitignore`, `.gitattributes`) are no longer included in the distribution archive (`export-ignore` in `.gitattributes`)
+- Test suite: `@covers` annotations now use fully qualified class names, so code coverage is measured correctly; added the missing tests to reach 100% line coverage
 
 ## [1.0.3] - 2026-05-14
 
