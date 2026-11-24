@@ -4,6 +4,7 @@ namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
+use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
@@ -20,7 +21,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers OrderService
+ * @covers \Hval\Nexi\Service\AbstractService
+ * @covers \Hval\Nexi\Service\OrderService
  */
 class OrderServiceTest extends TestCase
 {
@@ -359,5 +361,21 @@ class OrderServiceTest extends TestCase
         ;
 
         $this->service->find('ORD/001');
+    }
+
+    public function testCreateHppThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode request body.');
+
+        $order = new Order("ORD-\xB1", '1000', 'EUR');
+        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+
+        $this->service->createHpp($order, $session);
     }
 }
