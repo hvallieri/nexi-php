@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\OrderResponse;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\OrderResponse
  */
+#[CoversClass(OrderResponse::class)]
 class OrderResponseTest extends TestCase
 {
     /** @return array<string, mixed> */

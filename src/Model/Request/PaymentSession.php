@@ -6,45 +6,26 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class PaymentSession implements RequestModelInterface
 {
-    const ACTION_PAY = 'PAY';
-    const ACTION_VERIFY = 'VERIFY';
-    const ACTION_PREAUTH = 'PREAUTH';
+    public const string ACTION_PAY = 'PAY';
+    public const string ACTION_VERIFY = 'VERIFY';
+    public const string ACTION_PREAUTH = 'PREAUTH';
 
-    const CAPTURE_EXPLICIT = 'EXPLICIT';
-    const CAPTURE_IMPLICIT = 'IMPLICIT';
+    public const string CAPTURE_EXPLICIT = 'EXPLICIT';
+    public const string CAPTURE_IMPLICIT = 'IMPLICIT';
 
-    const EXEMPTION_NO_PREFERENCE = 'NO_PREFERENCE';
-    const EXEMPTION_CHALLENGE_REQUESTED = 'CHALLENGE_REQUESTED';
+    public const string EXEMPTION_NO_PREFERENCE = 'NO_PREFERENCE';
+    public const string EXEMPTION_CHALLENGE_REQUESTED = 'CHALLENGE_REQUESTED';
 
-    /** @var string */
-    private $actionType;
-
-    /** @var string */
-    private $amount;
-
-    /** @var string */
-    private $language;
-
-    /** @var string */
-    private $resultUrl;
-
-    /** @var string */
-    private $cancelUrl;
-
-    /** @var string|null */
-    private $notificationUrl;
-
-    /** @var string|null */
-    private $captureType;
-
-    /** @var string|null */
-    private $exemptions;
-
-    /** @var string|null */
-    private $paymentService;
-
-    /** @var Recurrence|null */
-    private $recurrence;
+    private string $actionType;
+    private string $amount;
+    private string $language;
+    private string $resultUrl;
+    private string $cancelUrl;
+    private ?string $notificationUrl;
+    private ?string $captureType;
+    private ?string $exemptions;
+    private ?string $paymentService;
+    private ?Recurrence $recurrence;
 
     public function __construct(
         string $actionType,
@@ -56,7 +37,7 @@ class PaymentSession implements RequestModelInterface
         ?string $captureType = null,
         ?string $exemptions = null,
         ?string $paymentService = null,
-        ?Recurrence $recurrence = null
+        ?Recurrence $recurrence = null,
     ) {
         $this->actionType = $actionType;
         $this->amount = $amount;

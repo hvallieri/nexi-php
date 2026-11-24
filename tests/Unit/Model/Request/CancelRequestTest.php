@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\CancelRequest;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\CancelRequest
  */
+#[CoversClass(CancelRequest::class)]
 class CancelRequestTest extends TestCase
 {
     public function testToArrayWithNoDescription(): void

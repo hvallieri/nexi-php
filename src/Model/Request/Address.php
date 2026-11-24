@@ -6,26 +6,13 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class Address implements RequestModelInterface
 {
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $street;
-
-    /** @var string */
-    private $city;
-
-    /** @var string */
-    private $postCode;
-
-    /** @var string */
-    private $country;
-
-    /** @var string|null */
-    private $province;
-
-    /** @var string|null */
-    private $additionalInfo;
+    private string $name;
+    private string $street;
+    private string $city;
+    private string $postCode;
+    private string $country;
+    private ?string $province;
+    private ?string $additionalInfo;
 
     public function __construct(
         string $name,
@@ -34,7 +21,7 @@ class Address implements RequestModelInterface
         string $postCode,
         string $country,
         ?string $province = null,
-        ?string $additionalInfo = null
+        ?string $additionalInfo = null,
     ) {
         $this->name = $name;
         $this->street = $street;

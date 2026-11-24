@@ -6,6 +6,7 @@ use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Service\AbstractService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -13,8 +14,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\AbstractService
  */
+#[CoversClass(AbstractService::class)]
 class AbstractServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -44,9 +45,7 @@ class AbstractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return (string) $request->getUri() === self::BASE_URL . '/orders';
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => (string) $request->getUri() === self::BASE_URL . '/orders'))
             ->willReturn(new Response(200, [], '{}'))
         ;
 
@@ -61,8 +60,8 @@ class AbstractServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'fromTime=2024-01-01') !== false
-                    && strpos($uri, 'maxRecords=10') !== false;
+                return str_contains($uri, 'fromTime=2024-01-01') === true
+                    && str_contains($uri, 'maxRecords=10') === true;
             }))
             ->willReturn(new Response(200, [], '{}'))
         ;
@@ -78,9 +77,7 @@ class AbstractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '?') === false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '?') === false))
             ->willReturn(new Response(200, [], '{}'))
         ;
 

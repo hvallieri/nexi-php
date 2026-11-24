@@ -13,13 +13,17 @@ class ContractService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-contracts-customers-customerid
      *
+     * @param string $customerId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return ContractsByCustomerResponse
      */
     public function findByCustomer(string $customerId): ContractsByCustomerResponse
     {
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/contracts/customers/' . rawurlencode($customerId))
+            $this->get($this->baseUrl . '/contracts/customers/' . rawurlencode($customerId)),
         );
 
         return ContractsByCustomerResponse::fromArray($data);
@@ -30,13 +34,15 @@ class ContractService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-contracts-contractid-deactivation
      *
+     * @param string $contractId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
     public function deactivate(string $contractId): void
     {
         $this->parseResponse(
-            $this->post($this->baseUrl . '/contracts/' . rawurlencode($contractId) . '/deactivation', '')
+            $this->post($this->baseUrl . '/contracts/' . rawurlencode($contractId) . '/deactivation', ''),
         );
     }
 }

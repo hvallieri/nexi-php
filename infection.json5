@@ -1,0 +1,13 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": ["src"]
+    },
+    "logs": {
+        "text": "infection.log",
+        "html": "coverage/infection.html"
+    },
+    "mutators": {
+        "@default": true
+    }
+}

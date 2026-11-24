@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\WebhookAdditionalData;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\WebhookAdditionalData
  */
+#[CoversClass(WebhookAdditionalData::class)]
 class WebhookAdditionalDataTest extends TestCase
 {
     public function testFromArrayPopulatesAllFields(): void

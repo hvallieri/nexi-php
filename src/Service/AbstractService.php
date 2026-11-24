@@ -11,23 +11,16 @@ use Psr\Http\Client\ClientInterface;
 
 abstract class AbstractService
 {
-    /** @var ClientInterface */
-    protected $httpClient;
-
-    /** @var HttpFactoryInterface */
-    protected $factory;
-
-    /** @var string */
-    protected $apiKey;
-
-    /** @var string */
-    protected $baseUrl;
+    protected ClientInterface $httpClient;
+    protected HttpFactoryInterface $factory;
+    protected string $apiKey;
+    protected string $baseUrl;
 
     public function __construct(
         ClientInterface $httpClient,
         HttpFactoryInterface $factory,
         string $apiKey,
-        string $baseUrl
+        string $baseUrl,
     ) {
         $this->httpClient = $httpClient;
         $this->factory = $factory;
@@ -55,7 +48,7 @@ abstract class AbstractService
             bin2hex(random_bytes(2)),
             bin2hex(random_bytes(2)),
             bin2hex(random_bytes(2)),
-            bin2hex(random_bytes(6))
+            bin2hex(random_bytes(6)),
         );
     }
 
@@ -65,6 +58,8 @@ abstract class AbstractService
     }
 
     /**
+     * @param string $url
+     * @param string $body
      * @param array<string, string> $extraHeaders
      *
      * @throws ClientExceptionInterface
@@ -128,22 +123,11 @@ abstract class AbstractService
         $status = $response['status'];
         $data = json_decode($response['body'], true);
 
-        if (!is_array($data)) {
-            $data = [];
-        }
-
-        if ($status === 401) {
-            throw new AuthenticationException('Invalid API key or unauthorized.', 401);
-        }
-
-        if ($status === 400) {
-            throw new InvalidRequestException((array) ($data['errors'] ?? []), $status);
-        }
-
-        if ($status >= 400) {
-            throw new ApiException((array) ($data['errors'] ?? []), $status);
-        }
-
-        return $data;
+        return match (true) {
+            $status === 401 => throw new AuthenticationException('Invalid API key or unauthorized.', 401),
+            $status === 400 => throw new InvalidRequestException((array) ($data['errors'] ?? []), $status),
+            $status >= 400 => throw new ApiException((array) ($data['errors'] ?? []), $status),
+            default => is_array($data) === true ? $data : [],
+        };
     }
 }

@@ -13,20 +13,24 @@ use Psr\Http\Client\ClientExceptionInterface;
 
 class OrderService extends AbstractService
 {
-    const AMOUNT_TYPE_ORDER_AMOUNT = 'ORDER_AMOUNT';
-    const AMOUNT_TYPE_AUTHORIZED_AMOUNT = 'AUTHORIZED_AMOUNT';
-    const AMOUNT_TYPE_CAPTURED_AMOUNT = 'CAPTURED_AMOUNT';
+    public const string AMOUNT_TYPE_ORDER_AMOUNT = 'ORDER_AMOUNT';
+    public const string AMOUNT_TYPE_AUTHORIZED_AMOUNT = 'AUTHORIZED_AMOUNT';
+    public const string AMOUNT_TYPE_CAPTURED_AMOUNT = 'CAPTURED_AMOUNT';
 
-    const ORDER_STATE_TO_CAPTURE = 'TO_CAPTURE';
-    const ORDER_STATE_CAPTURED = 'CAPTURED';
+    public const string ORDER_STATE_TO_CAPTURE = 'TO_CAPTURE';
+    public const string ORDER_STATE_CAPTURED = 'CAPTURED';
 
     /**
      * Creates an order and returns the Hosted Payment Page URL.
      *
      * @see https://developer.nexi.it/en/api/post-orders-hpp
      *
-     * @throws NexiException
+     * @param Order $order
+     * @param PaymentSession $paymentSession
+     *
      * @throws ClientExceptionInterface
+     *
+     * @return HppResponse
      */
     public function createHpp(Order $order, PaymentSession $paymentSession): HppResponse
     {
@@ -40,7 +44,7 @@ class OrderService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/orders/hpp', $body)
+            $this->post($this->baseUrl . '/orders/hpp', $body),
         );
 
         return HppResponse::fromArray($data);
@@ -52,17 +56,20 @@ class OrderService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-orders-mit
      *
+     * @param Order $order
+     * @param string $contractId
      * @param string|null $captureType one of the PaymentSession::CAPTURE_* constants; overwrites the terminal default
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
-     * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return OperationDetails
      */
     public function createMit(
         Order $order,
         string $contractId,
         ?string $captureType = null,
-        ?string $idempotencyKey = null
+        ?string $idempotencyKey = null,
     ): OperationDetails {
         $payload = [
             'order' => $order->toArray(),
@@ -83,8 +90,8 @@ class OrderService extends AbstractService
             $this->post(
                 $this->baseUrl . '/orders/mit',
                 $body,
-                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
-            )
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()],
+            ),
         );
 
         $operation = isset($data['operation']) && is_array($data['operation']) ? $data['operation'] : [];
@@ -102,10 +109,16 @@ class OrderService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-orders
      *
+     * @param string|null $fromTime
+     * @param string|null $toTime
+     * @param int|null $maxRecords
+     * @param string|null $customField
+     * @param string|null $orderId
      * @param string|null $amountType one of the AMOUNT_TYPE_* constants
+     * @param string|null $minAmount
+     * @param string|null $maxAmount
      * @param string|null $orderState one of the ORDER_STATE_* constants
      *
-     * @throws NexiException
      * @throws ClientExceptionInterface
      *
      * @return array<int, OrderSummary>
@@ -119,7 +132,7 @@ class OrderService extends AbstractService
         ?string $amountType = null,
         ?string $minAmount = null,
         ?string $maxAmount = null,
-        ?string $orderState = null
+        ?string $orderState = null,
     ): array {
         $params = [];
 
@@ -160,7 +173,7 @@ class OrderService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/orders', $params)
+            $this->get($this->baseUrl . '/orders', $params),
         );
 
         $items = isset($data['orders']) && is_array($data['orders']) ? $data['orders'] : [];
@@ -181,13 +194,17 @@ class OrderService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-orders-orderid
      *
+     * @param string $orderId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return OrderResponse
      */
     public function find(string $orderId): OrderResponse
     {
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/orders/' . rawurlencode($orderId))
+            $this->get($this->baseUrl . '/orders/' . rawurlencode($orderId)),
         );
 
         return OrderResponse::fromArray($data);

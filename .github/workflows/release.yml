@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.release.tag_name }}
 
@@ -21,14 +21,14 @@ jobs:
           if [ "$MAJOR" = "1" ]; then
             echo "version=7.2" >> $GITHUB_OUTPUT
           else
-            echo "version=8.2" >> $GITHUB_OUTPUT
+            echo "version=8.4" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ steps.php-version.outputs.version }}
-          extensions: curl, json
+          extensions: curl
           coverage: none
 
       - name: Install dependencies

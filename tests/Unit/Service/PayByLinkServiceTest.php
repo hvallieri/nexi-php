@@ -12,6 +12,7 @@ use Hval\Nexi\Model\Response\PaymentLink;
 use Hval\Nexi\Service\PayByLinkService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -19,8 +20,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\PayByLinkService
  */
+#[CoversClass(PayByLinkService::class)]
 class PayByLinkServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -66,6 +67,7 @@ class PayByLinkServiceTest extends TestCase
     public function testCreateReturnsPayByLinkResponse(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn($this->makeSuccessResponse())
         ;
@@ -82,10 +84,10 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink') !== false
-                    && $request->getMethod() === 'POST';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink') === true
+                    && $request->getMethod() === 'POST',
+            ))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -112,6 +114,7 @@ class PayByLinkServiceTest extends TestCase
     public function testCreateThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -148,10 +151,10 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink') !== false
-                    && $request->getMethod() === 'GET';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink') === true
+                    && $request->getMethod() === 'GET',
+            ))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
 
@@ -166,10 +169,10 @@ class PayByLinkServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'fromTime=2024-01-01') !== false
-                    && strpos($uri, 'toTime=2024-01-31') !== false
-                    && strpos($uri, 'maxRecords=10') !== false
-                    && strpos($uri, 'status=ACTIVE') !== false;
+                return str_contains($uri, 'fromTime=2024-01-01') === true
+                    && str_contains($uri, 'toTime=2024-01-31') === true
+                    && str_contains($uri, 'maxRecords=10') === true
+                    && str_contains($uri, 'status=ACTIVE') === true;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -185,10 +188,10 @@ class PayByLinkServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'status=EXPIRED') !== false
-                    && strpos($uri, 'fromTime') === false
-                    && strpos($uri, 'toTime') === false
-                    && strpos($uri, 'maxRecords') === false;
+                return str_contains($uri, 'status=EXPIRED') === true
+                    && str_contains($uri, 'fromTime') === false
+                    && str_contains($uri, 'toTime') === false
+                    && str_contains($uri, 'maxRecords') === false;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -199,6 +202,7 @@ class PayByLinkServiceTest extends TestCase
     public function testFindAllReturnsEmptyArrayWhenPaymentLinksKeyMissing(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -209,6 +213,7 @@ class PayByLinkServiceTest extends TestCase
     public function testFindAllThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -221,6 +226,7 @@ class PayByLinkServiceTest extends TestCase
     public function testFindReturnsPayByLinkResponse(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn($this->makeSuccessResponse())
         ;
@@ -237,10 +243,10 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink/LINK-001') !== false
-                    && $request->getMethod() === 'GET';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink/LINK-001') === true
+                    && $request->getMethod() === 'GET',
+            ))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -252,9 +258,7 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink/LINK%2F001') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink/LINK%2F001') === true))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -264,6 +268,7 @@ class PayByLinkServiceTest extends TestCase
     public function testFindThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -276,6 +281,7 @@ class PayByLinkServiceTest extends TestCase
     public function testRenewReturnsPayByLinkResponse(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn($this->makeSuccessResponse())
         ;
@@ -292,10 +298,10 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink/LINK-001/renewals') !== false
-                    && $request->getMethod() === 'POST';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink/LINK-001/renewals') === true
+                    && $request->getMethod() === 'POST',
+            ))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -324,9 +330,7 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return (string) $request->getBody() === '{}';
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -338,9 +342,7 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/paybylink/LINK%2F001/renewals') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink/LINK%2F001/renewals') === true))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -350,6 +352,7 @@ class PayByLinkServiceTest extends TestCase
     public function testRenewThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -364,10 +367,10 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/paybylink/LINK-001/cancels') !== false
-                    && $request->getMethod() === 'POST';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/paybylink/LINK-001/cancels') === true
+                    && $request->getMethod() === 'POST',
+            ))
             ->willReturn(new Response(200, [], '{}'))
         ;
 
@@ -379,9 +382,7 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/paybylink/LINK%2F001/cancels') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/paybylink/LINK%2F001/cancels') === true))
             ->willReturn(new Response(200, [], '{}'))
         ;
 
@@ -391,6 +392,7 @@ class PayByLinkServiceTest extends TestCase
     public function testCancelThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;

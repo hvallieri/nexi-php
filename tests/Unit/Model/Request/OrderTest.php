@@ -4,12 +4,13 @@ namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\CustomerInfo;
 use Hval\Nexi\Model\Request\Order;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\Order
  */
+#[CoversClass(Order::class)]
 class OrderTest extends TestCase
 {
     public function testToArrayWithRequiredFieldsOnly(): void
@@ -31,7 +32,7 @@ class OrderTest extends TestCase
             'EUR',
             'CUST-123',
             'Ordine di prova',
-            'promo2024'
+            'promo2024',
         );
 
         $result = $order->toArray();

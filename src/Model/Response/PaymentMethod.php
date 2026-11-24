@@ -6,27 +6,18 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class PaymentMethod implements ResponseModelInterface
 {
-    /** @var string|null */
-    private $methodType;
-
-    /** @var string|null */
-    private $circuit;
-
-    /** @var string|null */
-    private $imageLink;
-
-    /** @var bool|null */
-    private $recurringSupported;
-
-    /** @var bool|null */
-    private $oneClickSupported;
+    private ?string $methodType;
+    private ?string $circuit;
+    private ?string $imageLink;
+    private ?bool $recurringSupported;
+    private ?bool $oneClickSupported;
 
     public function __construct(
         ?string $methodType,
         ?string $circuit,
         ?string $imageLink,
         ?bool $recurringSupported,
-        ?bool $oneClickSupported
+        ?bool $oneClickSupported,
     ) {
         $this->methodType = $methodType;
         $this->circuit = $circuit;
@@ -62,15 +53,17 @@ class PaymentMethod implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['methodType'] ?? null,
-            $data['circuit'] ?? null,
-            $data['imageLink'] ?? null,
-            isset($data['recurringSupported']) ? (bool) $data['recurringSupported'] : null,
-            isset($data['oneClickSupported']) ? (bool) $data['oneClickSupported'] : null
+            methodType: $data['methodType'] ?? null,
+            circuit: $data['circuit'] ?? null,
+            imageLink: $data['imageLink'] ?? null,
+            recurringSupported: isset($data['recurringSupported']) ? (bool) $data['recurringSupported'] : null,
+            oneClickSupported: isset($data['oneClickSupported']) ? (bool) $data['oneClickSupported'] : null,
         );
     }
 }

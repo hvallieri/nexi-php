@@ -6,78 +6,60 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class OperationDetails implements ResponseModelInterface
 {
-    const CHANNEL_ECOMMERCE = 'ECOMMERCE';
-    const CHANNEL_POS = 'POS';
-    const CHANNEL_BACKOFFICE = 'BACKOFFICE';
+    public const string CHANNEL_ECOMMERCE = 'ECOMMERCE';
+    public const string CHANNEL_POS = 'POS';
+    public const string CHANNEL_BACKOFFICE = 'BACKOFFICE';
 
-    const OPERATION_TYPE_AUTHORIZATION = 'AUTHORIZATION';
-    const OPERATION_TYPE_CAPTURE = 'CAPTURE';
-    const OPERATION_TYPE_VOID = 'VOID';
-    const OPERATION_TYPE_REFUND = 'REFUND';
-    const OPERATION_TYPE_CANCEL = 'CANCEL';
-    const OPERATION_TYPE_CARD_VERIFICATION = 'CARD_VERIFICATION';
-    const OPERATION_TYPE_NOSHOW = 'NOSHOW';
-    const OPERATION_TYPE_INCREMENTAL = 'INCREMENTAL';
-    const OPERATION_TYPE_DELAY_CHARGE = 'DELAY_CHARGE';
+    public const string OPERATION_TYPE_AUTHORIZATION = 'AUTHORIZATION';
+    public const string OPERATION_TYPE_CAPTURE = 'CAPTURE';
+    public const string OPERATION_TYPE_VOID = 'VOID';
+    public const string OPERATION_TYPE_REFUND = 'REFUND';
+    public const string OPERATION_TYPE_CANCEL = 'CANCEL';
+    public const string OPERATION_TYPE_CARD_VERIFICATION = 'CARD_VERIFICATION';
+    public const string OPERATION_TYPE_NOSHOW = 'NOSHOW';
+    public const string OPERATION_TYPE_INCREMENTAL = 'INCREMENTAL';
+    public const string OPERATION_TYPE_DELAY_CHARGE = 'DELAY_CHARGE';
 
-    /** @var string|null */
-    private $orderId;
-
-    /** @var string|null */
-    private $operationId;
-
-    /** @var string|null */
-    private $channel;
-
-    /** @var string|null */
-    private $channelDetail;
-
-    /** @var string|null */
-    private $operationType;
-
-    /** @var string|null */
-    private $operationResult;
-
-    /** @var string|null */
-    private $operationTime;
-
-    /** @var string|null */
-    private $paymentMethod;
-
-    /** @var string|null */
-    private $paymentCircuit;
-
-    /** @var string|null */
-    private $paymentInstrumentInfo;
-
-    /** @var string|null */
-    private $paymentEndToEndId;
-
-    /** @var string|null */
-    private $cancelledOperationId;
-
-    /** @var string|null */
-    private $operationAmount;
-
-    /** @var string|null */
-    private $operationCurrency;
-
-    /** @var string|null */
-    private $paymentLinkId;
-
-    /** @var string|null */
-    private $terminalId;
-
+    private ?string $orderId;
+    private ?string $operationId;
+    private ?string $channel;
+    private ?string $channelDetail;
+    private ?string $operationType;
+    private ?string $operationResult;
+    private ?string $operationTime;
+    private ?string $paymentMethod;
+    private ?string $paymentCircuit;
+    private ?string $paymentInstrumentInfo;
+    private ?string $paymentEndToEndId;
+    private ?string $cancelledOperationId;
+    private ?string $operationAmount;
+    private ?string $operationCurrency;
+    private ?string $paymentLinkId;
+    private ?string $terminalId;
     /** @var array<int, mixed> */
-    private $warnings;
-
+    private array $warnings;
     /** @var array<string, mixed> */
-    private $customerInfo;
-
+    private array $customerInfo;
     /** @var array<string, mixed> */
-    private $additionalData;
+    private array $additionalData;
 
     /**
+     * @param string|null $orderId
+     * @param string|null $operationId
+     * @param string|null $channel
+     * @param string|null $channelDetail
+     * @param string|null $operationType
+     * @param string|null $operationResult
+     * @param string|null $operationTime
+     * @param string|null $paymentMethod
+     * @param string|null $paymentCircuit
+     * @param string|null $paymentInstrumentInfo
+     * @param string|null $paymentEndToEndId
+     * @param string|null $cancelledOperationId
+     * @param string|null $operationAmount
+     * @param string|null $operationCurrency
+     * @param string|null $paymentLinkId
+     * @param string|null $terminalId
      * @param array<int, mixed> $warnings
      * @param array<string, mixed> $customerInfo
      * @param array<string, mixed> $additionalData
@@ -101,7 +83,7 @@ class OperationDetails implements ResponseModelInterface
         ?string $terminalId,
         array $warnings,
         array $customerInfo = [],
-        array $additionalData = []
+        array $additionalData = [],
     ) {
         $this->orderId = $orderId;
         $this->operationId = $operationId;
@@ -233,29 +215,31 @@ class OperationDetails implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['orderId'] ?? null,
-            $data['operationId'] ?? null,
-            $data['channel'] ?? null,
-            $data['channelDetail'] ?? null,
-            $data['operationType'] ?? null,
-            $data['operationResult'] ?? null,
-            $data['operationTime'] ?? null,
-            $data['paymentMethod'] ?? null,
-            $data['paymentCircuit'] ?? null,
-            $data['paymentInstrumentInfo'] ?? null,
-            $data['paymentEndToEndId'] ?? null,
-            $data['cancelledOperationId'] ?? null,
-            $data['operationAmount'] ?? null,
-            $data['operationCurrency'] ?? null,
-            $data['paymentLinkId'] ?? null,
-            $data['terminalId'] ?? null,
-            isset($data['warnings']) && is_array($data['warnings']) ? $data['warnings'] : [],
-            isset($data['customerInfo']) && is_array($data['customerInfo']) ? $data['customerInfo'] : [],
-            isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : []
+            orderId: $data['orderId'] ?? null,
+            operationId: $data['operationId'] ?? null,
+            channel: $data['channel'] ?? null,
+            channelDetail: $data['channelDetail'] ?? null,
+            operationType: $data['operationType'] ?? null,
+            operationResult: $data['operationResult'] ?? null,
+            operationTime: $data['operationTime'] ?? null,
+            paymentMethod: $data['paymentMethod'] ?? null,
+            paymentCircuit: $data['paymentCircuit'] ?? null,
+            paymentInstrumentInfo: $data['paymentInstrumentInfo'] ?? null,
+            paymentEndToEndId: $data['paymentEndToEndId'] ?? null,
+            cancelledOperationId: $data['cancelledOperationId'] ?? null,
+            operationAmount: $data['operationAmount'] ?? null,
+            operationCurrency: $data['operationCurrency'] ?? null,
+            paymentLinkId: $data['paymentLinkId'] ?? null,
+            terminalId: $data['terminalId'] ?? null,
+            warnings: isset($data['warnings']) && is_array($data['warnings']) ? $data['warnings'] : [],
+            customerInfo: isset($data['customerInfo']) && is_array($data['customerInfo']) ? $data['customerInfo'] : [],
+            additionalData: isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : [],
         );
     }
 }

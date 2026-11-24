@@ -10,15 +10,15 @@ use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Service\PayByLinkService;
 use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
-use InvalidArgumentException;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\NexiClient
  */
+#[CoversClass(NexiClient::class)]
 class NexiClientTest extends TestCase
 {
     /** @var NexiClient */
@@ -30,8 +30,8 @@ class NexiClientTest extends TestCase
         $this->client = new NexiClient(
             'test-api-key',
             NexiClient::ENV_SANDBOX,
-            $this->createMock(ClientInterface::class),
-            new HttpFactory($psr17, $psr17)
+            $this->createStub(ClientInterface::class),
+            new HttpFactory($psr17, $psr17),
         );
     }
 
@@ -67,14 +67,14 @@ class NexiClientTest extends TestCase
 
     public function testUnknownEnvironmentThrowsInvalidArgumentException(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         $psr17 = new Psr17Factory();
         new NexiClient(
             'test-api-key',
             'unknown-env',
-            $this->createMock(ClientInterface::class),
-            new HttpFactory($psr17, $psr17)
+            $this->createStub(ClientInterface::class),
+            new HttpFactory($psr17, $psr17),
         );
     }
 
@@ -82,7 +82,7 @@ class NexiClientTest extends TestCase
     {
         $this->assertNotSame(
             NexiClient::BASE_URLS[NexiClient::ENV_SANDBOX],
-            NexiClient::BASE_URLS[NexiClient::ENV_PRODUCTION]
+            NexiClient::BASE_URLS[NexiClient::ENV_PRODUCTION],
         );
     }
 }

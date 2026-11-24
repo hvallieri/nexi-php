@@ -2,17 +2,21 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
          colors="true"
-         verbose="true"
-         forceCoversAnnotation="true">
+         requireCoverageMetadata="true"
+         failOnDeprecation="true"
+         failOnNotice="true"
+         failOnWarning="true"
+         failOnRisky="true">
     <testsuites>
         <testsuite name="hval/nexi-php">
-            <directory>tests/</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/</directory>
-        </whitelist>
-    </filter>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
 </phpunit>

@@ -4,13 +4,14 @@ namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\ContractsByCustomerResponse;
 use Hval\Nexi\Model\Response\ContractSummary;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\ContractsByCustomerResponse
- * @covers \Hval\Nexi\Model\Response\ContractSummary
  */
+#[CoversClass(ContractsByCustomerResponse::class)]
+#[CoversClass(ContractSummary::class)]
 class ContractsByCustomerResponseTest extends TestCase
 {
     public function testFromArrayPopulatesAllFields(): void

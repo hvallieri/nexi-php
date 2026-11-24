@@ -6,26 +6,13 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class ContractSummary implements ResponseModelInterface
 {
-    /** @var string|null */
-    private $contractId;
-
-    /** @var string|null */
-    private $contractType;
-
-    /** @var string|null */
-    private $contractExpiryDate;
-
-    /** @var string|null */
-    private $contractFrequency;
-
-    /** @var string|null */
-    private $paymentMethod;
-
-    /** @var string|null */
-    private $paymentCircuit;
-
-    /** @var string|null */
-    private $paymentInstrumentInfo;
+    private ?string $contractId;
+    private ?string $contractType;
+    private ?string $contractExpiryDate;
+    private ?string $contractFrequency;
+    private ?string $paymentMethod;
+    private ?string $paymentCircuit;
+    private ?string $paymentInstrumentInfo;
 
     public function __construct(
         ?string $contractId,
@@ -34,7 +21,7 @@ class ContractSummary implements ResponseModelInterface
         ?string $contractFrequency,
         ?string $paymentMethod,
         ?string $paymentCircuit,
-        ?string $paymentInstrumentInfo
+        ?string $paymentInstrumentInfo,
     ) {
         $this->contractId = $contractId;
         $this->contractType = $contractType;
@@ -82,17 +69,19 @@ class ContractSummary implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['contractId'] ?? null,
-            $data['contractType'] ?? null,
-            $data['contractExpiryDate'] ?? null,
-            $data['contractFrequency'] ?? null,
-            $data['paymentMethod'] ?? null,
-            $data['paymentCircuit'] ?? null,
-            $data['paymentInstrumentInfo'] ?? null
+            contractId: $data['contractId'] ?? null,
+            contractType: $data['contractType'] ?? null,
+            contractExpiryDate: $data['contractExpiryDate'] ?? null,
+            contractFrequency: $data['contractFrequency'] ?? null,
+            paymentMethod: $data['paymentMethod'] ?? null,
+            paymentCircuit: $data['paymentCircuit'] ?? null,
+            paymentInstrumentInfo: $data['paymentInstrumentInfo'] ?? null,
         );
     }
 }

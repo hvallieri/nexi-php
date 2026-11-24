@@ -6,17 +6,17 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class OrderResponse implements ResponseModelInterface
 {
-    const OPERATION_RESULT_PENDING = 'PENDING';
-    const OPERATION_RESULT_AUTHORIZED = 'AUTHORIZED';
-    const OPERATION_RESULT_EXECUTED = 'EXECUTED';
-    const OPERATION_RESULT_DECLINED = 'DECLINED';
-    const OPERATION_RESULT_DENIED_BY_RISK = 'DENIED_BY_RISK';
-    const OPERATION_RESULT_THREEDS_VALIDATED = 'THREEDS_VALIDATED';
-    const OPERATION_RESULT_THREEDS_FAILED = 'THREEDS_FAILED';
-    const OPERATION_RESULT_CANCELED = 'CANCELED';
-    const OPERATION_RESULT_VOIDED = 'VOIDED';
-    const OPERATION_RESULT_REFUNDED = 'REFUNDED';
-    const OPERATION_RESULT_FAILED = 'FAILED';
+    public const OPERATION_RESULT_PENDING = 'PENDING';
+    public const OPERATION_RESULT_AUTHORIZED = 'AUTHORIZED';
+    public const OPERATION_RESULT_EXECUTED = 'EXECUTED';
+    public const OPERATION_RESULT_DECLINED = 'DECLINED';
+    public const OPERATION_RESULT_DENIED_BY_RISK = 'DENIED_BY_RISK';
+    public const OPERATION_RESULT_THREEDS_VALIDATED = 'THREEDS_VALIDATED';
+    public const OPERATION_RESULT_THREEDS_FAILED = 'THREEDS_FAILED';
+    public const OPERATION_RESULT_CANCELED = 'CANCELED';
+    public const OPERATION_RESULT_VOIDED = 'VOIDED';
+    public const OPERATION_RESULT_REFUNDED = 'REFUNDED';
+    public const OPERATION_RESULT_FAILED = 'FAILED';
 
     /** @var string|null */
     private $orderId;
@@ -54,7 +54,7 @@ class OrderResponse implements ResponseModelInterface
         ?string $lastOperationType,
         ?string $lastOperationTime,
         array $operations,
-        array $raw
+        array $raw,
     ) {
         $this->orderId = $orderId;
         $this->lastOperationResult = $lastOperationResult;
@@ -140,7 +140,7 @@ class OrderResponse implements ResponseModelInterface
             $orderStatus['lastOperationType'] ?? null,
             $orderStatus['lastOperationTime'] ?? null,
             $operations,
-            $data
+            $data,
         );
     }
 }

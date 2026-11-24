@@ -6,29 +6,14 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class CustomerInfo implements RequestModelInterface
 {
-    /** @var string|null */
-    private $cardHolderName;
-
-    /** @var string|null */
-    private $cardHolderEmail;
-
-    /** @var Address|null */
-    private $billingAddress;
-
-    /** @var Address|null */
-    private $shippingAddress;
-
-    /** @var string|null */
-    private $mobilePhoneCountryCode;
-
-    /** @var string|null */
-    private $mobilePhone;
-
-    /** @var string|null */
-    private $homePhone;
-
-    /** @var string|null */
-    private $workPhone;
+    private ?string $cardHolderName;
+    private ?string $cardHolderEmail;
+    private ?Address $billingAddress;
+    private ?Address $shippingAddress;
+    private ?string $mobilePhoneCountryCode;
+    private ?string $mobilePhone;
+    private ?string $homePhone;
+    private ?string $workPhone;
 
     public function __construct(
         ?string $cardHolderName = null,
@@ -38,7 +23,7 @@ class CustomerInfo implements RequestModelInterface
         ?string $mobilePhoneCountryCode = null,
         ?string $mobilePhone = null,
         ?string $homePhone = null,
-        ?string $workPhone = null
+        ?string $workPhone = null,
     ) {
         $this->cardHolderName = $cardHolderName;
         $this->cardHolderEmail = $cardHolderEmail;

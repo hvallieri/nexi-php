@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\OrderSummary;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\OrderSummary
  */
+#[CoversClass(OrderSummary::class)]
 class OrderSummaryTest extends TestCase
 {
     public function testFromArrayPopulatesAllFields(): void

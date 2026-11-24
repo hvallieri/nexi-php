@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\Recurrence;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\Recurrence
  */
+#[CoversClass(Recurrence::class)]
 class RecurrenceTest extends TestCase
 {
     public function testToArrayWithActionOnly(): void
@@ -25,7 +26,7 @@ class RecurrenceTest extends TestCase
             'C-9876',
             Recurrence::CONTRACT_TYPE_MIT_SCHEDULED,
             '2025-12-31',
-            '30'
+            '30',
         );
 
         $this->assertSame([

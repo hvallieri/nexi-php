@@ -5,7 +5,7 @@ namespace Hval\Nexi\Exception;
 class InvalidRequestException extends NexiException
 {
     /** @var array<array{code: string, description: string}> */
-    private $errors;
+    private array $errors;
 
     /**
      * @param array<array{code: string, description: string}> $errors
@@ -15,10 +15,8 @@ class InvalidRequestException extends NexiException
         $this->errors = $errors;
 
         $messages = array_map(
-            static function (array $e): string {
-                return '[' . ($e['code'] ?? '?') . '] ' . ($e['description'] ?? '?');
-            },
-            $errors
+            static fn (array $e): string => '[' . ($e['code'] ?? '?') . '] ' . ($e['description'] ?? '?'),
+            $errors,
         );
 
         parent::__construct(implode('; ', $messages), $httpStatus);
