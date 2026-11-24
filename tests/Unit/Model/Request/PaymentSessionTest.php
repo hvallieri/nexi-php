@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers PaymentSession
+ * @covers \Hval\Nexi\Model\Request\PaymentSession
  */
 class PaymentSessionTest extends TestCase
 {
@@ -86,6 +86,32 @@ class PaymentSessionTest extends TestCase
 
         $this->assertArrayHasKey('recurrence', $result);
         $this->assertSame('CONTRACT_CREATION', $result['recurrence']['action']);
+    }
+
+    public function testToArrayWithCaptureTypeExemptionsAndPaymentService(): void
+    {
+        $session = new PaymentSession(
+            PaymentSession::ACTION_PREAUTH,
+            '1000',
+            'ita',
+            'https://example.com/result',
+            'https://example.com/cancel',
+            null,
+            PaymentSession::CAPTURE_EXPLICIT,
+            PaymentSession::EXEMPTION_CHALLENGE_REQUESTED,
+            'PAYPAL'
+        );
+
+        $this->assertSame([
+            'actionType' => 'PREAUTH',
+            'amount' => '1000',
+            'language' => 'ita',
+            'resultUrl' => 'https://example.com/result',
+            'cancelUrl' => 'https://example.com/cancel',
+            'captureType' => 'EXPLICIT',
+            'exemptions' => 'CHALLENGE_REQUESTED',
+            'paymentService' => 'PAYPAL',
+        ], $session->toArray());
     }
 
     public function testActionTypeConstants(): void
