@@ -34,14 +34,10 @@ class OrderService extends AbstractService
      */
     public function createHpp(Order $order, PaymentSession $paymentSession): HppResponse
     {
-        $body = json_encode([
+        $body = $this->encodeBody([
             'order' => $order->toArray(),
             'paymentSession' => $paymentSession->toArray(),
-        ]);
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode request body.');
-        }
+        ], 'Failed to encode request body.');
 
         $data = $this->parseResponse(
             $this->post($this->baseUrl . '/orders/hpp', $body),
@@ -80,11 +76,7 @@ class OrderService extends AbstractService
             $payload['captureType'] = $captureType;
         }
 
-        $body = json_encode($payload);
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode MIT request body.');
-        }
+        $body = $this->encodeBody($payload, 'Failed to encode MIT request body.');
 
         $data = $this->parseResponse(
             $this->post(

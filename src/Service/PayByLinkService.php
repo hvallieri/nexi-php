@@ -29,14 +29,10 @@ class PayByLinkService extends AbstractService
         $sessionData = $session->toArray();
         $sessionData['expirationDate'] = $expirationDate;
 
-        $body = json_encode([
+        $body = $this->encodeBody([
             'order' => $order->toArray(),
             'paymentSession' => $sessionData,
-        ]);
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode Pay-by-Link request body.');
-        }
+        ], 'Failed to encode Pay-by-Link request body.');
 
         $data = $this->parseResponse(
             $this->post($this->baseUrl . '/orders/paybylink', $body),
@@ -142,11 +138,7 @@ class PayByLinkService extends AbstractService
         $body = '{}';
 
         if ($expirationDate !== null) {
-            $body = json_encode(['expirationDate' => $expirationDate]);
-
-            if ($body === false) {
-                throw new NexiException('Failed to encode Pay-by-Link renewal request body.');
-            }
+            $body = $this->encodeBody(['expirationDate' => $expirationDate], 'Failed to encode Pay-by-Link renewal request body.');
         }
 
         $data = $this->parseResponse(

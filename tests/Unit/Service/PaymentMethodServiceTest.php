@@ -3,7 +3,6 @@
 namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\AuthenticationException;
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Response\PaymentMethod;
 use Hval\Nexi\Service\PaymentMethodService;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -33,7 +32,7 @@ class PaymentMethodServiceTest extends TestCase
     {
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->service = new PaymentMethodService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+        $this->service = new PaymentMethodService($this->httpClient, $psr17, self::API_KEY, self::BASE_URL);
     }
 
     public function testListAllReturnsArrayOfPaymentMethod(): void
@@ -46,7 +45,7 @@ class PaymentMethodServiceTest extends TestCase
                     ['methodType' => 'CARD', 'circuit' => 'VISA', 'imageLink' => 'https://example.com/visa.svg', 'recurringSupported' => true, 'oneClickSupported' => true],
                     ['methodType' => 'CARD', 'circuit' => 'MC', 'imageLink' => 'https://example.com/mc.svg', 'recurringSupported' => false, 'oneClickSupported' => false],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $result = $this->service->listAll();
@@ -66,7 +65,7 @@ class PaymentMethodServiceTest extends TestCase
                 fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/payment_methods') === true
                     && str_contains((string) $request->getUri(), '?') === false,
             ))
-            ->willReturn(new Response(200, [], json_encode(['paymentMethods' => []])))
+            ->willReturn(new Response(200, [], json_encode(['paymentMethods' => []], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->listAll();
@@ -77,7 +76,7 @@ class PaymentMethodServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->assertSame([], $this->service->listAll());

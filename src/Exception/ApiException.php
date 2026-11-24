@@ -4,11 +4,12 @@ namespace Hval\Nexi\Exception;
 
 class ApiException extends NexiException
 {
-    /** @var array<array{code: string, description: string}> */
+    /** @var array<array{code?: string, description?: string}> */
     private array $errors;
 
     /**
-     * @param array<array{code: string, description: string}> $errors
+     * @param array<array{code?: string, description?: string}> $errors
+     * @param int $httpStatus
      */
     public function __construct(array $errors, int $httpStatus)
     {
@@ -23,7 +24,7 @@ class ApiException extends NexiException
     }
 
     /**
-     * @return array<array{code: string, description: string}>
+     * @return array<array{code?: string, description?: string}>
      */
     public function getErrors(): array
     {

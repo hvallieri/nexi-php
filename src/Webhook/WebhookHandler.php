@@ -23,7 +23,7 @@ class WebhookHandler
     {
         $data = json_decode($rawBody, true);
 
-        if (!is_array($data)) {
+        if (is_array($data) === false) {
             throw new WebhookSignatureException('Invalid webhook payload: not valid JSON.');
         }
 

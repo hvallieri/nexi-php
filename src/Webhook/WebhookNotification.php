@@ -3,8 +3,9 @@
 namespace Hval\Nexi\Webhook;
 
 use Hval\Nexi\Model\Response\WebhookAdditionalData;
+use Hval\Nexi\Model\ResponseModelInterface;
 
-class WebhookNotification
+final class WebhookNotification implements ResponseModelInterface
 {
     private ?string $eventId;
     private ?string $eventTime;
@@ -280,9 +281,9 @@ class WebhookNotification
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $operation = isset($data['operation']) && is_array($data['operation']) ? $data['operation'] : [];
         $rawAdditionalData = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : null;

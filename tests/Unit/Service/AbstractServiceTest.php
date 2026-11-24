@@ -2,7 +2,6 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Service\AbstractService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
@@ -32,7 +31,7 @@ class AbstractServiceTest extends TestCase
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
 
-        $this->service = new class($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL) extends AbstractService {
+        $this->service = new class($this->httpClient, $psr17, self::API_KEY, self::BASE_URL) extends AbstractService {
             public function getPublic(string $url, array $queryParams = []): array
             {
                 return $this->get($url, $queryParams);

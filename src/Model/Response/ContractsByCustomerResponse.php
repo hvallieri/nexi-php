@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class ContractsByCustomerResponse implements ResponseModelInterface
+final class ContractsByCustomerResponse implements ResponseModelInterface
 {
     /** @var string|null */
     private $customerId;
@@ -36,8 +36,10 @@ class ContractsByCustomerResponse implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $contracts = [];
 

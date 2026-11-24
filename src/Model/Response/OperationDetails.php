@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class OperationDetails implements ResponseModelInterface
+final class OperationDetails implements ResponseModelInterface
 {
     public const string CHANNEL_ECOMMERCE = 'ECOMMERCE';
     public const string CHANNEL_POS = 'POS';
@@ -216,9 +216,9 @@ class OperationDetails implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             orderId: $data['orderId'] ?? null,

@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class OperationResponse implements ResponseModelInterface
+final class OperationResponse implements ResponseModelInterface
 {
     private ?string $operationId;
     private ?string $operationTime;
@@ -44,9 +44,9 @@ class OperationResponse implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             operationId: $data['operationId'] ?? null,

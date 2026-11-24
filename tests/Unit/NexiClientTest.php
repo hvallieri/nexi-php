@@ -2,7 +2,6 @@
 
 namespace Hval\Nexi\Tests\Unit;
 
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\NexiClient;
 use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
@@ -31,7 +30,7 @@ class NexiClientTest extends TestCase
             'test-api-key',
             NexiClient::ENV_SANDBOX,
             $this->createStub(ClientInterface::class),
-            new HttpFactory($psr17, $psr17),
+            $psr17,
         );
     }
 
@@ -74,7 +73,7 @@ class NexiClientTest extends TestCase
             'test-api-key',
             'unknown-env',
             $this->createStub(ClientInterface::class),
-            new HttpFactory($psr17, $psr17),
+            $psr17,
         );
     }
 

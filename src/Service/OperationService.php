@@ -117,11 +117,7 @@ class OperationService extends AbstractService
      */
     public function refund(string $operationId, RefundRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = json_encode($request->toArray());
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode refund request body.');
-        }
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode refund request body.');
 
         $data = $this->parseResponse(
             $this->post(
@@ -149,11 +145,7 @@ class OperationService extends AbstractService
      */
     public function capture(string $operationId, CaptureRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = json_encode($request->toArray());
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode capture request body.');
-        }
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode capture request body.');
 
         $data = $this->parseResponse(
             $this->post(
@@ -180,11 +172,7 @@ class OperationService extends AbstractService
      */
     public function cancel(string $operationId, CancelRequest $request): OperationResponse
     {
-        $body = json_encode($request->toArray());
-
-        if ($body === false) {
-            throw new NexiException('Failed to encode cancel request body.');
-        }
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode cancel request body.');
 
         $data = $this->parseResponse(
             $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/cancels', $body),

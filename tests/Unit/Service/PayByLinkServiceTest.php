@@ -4,7 +4,6 @@ namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\NexiException;
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\PayByLinkResponse;
@@ -37,7 +36,7 @@ class PayByLinkServiceTest extends TestCase
     {
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->service = new PayByLinkService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+        $this->service = new PayByLinkService($this->httpClient, $psr17, self::API_KEY, self::BASE_URL);
     }
 
     private function makeOrder(): Order
@@ -61,7 +60,7 @@ class PayByLinkServiceTest extends TestCase
                 'status' => 'ACTIVE',
                 'securityToken' => 'tok_abc123',
             ],
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 
     public function testCreateReturnsPayByLinkResponse(): void
@@ -134,7 +133,7 @@ class PayByLinkServiceTest extends TestCase
                     ['linkId' => 'LINK-001', 'amount' => '1000', 'status' => 'ACTIVE'],
                     ['linkId' => 'LINK-002', 'amount' => '2000', 'status' => 'EXPIRED'],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $result = $this->service->findAll();
@@ -155,7 +154,7 @@ class PayByLinkServiceTest extends TestCase
                 fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/paybylink') === true
                     && $request->getMethod() === 'GET',
             ))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll();
@@ -174,7 +173,7 @@ class PayByLinkServiceTest extends TestCase
                     && str_contains($uri, 'maxRecords=10') === true
                     && str_contains($uri, 'status=ACTIVE') === true;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll('2024-01-01', '2024-01-31', 10, PaymentLink::STATUS_ACTIVE);
@@ -193,7 +192,7 @@ class PayByLinkServiceTest extends TestCase
                     && str_contains($uri, 'toTime') === false
                     && str_contains($uri, 'maxRecords') === false;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll(null, null, null, PaymentLink::STATUS_EXPIRED);
@@ -204,7 +203,7 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->assertSame([], $this->service->findAll());
