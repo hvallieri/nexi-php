@@ -6,6 +6,7 @@ use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
+use Hval\Nexi\Utils\Extractor;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -131,13 +132,41 @@ abstract class AbstractService
     protected function parseResponse(array $response): array
     {
         $status = $response['status'];
-        $data = json_decode($response['body'], true);
+        $data = Extractor::fromJson($response['body']) ?? [];
 
         return match (true) {
             $status === 401 => throw new AuthenticationException('Invalid API key or unauthorized.', 401),
-            $status === 400 => throw new InvalidRequestException((array) ($data['errors'] ?? []), $status),
-            $status >= 400 => throw new ApiException((array) ($data['errors'] ?? []), $status),
-            default => is_array($data) === true ? $data : [],
+            $status === 400 => throw new InvalidRequestException($this->extractErrors($data), $status),
+            $status >= 400 => throw new ApiException($this->extractErrors($data), $status),
+            default => $data,
         };
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return list<array{code?: string, description?: string}>
+     */
+    private function extractErrors(array $data): array
+    {
+        $errors = [];
+
+        foreach (Extractor::list($data, 'errors') as $item) {
+            $error = [];
+            $code = Extractor::string($item, 'code');
+            $description = Extractor::string($item, 'description');
+
+            if ($code !== null) {
+                $error['code'] = $code;
+            }
+
+            if ($description !== null) {
+                $error['description'] = $description;
+            }
+
+            $errors[] = $error;
+        }
+
+        return $errors;
     }
 }

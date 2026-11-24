@@ -3,6 +3,7 @@
 namespace Hval\Nexi\Webhook;
 
 use Hval\Nexi\Exception\WebhookSignatureException;
+use Hval\Nexi\Utils\Extractor;
 
 class WebhookHandler
 {
@@ -17,17 +18,14 @@ class WebhookHandler
      * @param string $rawBody Raw JSON body of the HTTP request
      * @param string $savedToken The securityToken stored at order creation
      *
-     * @throws WebhookSignatureException if the token does not match
+     * @throws WebhookSignatureException if the payload is not a valid JSON object or the token does not match
+     *
+     * @return WebhookNotification
      */
     public function handle(string $rawBody, string $savedToken): WebhookNotification
     {
-        $data = json_decode($rawBody, true);
-
-        if (is_array($data) === false) {
-            throw new WebhookSignatureException('Invalid webhook payload: not valid JSON.');
-        }
-
-        $receivedToken = (string) ($data['securityToken'] ?? '');
+        $data = Extractor::fromJsonOrFail($rawBody, new WebhookSignatureException('Invalid webhook payload: not valid JSON.'));
+        $receivedToken = Extractor::string($data, 'securityToken') ?? '';
 
         if (hash_equals($savedToken, $receivedToken) === false) {
             throw new WebhookSignatureException('Webhook securityToken mismatch.');
