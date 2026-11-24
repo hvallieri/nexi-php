@@ -2,6 +2,7 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
+use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
@@ -12,9 +13,12 @@ use Hval\Nexi\Model\Response\HppResponse;
 use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OrderResponse;
 use Hval\Nexi\Model\Response\OrderSummary;
+use Hval\Nexi\Service\AbstractService;
 use Hval\Nexi\Service\OrderService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -22,9 +26,9 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\AbstractService
- * @covers \Hval\Nexi\Service\OrderService
  */
+#[CoversClass(AbstractService::class)]
+#[CoversClass(OrderService::class)]
 class OrderServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -63,6 +67,7 @@ class OrderServiceTest extends TestCase
     public function testCreateMitReturnsOperationDetails(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn($this->makeMitSuccessResponse())
         ;
@@ -82,10 +87,10 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/mit') !== false
-                    && $request->getMethod() === 'POST';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/mit') === true
+                    && $request->getMethod() === 'POST',
+            ))
             ->willReturn($this->makeMitSuccessResponse())
         ;
 
@@ -127,7 +132,7 @@ class OrderServiceTest extends TestCase
         $this->service->createMit(
             new Order('ORD-001', '1000', 'EUR'),
             'CONTRACT-001',
-            PaymentSession::CAPTURE_EXPLICIT
+            PaymentSession::CAPTURE_EXPLICIT,
         );
     }
 
@@ -136,9 +141,7 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return $request->getHeaderLine('Idempotency-Key') !== '';
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => $request->getHeaderLine('Idempotency-Key') !== ''))
             ->willReturn($this->makeMitSuccessResponse())
         ;
 
@@ -150,9 +153,7 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return $request->getHeaderLine('Idempotency-Key') === 'my-custom-key';
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => $request->getHeaderLine('Idempotency-Key') === 'my-custom-key'))
             ->willReturn($this->makeMitSuccessResponse())
         ;
 
@@ -162,6 +163,7 @@ class OrderServiceTest extends TestCase
     public function testCreateMitThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -188,7 +190,7 @@ class OrderServiceTest extends TestCase
             '1000',
             'ita',
             'https://example.com/result',
-            'https://example.com/cancel'
+            'https://example.com/cancel',
         );
 
         $response = $this->service->createHpp($order, $session);
@@ -203,11 +205,11 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return $request->getHeaderLine('X-Api-Key') === self::API_KEY
-                    && $request->hasHeader('Correlation-Id')
-                    && $request->getHeaderLine('Content-Type') === 'application/json';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => $request->getHeaderLine('X-Api-Key') === self::API_KEY
+                    && $request->hasHeader('Correlation-Id') === true
+                    && $request->getHeaderLine('Content-Type') === 'application/json',
+            ))
             ->willReturn(new Response(200, [], json_encode([
                 'hostedPage' => 'https://x.com', 'securityToken' => 'tok',
             ])))
@@ -247,6 +249,7 @@ class OrderServiceTest extends TestCase
     public function testCreateHppThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -262,6 +265,7 @@ class OrderServiceTest extends TestCase
     public function testCreateHppThrowsInvalidRequestExceptionOn400(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(400, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Invalid merchant URL']],
@@ -280,6 +284,7 @@ class OrderServiceTest extends TestCase
     public function testInvalidRequestExceptionContainsErrors(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(400, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Invalid merchant URL']],
@@ -304,10 +309,10 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/ORD-001') !== false
-                    && $request->getHeaderLine('X-Api-Key') === self::API_KEY;
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/ORD-001') === true
+                    && $request->getHeaderLine('X-Api-Key') === self::API_KEY,
+            ))
             ->willReturn(new Response(200, [], json_encode([
                 'orderStatus' => [
                     'order' => [
@@ -340,11 +345,12 @@ class OrderServiceTest extends TestCase
     public function testCreateHppThrowsApiExceptionOn500WithoutErrorsKey(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], '{}'))
         ;
 
-        $this->expectException(\Hval\Nexi\Exception\ApiException::class);
+        $this->expectException(ApiException::class);
 
         $order = new Order('ORD-001', '1000', 'EUR');
         $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
@@ -355,11 +361,12 @@ class OrderServiceTest extends TestCase
     public function testCreateHppThrowsInvalidRequestExceptionOn400WithoutErrorsKey(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(400, [], '{}'))
         ;
 
-        $this->expectException(\Hval\Nexi\Exception\InvalidRequestException::class);
+        $this->expectException(InvalidRequestException::class);
 
         $order = new Order('ORD-001', '1000', 'EUR');
         $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
@@ -370,6 +377,7 @@ class OrderServiceTest extends TestCase
     public function testFindThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -382,13 +390,14 @@ class OrderServiceTest extends TestCase
     public function testFindThrowsApiExceptionOn500(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Internal server error']],
             ])))
         ;
 
-        $this->expectException(\Hval\Nexi\Exception\ApiException::class);
+        $this->expectException(ApiException::class);
         $this->expectExceptionCode(500);
 
         $this->service->find('ORD-001');
@@ -423,10 +432,10 @@ class OrderServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'fromTime=2024-01-01') !== false
-                    && strpos($uri, 'toTime=2024-01-31') !== false
-                    && strpos($uri, 'maxRecords=10') !== false
-                    && strpos($uri, 'customField=promo') !== false;
+                return str_contains($uri, 'fromTime=2024-01-01') === true
+                    && str_contains($uri, 'toTime=2024-01-31') === true
+                    && str_contains($uri, 'maxRecords=10') === true
+                    && str_contains($uri, 'customField=promo') === true;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -442,10 +451,10 @@ class OrderServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'maxRecords=5') !== false
-                    && strpos($uri, 'fromTime') === false
-                    && strpos($uri, 'toTime') === false
-                    && strpos($uri, 'customField') === false;
+                return str_contains($uri, 'maxRecords=5') === true
+                    && str_contains($uri, 'fromTime') === false
+                    && str_contains($uri, 'toTime') === false
+                    && str_contains($uri, 'customField') === false;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -461,11 +470,11 @@ class OrderServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'orderId=ORD-001') !== false
-                    && strpos($uri, 'amountType=AUTHORIZED_AMOUNT') !== false
-                    && strpos($uri, 'minAmount=500') !== false
-                    && strpos($uri, 'maxAmount=2000') !== false
-                    && strpos($uri, 'orderState=TO_CAPTURE') !== false;
+                return str_contains($uri, 'orderId=ORD-001') === true
+                    && str_contains($uri, 'amountType=AUTHORIZED_AMOUNT') === true
+                    && str_contains($uri, 'minAmount=500') === true
+                    && str_contains($uri, 'maxAmount=2000') === true
+                    && str_contains($uri, 'orderState=TO_CAPTURE') === true;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -479,7 +488,7 @@ class OrderServiceTest extends TestCase
             OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT,
             '500',
             '2000',
-            OrderService::ORDER_STATE_TO_CAPTURE
+            OrderService::ORDER_STATE_TO_CAPTURE,
         );
     }
 
@@ -491,11 +500,11 @@ class OrderServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'orderId') === false
-                    && strpos($uri, 'amountType') === false
-                    && strpos($uri, 'minAmount') === false
-                    && strpos($uri, 'maxAmount') === false
-                    && strpos($uri, 'orderState') === false;
+                return str_contains($uri, 'orderId') === false
+                    && str_contains($uri, 'amountType') === false
+                    && str_contains($uri, 'minAmount') === false
+                    && str_contains($uri, 'maxAmount') === false
+                    && str_contains($uri, 'orderState') === false;
             }))
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -503,6 +512,7 @@ class OrderServiceTest extends TestCase
         $this->service->findAll('2024-01-01', '2024-01-31');
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function testConstants(): void
     {
         $this->assertSame('ORDER_AMOUNT', OrderService::AMOUNT_TYPE_ORDER_AMOUNT);
@@ -515,6 +525,7 @@ class OrderServiceTest extends TestCase
     public function testFindAllReturnsEmptyArrayWhenOrdersKeyMissing(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -525,6 +536,7 @@ class OrderServiceTest extends TestCase
     public function testFindAllThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -539,9 +551,7 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/orders/ORD%2F001') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/orders/ORD%2F001') === true))
             ->willReturn(new Response(200, [], json_encode([
                 'orderStatus' => ['order' => ['orderId' => 'ORD/001']],
                 'operations' => [],

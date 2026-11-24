@@ -6,38 +6,19 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class Order implements RequestModelInterface
 {
-    /** @var string */
-    private $orderId;
-
-    /** @var string */
-    private $amount;
-
-    /** @var string */
-    private $currency;
-
-    /** @var string|null */
-    private $customerId;
-
-    /** @var string|null */
-    private $description;
-
-    /** @var string|null */
-    private $customField;
-
-    /** @var CustomerInfo|null */
-    private $customerInfo;
-
-    /** @var string[]|null */
-    private $termsAndConditionsIds;
-
-    /** @var string|null */
-    private $transactionSummary;
-
+    private string $orderId;
+    private string $amount;
+    private string $currency;
+    private ?string $customerId;
+    private ?string $description;
+    private ?string $customField;
+    private ?CustomerInfo $customerInfo;
+    /** @var array<int, string>|null */
+    private ?array $termsAndConditionsIds;
+    private ?string $transactionSummary;
     /** @var array<int, mixed>|null */
-    private $installments;
-
-    /** @var int|null */
-    private $installmentQty;
+    private ?array $installments;
+    private ?int $installmentQty;
 
     public function __construct(
         string $orderId,
@@ -50,7 +31,7 @@ class Order implements RequestModelInterface
         ?array $termsAndConditionsIds = null,
         ?string $transactionSummary = null,
         ?array $installments = null,
-        ?int $installmentQty = null
+        ?int $installmentQty = null,
     ) {
         $this->orderId = $orderId;
         $this->amount = $amount;

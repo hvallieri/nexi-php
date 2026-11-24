@@ -8,6 +8,7 @@ use Hval\Nexi\Model\Response\PaymentMethod;
 use Hval\Nexi\Service\PaymentMethodService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -15,8 +16,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\PaymentMethodService
  */
+#[CoversClass(PaymentMethodService::class)]
 class PaymentMethodServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -61,10 +62,10 @@ class PaymentMethodServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/payment_methods') !== false
-                    && strpos((string) $request->getUri(), '?') === false;
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/payment_methods') === true
+                    && str_contains((string) $request->getUri(), '?') === false,
+            ))
             ->willReturn(new Response(200, [], json_encode(['paymentMethods' => []])))
         ;
 
@@ -74,6 +75,7 @@ class PaymentMethodServiceTest extends TestCase
     public function testListAllReturnsEmptyArrayWhenKeyMissing(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -84,6 +86,7 @@ class PaymentMethodServiceTest extends TestCase
     public function testListAllThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;

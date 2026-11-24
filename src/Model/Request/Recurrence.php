@@ -6,36 +6,27 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class Recurrence implements RequestModelInterface
 {
-    const ACTION_NO_RECURRING = 'NO_RECURRING';
-    const ACTION_SUBSEQUENT_PAYMENT = 'SUBSEQUENT_PAYMENT';
-    const ACTION_CONTRACT_CREATION = 'CONTRACT_CREATION';
-    const ACTION_CARD_SUBSTITUTION = 'CARD_SUBSTITUTION';
+    public const string ACTION_NO_RECURRING = 'NO_RECURRING';
+    public const string ACTION_SUBSEQUENT_PAYMENT = 'SUBSEQUENT_PAYMENT';
+    public const string ACTION_CONTRACT_CREATION = 'CONTRACT_CREATION';
+    public const string ACTION_CARD_SUBSTITUTION = 'CARD_SUBSTITUTION';
 
-    const CONTRACT_TYPE_MIT_UNSCHEDULED = 'MIT_UNSCHEDULED';
-    const CONTRACT_TYPE_MIT_SCHEDULED = 'MIT_SCHEDULED';
-    const CONTRACT_TYPE_CIT = 'CIT';
+    public const string CONTRACT_TYPE_MIT_UNSCHEDULED = 'MIT_UNSCHEDULED';
+    public const string CONTRACT_TYPE_MIT_SCHEDULED = 'MIT_SCHEDULED';
+    public const string CONTRACT_TYPE_CIT = 'CIT';
 
-    /** @var string */
-    private $action;
-
-    /** @var string|null */
-    private $contractId;
-
-    /** @var string|null */
-    private $contractType;
-
-    /** @var string|null */
-    private $contractExpiryDate;
-
-    /** @var string|null */
-    private $contractFrequency;
+    private string $action;
+    private ?string $contractId;
+    private ?string $contractType;
+    private ?string $contractExpiryDate;
+    private ?string $contractFrequency;
 
     public function __construct(
         string $action,
         ?string $contractId = null,
         ?string $contractType = null,
         ?string $contractExpiryDate = null,
-        ?string $contractFrequency = null
+        ?string $contractFrequency = null,
     ) {
         $this->action = $action;
         $this->contractId = $contractId;

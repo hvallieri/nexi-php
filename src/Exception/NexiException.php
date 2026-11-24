@@ -2,8 +2,6 @@
 
 namespace Hval\Nexi\Exception;
 
-use RuntimeException;
-
-class NexiException extends RuntimeException
+class NexiException extends \RuntimeException
 {
 }

@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\HppResponse;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\HppResponse
  */
+#[CoversClass(HppResponse::class)]
 class HppResponseTest extends TestCase
 {
     public function testFromArray(): void

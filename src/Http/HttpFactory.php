@@ -6,14 +6,15 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
 class HttpFactory implements HttpFactoryInterface
 {
     /** @var RequestFactoryInterface */
-    private $requestFactory;
+    private RequestFactoryInterface $requestFactory;
 
     /** @var StreamFactoryInterface */
-    private $streamFactory;
+    private StreamFactoryInterface $streamFactory;
 
     public function __construct(RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory)
     {
@@ -22,7 +23,7 @@ class HttpFactory implements HttpFactoryInterface
     }
 
     /**
-     * @param string|\Psr\Http\Message\UriInterface $uri
+     * @param string|UriInterface $uri
      */
     public function createRequest(string $method, $uri): RequestInterface
     {

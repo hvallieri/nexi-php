@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\Address;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\Address
  */
+#[CoversClass(Address::class)]
 class AddressTest extends TestCase
 {
     public function testToArrayWithRequiredFieldsOnly(): void
@@ -33,7 +34,7 @@ class AddressTest extends TestCase
             '20100',
             'ITA',
             'MI',
-            'Scala B'
+            'Scala B',
         );
 
         $result = $address->toArray();

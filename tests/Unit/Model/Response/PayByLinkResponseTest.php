@@ -4,13 +4,14 @@ namespace Hval\Nexi\Tests\Unit\Model\Response;
 
 use Hval\Nexi\Model\Response\PayByLinkResponse;
 use Hval\Nexi\Model\Response\PaymentLink;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Response\PayByLinkResponse
- * @covers \Hval\Nexi\Model\Response\PaymentLink
  */
+#[CoversClass(PayByLinkResponse::class)]
+#[CoversClass(PaymentLink::class)]
 class PayByLinkResponseTest extends TestCase
 {
     public function testFromArrayPopulatesPaymentLink(): void

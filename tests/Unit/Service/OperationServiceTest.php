@@ -4,6 +4,7 @@ namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
+use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\CancelRequest;
@@ -11,9 +12,11 @@ use Hval\Nexi\Model\Request\CaptureRequest;
 use Hval\Nexi\Model\Request\RefundRequest;
 use Hval\Nexi\Model\Response\OperationDetails;
 use Hval\Nexi\Model\Response\OperationResponse;
+use Hval\Nexi\Service\AbstractService;
 use Hval\Nexi\Service\OperationService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -21,9 +24,9 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\AbstractService
- * @covers \Hval\Nexi\Service\OperationService
  */
+#[CoversClass(AbstractService::class)]
+#[CoversClass(OperationService::class)]
 class OperationServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -48,10 +51,10 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/refunds') !== false
-                    && $request->getHeaderLine('X-Api-Key') === self::API_KEY;
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/refunds') === true
+                    && $request->getHeaderLine('X-Api-Key') === self::API_KEY,
+            ))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -85,9 +88,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/captures') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/captures') === true))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -102,9 +103,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/cancels') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/' . self::OPERATION_ID . '/cancels') === true))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -151,6 +150,7 @@ class OperationServiceTest extends TestCase
     public function testRefundThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -163,6 +163,7 @@ class OperationServiceTest extends TestCase
     public function testRefundThrowsApiExceptionOn500(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
@@ -178,6 +179,7 @@ class OperationServiceTest extends TestCase
     public function testCaptureThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -190,6 +192,7 @@ class OperationServiceTest extends TestCase
     public function testCaptureThrowsApiExceptionOn500(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
@@ -205,6 +208,7 @@ class OperationServiceTest extends TestCase
     public function testCancelThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -217,6 +221,7 @@ class OperationServiceTest extends TestCase
     public function testCancelThrowsApiExceptionOn500(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
@@ -232,11 +237,12 @@ class OperationServiceTest extends TestCase
     public function testRefundThrowsApiExceptionOn500WithoutErrorsKey(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(500, [], '{}'))
         ;
 
-        $this->expectException(\Hval\Nexi\Exception\ApiException::class);
+        $this->expectException(ApiException::class);
 
         $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
@@ -244,11 +250,12 @@ class OperationServiceTest extends TestCase
     public function testRefundThrowsInvalidRequestExceptionOn400WithoutErrorsKey(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(400, [], '{}'))
         ;
 
-        $this->expectException(\Hval\Nexi\Exception\InvalidRequestException::class);
+        $this->expectException(InvalidRequestException::class);
 
         $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR'));
     }
@@ -276,9 +283,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request) use ($key): bool {
-                return $request->getHeaderLine('Idempotency-Key') === $key;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => $request->getHeaderLine('Idempotency-Key') === $key))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -308,9 +313,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request) use ($key): bool {
-                return $request->getHeaderLine('Idempotency-Key') === $key;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => $request->getHeaderLine('Idempotency-Key') === $key))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -322,9 +325,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return $request->getHeaderLine('Idempotency-Key') === '';
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => $request->getHeaderLine('Idempotency-Key') === ''))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -338,9 +339,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/OP%2F12%20345/refunds') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/OP%2F12%20345/refunds') === true))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -376,12 +375,12 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'fromTime=2024-01-01') !== false
-                    && strpos($uri, 'toTime=2024-01-31') !== false
-                    && strpos($uri, 'channel=ECOMMERCE') !== false
-                    && strpos($uri, 'operationType=AUTHORIZATION') !== false
-                    && strpos($uri, 'maxRecords=10') !== false
-                    && strpos($uri, 'customField=promo') !== false;
+                return str_contains($uri, 'fromTime=2024-01-01') === true
+                    && str_contains($uri, 'toTime=2024-01-31') === true
+                    && str_contains($uri, 'channel=ECOMMERCE') === true
+                    && str_contains($uri, 'operationType=AUTHORIZATION') === true
+                    && str_contains($uri, 'maxRecords=10') === true
+                    && str_contains($uri, 'customField=promo') === true;
             }))
             ->willReturn(new Response(200, [], json_encode(['operations' => []])))
         ;
@@ -397,10 +396,10 @@ class OperationServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $uri = (string) $request->getUri();
 
-                return strpos($uri, 'channel=ECOMMERCE') !== false
-                    && strpos($uri, 'fromTime') === false
-                    && strpos($uri, 'toTime') === false
-                    && strpos($uri, 'operationType') === false;
+                return str_contains($uri, 'channel=ECOMMERCE') === true
+                    && str_contains($uri, 'fromTime') === false
+                    && str_contains($uri, 'toTime') === false
+                    && str_contains($uri, 'operationType') === false;
             }))
             ->willReturn(new Response(200, [], json_encode(['operations' => []])))
         ;
@@ -411,6 +410,7 @@ class OperationServiceTest extends TestCase
     public function testFindAllReturnsEmptyArrayWhenOperationsKeyMissing(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([])))
         ;
@@ -421,6 +421,7 @@ class OperationServiceTest extends TestCase
     public function testFindAllThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -435,9 +436,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/OP-001') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/OP-001') === true))
             ->willReturn(new Response(200, [], json_encode([
                 'operationId' => 'OP-001',
                 'orderId' => 'ORD-001',
@@ -459,9 +458,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/operations/OP%2F001') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/OP%2F001') === true))
             ->willReturn(new Response(200, [], json_encode(['operationId' => 'OP/001'])))
         ;
 
@@ -471,6 +468,7 @@ class OperationServiceTest extends TestCase
     public function testFindThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;

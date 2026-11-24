@@ -6,14 +6,9 @@ use Hval\Nexi\Model\RequestModelInterface;
 
 class CaptureRequest implements RequestModelInterface
 {
-    /** @var string|null */
-    private $amount;
-
-    /** @var string|null */
-    private $currency;
-
-    /** @var string|null */
-    private $description;
+    private ?string $amount;
+    private ?string $currency;
+    private ?string $description;
 
     /**
      * Omitting both amount and currency triggers a full capture on the Nexi side.
@@ -24,7 +19,7 @@ class CaptureRequest implements RequestModelInterface
     public function __construct(
         ?string $amount = null,
         ?string $currency = null,
-        ?string $description = null
+        ?string $description = null,
     ) {
         $this->amount = $amount;
         $this->currency = $currency;

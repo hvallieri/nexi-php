@@ -19,7 +19,13 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-operations
      *
-     * @throws NexiException
+     * @param string|null $fromTime
+     * @param string|null $toTime
+     * @param int|null $maxRecords
+     * @param string|null $channel
+     * @param string|null $operationType
+     * @param string|null $customField
+     *
      * @throws ClientExceptionInterface
      *
      * @return array<int, OperationDetails>
@@ -30,7 +36,7 @@ class OperationService extends AbstractService
         ?int $maxRecords = null,
         ?string $channel = null,
         ?string $operationType = null,
-        ?string $customField = null
+        ?string $customField = null,
     ): array {
         $params = [];
 
@@ -59,7 +65,7 @@ class OperationService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/operations', $params)
+            $this->get($this->baseUrl . '/operations', $params),
         );
 
         $items = isset($data['operations']) && is_array($data['operations']) ? $data['operations'] : [];
@@ -80,13 +86,17 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-operations-operationid
      *
+     * @param string $operationId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return OperationDetails
      */
     public function find(string $operationId): OperationDetails
     {
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/operations/' . rawurlencode($operationId))
+            $this->get($this->baseUrl . '/operations/' . rawurlencode($operationId)),
         );
 
         return OperationDetails::fromArray($data);
@@ -97,10 +107,13 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
      *
+     * @param string $operationId
+     * @param RefundRequest $request
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
-     * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return OperationResponse
      */
     public function refund(string $operationId, RefundRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
@@ -114,8 +127,8 @@ class OperationService extends AbstractService
             $this->post(
                 $this->baseUrl . '/operations/' . rawurlencode($operationId) . '/refunds',
                 $body,
-                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
-            )
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()],
+            ),
         );
 
         return OperationResponse::fromArray($data);
@@ -126,10 +139,13 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
      *
+     * @param string $operationId
+     * @param CaptureRequest $request
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
-     * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return OperationResponse
      */
     public function capture(string $operationId, CaptureRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
@@ -143,8 +159,8 @@ class OperationService extends AbstractService
             $this->post(
                 $this->baseUrl . '/operations/' . rawurlencode($operationId) . '/captures',
                 $body,
-                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()]
-            )
+                ['Idempotency-Key' => $idempotencyKey ?? $this->generateIdempotencyKey()],
+            ),
         );
 
         return OperationResponse::fromArray($data);
@@ -155,8 +171,12 @@ class OperationService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
      *
-     * @throws NexiException
+     * @param string $operationId
+     * @param CancelRequest $request
+     *
      * @throws ClientExceptionInterface
+     *
+     * @return OperationResponse
      */
     public function cancel(string $operationId, CancelRequest $request): OperationResponse
     {
@@ -167,7 +187,7 @@ class OperationService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/cancels', $body)
+            $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/cancels', $body),
         );
 
         return OperationResponse::fromArray($data);

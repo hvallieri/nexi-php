@@ -16,8 +16,13 @@ class PayByLinkService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-orders-paybylink
      *
-     * @throws NexiException
+     * @param Order $order
+     * @param PaymentSession $session
+     * @param string $expirationDate
+     *
      * @throws ClientExceptionInterface
+     *
+     * @return PayByLinkResponse
      */
     public function create(Order $order, PaymentSession $session, string $expirationDate): PayByLinkResponse
     {
@@ -34,7 +39,7 @@ class PayByLinkService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/orders/paybylink', $body)
+            $this->post($this->baseUrl . '/orders/paybylink', $body),
         );
 
         return PayByLinkResponse::fromArray($data);
@@ -48,9 +53,11 @@ class PayByLinkService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-orders-paybylink
      *
+     * @param ?string $fromTime
+     * @param string|null $toTime
+     * @param int|null $maxRecords
      * @param string|null $status one of the PaymentLink::STATUS_* constants
      *
-     * @throws NexiException
      * @throws ClientExceptionInterface
      *
      * @return array<int, PaymentLink>
@@ -59,7 +66,7 @@ class PayByLinkService extends AbstractService
         ?string $fromTime = null,
         ?string $toTime = null,
         ?int $maxRecords = null,
-        ?string $status = null
+        ?string $status = null,
     ): array {
         $params = [];
 
@@ -80,7 +87,7 @@ class PayByLinkService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/orders/paybylink', $params)
+            $this->get($this->baseUrl . '/orders/paybylink', $params),
         );
 
         $items = isset($data['paymentLinks']) && is_array($data['paymentLinks']) ? $data['paymentLinks'] : [];
@@ -101,13 +108,17 @@ class PayByLinkService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/get-orders-paybylink-linkid
      *
+     * @param string $linkId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
+     *
+     * @return PayByLinkResponse
      */
     public function find(string $linkId): PayByLinkResponse
     {
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/orders/paybylink/' . rawurlencode($linkId))
+            $this->get($this->baseUrl . '/orders/paybylink/' . rawurlencode($linkId)),
         );
 
         return PayByLinkResponse::fromArray($data);
@@ -119,8 +130,12 @@ class PayByLinkService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-orders-paybylink-linkid-renewals
      *
-     * @throws NexiException
+     * @param string $linkId
+     * @param string|null $expirationDate
+     *
      * @throws ClientExceptionInterface
+     *
+     * @return PayByLinkResponse
      */
     public function renew(string $linkId, ?string $expirationDate = null): PayByLinkResponse
     {
@@ -135,7 +150,7 @@ class PayByLinkService extends AbstractService
         }
 
         $data = $this->parseResponse(
-            $this->post($this->baseUrl . '/orders/paybylink/' . rawurlencode($linkId) . '/renewals', $body)
+            $this->post($this->baseUrl . '/orders/paybylink/' . rawurlencode($linkId) . '/renewals', $body),
         );
 
         return PayByLinkResponse::fromArray($data);
@@ -146,13 +161,15 @@ class PayByLinkService extends AbstractService
      *
      * @see https://developer.nexi.it/en/api/post-paybylink-linkid-cancels
      *
+     * @param string $linkId
+     *
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
     public function cancel(string $linkId): void
     {
         $this->parseResponse(
-            $this->post($this->baseUrl . '/paybylink/' . rawurlencode($linkId) . '/cancels', '')
+            $this->post($this->baseUrl . '/paybylink/' . rawurlencode($linkId) . '/cancels', ''),
         );
     }
 }

@@ -5,13 +5,14 @@ namespace Hval\Nexi\Tests\Unit\Webhook;
 use Hval\Nexi\Exception\WebhookSignatureException;
 use Hval\Nexi\Webhook\WebhookHandler;
 use Hval\Nexi\Webhook\WebhookNotification;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Webhook\WebhookHandler
- * @covers \Hval\Nexi\Webhook\WebhookNotification
  */
+#[CoversClass(WebhookHandler::class)]
+#[CoversClass(WebhookNotification::class)]
 class WebhookHandlerTest extends TestCase
 {
     private const TOKEN = 'securetoken123abc';

@@ -21,7 +21,7 @@ class PaymentMethodService extends AbstractService
     public function listAll(): array
     {
         $data = $this->parseResponse(
-            $this->get($this->baseUrl . '/payment_methods')
+            $this->get($this->baseUrl . '/payment_methods'),
         );
 
         $items = isset($data['paymentMethods']) && is_array($data['paymentMethods']) ? $data['paymentMethods'] : [];

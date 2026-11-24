@@ -5,14 +5,15 @@ namespace Hval\Nexi\Tests\Unit\Http;
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Http\HttpFactoryInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Http\HttpFactory
  */
+#[CoversClass(HttpFactory::class)]
 class HttpFactoryTest extends TestCase
 {
     /** @var HttpFactory */

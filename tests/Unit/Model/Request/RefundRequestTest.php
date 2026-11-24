@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\RefundRequest;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\RefundRequest
  */
+#[CoversClass(RefundRequest::class)]
 class RefundRequestTest extends TestCase
 {
     public function testToArrayWithRequiredFieldsOnly(): void

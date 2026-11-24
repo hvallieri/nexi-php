@@ -6,11 +6,8 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class HppResponse implements ResponseModelInterface
 {
-    /** @var string|null */
-    private $hostedPage;
-
-    /** @var string|null */
-    private $securityToken;
+    private ?string $hostedPage;
+    private ?string $securityToken;
 
     public function __construct(?string $hostedPage, ?string $securityToken)
     {
@@ -30,12 +27,14 @@ class HppResponse implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['hostedPage'] ?? null,
-            $data['securityToken'] ?? null
+            hostedPage: $data['hostedPage'] ?? null,
+            securityToken: $data['securityToken'] ?? null,
         );
     }
 }

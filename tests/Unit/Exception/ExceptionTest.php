@@ -7,15 +7,16 @@ use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Exception\WebhookSignatureException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Exception\ApiException
- * @covers \Hval\Nexi\Exception\AuthenticationException
- * @covers \Hval\Nexi\Exception\InvalidRequestException
- * @covers \Hval\Nexi\Exception\WebhookSignatureException
  */
+#[CoversClass(ApiException::class)]
+#[CoversClass(AuthenticationException::class)]
+#[CoversClass(InvalidRequestException::class)]
+#[CoversClass(WebhookSignatureException::class)]
 class ExceptionTest extends TestCase
 {
     public function testApiExceptionExtendsNexiException(): void

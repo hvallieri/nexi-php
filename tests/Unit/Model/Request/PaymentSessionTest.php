@@ -4,12 +4,13 @@ namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Request\Recurrence;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\PaymentSession
  */
+#[CoversClass(PaymentSession::class)]
 class PaymentSessionTest extends TestCase
 {
     public function testToArrayWithRequiredFieldsOnly(): void
@@ -19,7 +20,7 @@ class PaymentSessionTest extends TestCase
             '1000',
             'ita',
             'https://example.com/result',
-            'https://example.com/cancel'
+            'https://example.com/cancel',
         );
 
         $this->assertSame([
@@ -39,7 +40,7 @@ class PaymentSessionTest extends TestCase
             'ita',
             'https://example.com/result',
             'https://example.com/cancel',
-            'https://example.com/webhook'
+            'https://example.com/webhook',
         );
 
         $result = $session->toArray();
@@ -54,7 +55,7 @@ class PaymentSessionTest extends TestCase
             '1000',
             'ita',
             'https://example.com/result',
-            'https://example.com/cancel'
+            'https://example.com/cancel',
         );
 
         $result = $session->toArray();
@@ -79,7 +80,7 @@ class PaymentSessionTest extends TestCase
             null,
             null,
             null,
-            $recurrence
+            $recurrence,
         );
 
         $result = $session->toArray();
@@ -99,7 +100,7 @@ class PaymentSessionTest extends TestCase
             null,
             PaymentSession::CAPTURE_EXPLICIT,
             PaymentSession::EXEMPTION_CHALLENGE_REQUESTED,
-            'PAYPAL'
+            'PAYPAL',
         );
 
         $this->assertSame([

@@ -6,109 +6,57 @@ use Hval\Nexi\Model\Response\WebhookAdditionalData;
 
 class WebhookNotification
 {
-    /** @var string|null */
-    private $eventId;
-
-    /** @var string|null */
-    private $eventTime;
-
-    /** @var string|null */
-    private $securityToken;
-
-    /** @var string|null */
-    private $orderId;
-
-    /** @var string|null */
-    private $operationId;
-
-    /** @var string|null */
-    private $channel;
-
-    /** @var string|null */
-    private $operationType;
-
-    /** @var string|null */
-    private $operationResult;
-
-    /** @var string|null */
-    private $operationTime;
-
-    /** @var string|null */
-    private $paymentMethod;
-
-    /** @var string|null */
-    private $paymentCircuit;
-
-    /** @var string|null */
-    private $operationAmount;
-
-    /** @var string|null */
-    private $operationCurrency;
-
+    private ?string $eventId;
+    private ?string $eventTime;
+    private ?string $securityToken;
+    private ?string $orderId;
+    private ?string $operationId;
+    private ?string $channel;
+    private ?string $operationType;
+    private ?string $operationResult;
+    private ?string $operationTime;
+    private ?string $paymentMethod;
+    private ?string $paymentCircuit;
+    private ?string $operationAmount;
+    private ?string $operationCurrency;
     /** @var array<string, mixed> */
-    private $raw;
-
-    /** @var string|null */
-    private $paymentId;
-
-    /** @var string|null */
-    private $result;
-
-    /** @var string|null */
-    private $rootPaymentMethod;
-
-    /** @var string|null */
-    private $rootPaymentInstrumentInfo;
-
-    /** @var string|null */
-    private $orderAmount;
-
-    /** @var string|null */
-    private $currency;
-
-    /** @var string|null */
-    private $customerId;
-
-    /** @var string|null */
-    private $description;
-
-    /** @var string|null */
-    private $customField;
-
-    /** @var string|null */
-    private $orderTime;
-
-    /** @var string|null */
-    private $eventType;
-
-    /** @var string|null */
-    private $errorCode;
-
-    /** @var string|null */
-    private $errorMessage;
-
-    /** @var WebhookAdditionalData|null */
-    private $additionalData;
-
-    /** @var string|null */
-    private $paymentInstrumentInfo;
-
-    /** @var string|null */
-    private $paymentEndToEndId;
-
-    /** @var string|null */
-    private $cancelledOperationId;
-
+    private array $raw;
+    private ?string $paymentId;
+    private ?string $result;
+    private ?string $rootPaymentMethod;
+    private ?string $rootPaymentInstrumentInfo;
+    private ?string $orderAmount;
+    private ?string $currency;
+    private ?string $customerId;
+    private ?string $description;
+    private ?string $customField;
+    private ?string $orderTime;
+    private ?string $eventType;
+    private ?string $errorCode;
+    private ?string $errorMessage;
+    private ?WebhookAdditionalData $additionalData;
+    private ?string $paymentInstrumentInfo;
+    private ?string $paymentEndToEndId;
+    private ?string $cancelledOperationId;
     /** @var array<int, mixed> */
-    private $warnings = [];
-
-    /** @var string|null */
-    private $paymentLinkId;
-
-    /** @var string|null */
-    private $terminalId;
+    private array $warnings = [];
+    private ?string $paymentLinkId;
+    private ?string $terminalId;
 
     /**
+     * @param string|null $eventId
+     * @param string|null $eventTime
+     * @param string|null $securityToken
+     * @param string|null $orderId
+     * @param string|null $operationId
+     * @param string|null $channel
+     * @param string|null $operationType
+     * @param string|null $operationResult
+     * @param string|null $operationTime
+     * @param string|null $paymentMethod
+     * @param string|null $paymentCircuit
+     * @param string|null $operationAmount
+     * @param string|null $operationCurrency
      * @param array<string, mixed> $raw
      */
     public function __construct(
@@ -125,7 +73,7 @@ class WebhookNotification
         ?string $paymentCircuit,
         ?string $operationAmount,
         ?string $operationCurrency,
-        array $raw
+        array $raw,
     ) {
         $this->eventId = $eventId;
         $this->eventTime = $eventTime;
@@ -331,6 +279,8 @@ class WebhookNotification
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -338,20 +288,20 @@ class WebhookNotification
         $rawAdditionalData = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : null;
 
         $instance = new self(
-            $data['eventId'] ?? null,
-            $data['eventTime'] ?? null,
-            $data['securityToken'] ?? null,
-            $operation['orderId'] ?? null,
-            $operation['operationId'] ?? null,
-            $operation['channel'] ?? null,
-            $operation['operationType'] ?? null,
-            $operation['operationResult'] ?? null,
-            $operation['operationTime'] ?? null,
-            $operation['paymentMethod'] ?? null,
-            $operation['paymentCircuit'] ?? null,
-            $operation['operationAmount'] ?? null,
-            $operation['operationCurrency'] ?? null,
-            $data
+            eventId: $data['eventId'] ?? null,
+            eventTime: $data['eventTime'] ?? null,
+            securityToken: $data['securityToken'] ?? null,
+            orderId: $operation['orderId'] ?? null,
+            operationId: $operation['operationId'] ?? null,
+            channel: $operation['channel'] ?? null,
+            operationType: $operation['operationType'] ?? null,
+            operationResult: $operation['operationResult'] ?? null,
+            operationTime: $operation['operationTime'] ?? null,
+            paymentMethod: $operation['paymentMethod'] ?? null,
+            paymentCircuit: $operation['paymentCircuit'] ?? null,
+            operationAmount: $operation['operationAmount'] ?? null,
+            operationCurrency: $operation['operationCurrency'] ?? null,
+            raw: $data,
         );
 
         $instance->paymentId = $data['paymentId'] ?? null;

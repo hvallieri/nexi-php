@@ -6,31 +6,18 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class PaymentLink implements ResponseModelInterface
 {
-    const STATUS_ACTIVE = 'ACTIVE';
-    const STATUS_DELETED = 'DELETED';
-    const STATUS_EXPIRED = 'EXPIRED';
-    const STATUS_INACTIVE = 'INACTIVE';
+    public const string STATUS_ACTIVE = 'ACTIVE';
+    public const string STATUS_DELETED = 'DELETED';
+    public const string STATUS_EXPIRED = 'EXPIRED';
+    public const string STATUS_INACTIVE = 'INACTIVE';
 
-    /** @var string|null */
-    private $linkId;
-
-    /** @var string|null */
-    private $amount;
-
-    /** @var string|null */
-    private $expirationDate;
-
-    /** @var string|null */
-    private $link;
-
-    /** @var string|null */
-    private $paidByOperationId;
-
-    /** @var string|null */
-    private $status;
-
-    /** @var string|null */
-    private $securityToken;
+    private ?string $linkId;
+    private ?string $amount;
+    private ?string $expirationDate;
+    private ?string $link;
+    private ?string $paidByOperationId;
+    private ?string $status;
+    private ?string $securityToken;
 
     public function __construct(
         ?string $linkId,
@@ -39,7 +26,7 @@ class PaymentLink implements ResponseModelInterface
         ?string $link,
         ?string $paidByOperationId,
         ?string $status,
-        ?string $securityToken
+        ?string $securityToken,
     ) {
         $this->linkId = $linkId;
         $this->amount = $amount;
@@ -87,17 +74,19 @@ class PaymentLink implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['linkId'] ?? null,
-            $data['amount'] ?? null,
-            $data['expirationDate'] ?? null,
-            $data['link'] ?? null,
-            $data['paidByOperationId'] ?? null,
-            $data['status'] ?? null,
-            $data['securityToken'] ?? null
+            linkId: $data['linkId'] ?? null,
+            amount: $data['amount'] ?? null,
+            expirationDate: $data['expirationDate'] ?? null,
+            link: $data['link'] ?? null,
+            paidByOperationId: $data['paidByOperationId'] ?? null,
+            status: $data['status'] ?? null,
+            securityToken: $data['securityToken'] ?? null,
         );
     }
 }

@@ -8,6 +8,7 @@ use Hval\Nexi\Model\Response\ContractsByCustomerResponse;
 use Hval\Nexi\Service\ContractService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
@@ -15,8 +16,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Service\ContractService
  */
+#[CoversClass(ContractService::class)]
 class ContractServiceTest extends TestCase
 {
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
@@ -62,10 +63,10 @@ class ContractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/contracts/customers/CUST-001') !== false
-                    && $request->getMethod() === 'GET';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/customers/CUST-001') === true
+                    && $request->getMethod() === 'GET',
+            ))
             ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST-001', 'contracts' => []])))
         ;
 
@@ -77,9 +78,7 @@ class ContractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/contracts/customers/CUST%2F001') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/customers/CUST%2F001') === true))
             ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST/001', 'contracts' => []])))
         ;
 
@@ -89,6 +88,7 @@ class ContractServiceTest extends TestCase
     public function testFindByCustomerThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;
@@ -103,10 +103,10 @@ class ContractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/contracts/CONTR-001/deactivation') !== false
-                    && $request->getMethod() === 'POST';
-            }))
+            ->with($this->callback(
+                fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/CONTR-001/deactivation') === true
+                    && $request->getMethod() === 'POST',
+            ))
             ->willReturn(new Response(200, [], '{}'))
         ;
 
@@ -118,9 +118,7 @@ class ContractServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return strpos((string) $request->getUri(), '/contracts/CONTR%2F001/deactivation') !== false;
-            }))
+            ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/CONTR%2F001/deactivation') === true))
             ->willReturn(new Response(200, [], '{}'))
         ;
 
@@ -130,6 +128,7 @@ class ContractServiceTest extends TestCase
     public function testDeactivateThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(401))
         ;

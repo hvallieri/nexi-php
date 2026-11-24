@@ -4,12 +4,13 @@ namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\Address;
 use Hval\Nexi\Model\Request\CustomerInfo;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\CustomerInfo
  */
+#[CoversClass(CustomerInfo::class)]
 class CustomerInfoTest extends TestCase
 {
     public function testToArrayWithNoFields(): void
@@ -32,7 +33,7 @@ class CustomerInfoTest extends TestCase
             '39',
             '3331234567',
             '0212345678',
-            '0298765432'
+            '0298765432',
         );
 
         $result = $info->toArray();

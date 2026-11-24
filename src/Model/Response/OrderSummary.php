@@ -50,7 +50,7 @@ class OrderSummary implements ResponseModelInterface
         ?string $capturedAmount,
         ?string $lastOperationType,
         ?string $lastOperationTime,
-        ?array $termsAndConditionsIds
+        ?array $termsAndConditionsIds,
     ) {
         $this->orderId = $orderId;
         $this->amount = $amount;
@@ -141,7 +141,7 @@ class OrderSummary implements ResponseModelInterface
             $data['capturedAmount'] ?? null,
             $data['lastOperationType'] ?? null,
             $data['lastOperationTime'] ?? null,
-            isset($data['termsAndConditionsIds']) && is_array($data['termsAndConditionsIds']) ? $data['termsAndConditionsIds'] : null
+            isset($data['termsAndConditionsIds']) && is_array($data['termsAndConditionsIds']) ? $data['termsAndConditionsIds'] : null,
         );
     }
 }

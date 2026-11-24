@@ -9,15 +9,14 @@ use Hval\Nexi\Service\OrderService;
 use Hval\Nexi\Service\PayByLinkService;
 use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
-use InvalidArgumentException;
 use Psr\Http\Client\ClientInterface;
 
 class NexiClient
 {
-    const ENV_PRODUCTION = 'production';
-    const ENV_SANDBOX = 'sandbox';
+    public const ENV_PRODUCTION = 'production';
+    public const ENV_SANDBOX = 'sandbox';
 
-    const BASE_URLS = [
+    public const BASE_URLS = [
         self::ENV_PRODUCTION => 'https://xpay.nexigroup.com/api/phoenix-0.0/psp/api/v1',
         self::ENV_SANDBOX => 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1',
     ];
@@ -44,10 +43,10 @@ class NexiClient
         string $apiKey,
         string $environment,
         ClientInterface $httpClient,
-        HttpFactoryInterface $factory
+        HttpFactoryInterface $factory,
     ) {
         if (isset(self::BASE_URLS[$environment]) === false) {
-            throw new InvalidArgumentException($environment . ' is not a valid Environment');
+            throw new \InvalidArgumentException($environment . ' is not a valid Environment');
         }
 
         $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);

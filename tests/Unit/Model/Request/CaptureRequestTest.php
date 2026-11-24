@@ -3,12 +3,13 @@
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
 use Hval\Nexi\Model\Request\CaptureRequest;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers \Hval\Nexi\Model\Request\CaptureRequest
  */
+#[CoversClass(CaptureRequest::class)]
 class CaptureRequestTest extends TestCase
 {
     public function testToArrayWithRequiredFieldsOnly(): void

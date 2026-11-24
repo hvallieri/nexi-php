@@ -6,16 +6,14 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 class OperationResponse implements ResponseModelInterface
 {
-    /** @var string|null */
-    private $operationId;
-
-    /** @var string|null */
-    private $operationTime;
-
+    private ?string $operationId;
+    private ?string $operationTime;
     /** @var array<string, mixed> */
-    private $raw;
+    private array $raw;
 
     /**
+     * @param string|null $operationId
+     * @param string|null $operationTime
      * @param array<string, mixed> $raw
      */
     public function __construct(?string $operationId, ?string $operationTime, array $raw)
@@ -45,13 +43,15 @@ class OperationResponse implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return self
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['operationId'] ?? null,
-            $data['operationTime'] ?? null,
-            $data
+            operationId: $data['operationId'] ?? null,
+            operationTime: $data['operationTime'] ?? null,
+            raw: $data,
         );
     }
 }
