@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers Recurrence
+ * @covers \Hval\Nexi\Model\Request\Recurrence
  */
 class RecurrenceTest extends TestCase
 {

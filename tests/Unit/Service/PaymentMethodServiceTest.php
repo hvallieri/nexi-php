@@ -15,7 +15,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers PaymentMethodService
+ * @covers \Hval\Nexi\Service\PaymentMethodService
  */
 class PaymentMethodServiceTest extends TestCase
 {
