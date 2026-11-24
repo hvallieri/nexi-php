@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class PaymentLink implements ResponseModelInterface
+final class PaymentLink implements ResponseModelInterface
 {
     public const string STATUS_ACTIVE = 'ACTIVE';
     public const string STATUS_DELETED = 'DELETED';
@@ -75,9 +75,9 @@ class PaymentLink implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             linkId: $data['linkId'] ?? null,

@@ -49,7 +49,7 @@ class WebhookHandlerTest extends TestCase
 
     public function testHandleReturnsNotificationWhenTokenMatches(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertInstanceOf(WebhookNotification::class, $notification);
         $this->assertSame('EVT-001', $notification->getEventId());
@@ -72,7 +72,7 @@ class WebhookHandlerTest extends TestCase
         $payload = json_encode([
             'securityToken' => 'wrong-token',
             'operation' => ['orderId' => 'ORD-001'],
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $this->expectException(WebhookSignatureException::class);
         $this->expectExceptionMessage('securityToken mismatch');
@@ -92,7 +92,7 @@ class WebhookHandlerTest extends TestCase
     {
         $payload = json_encode([
             'operation' => ['orderId' => 'ORD-001', 'operationResult' => 'AUTHORIZED'],
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $this->expectException(WebhookSignatureException::class);
 
@@ -101,14 +101,14 @@ class WebhookHandlerTest extends TestCase
 
     public function testIsAuthorizedReturnsFalseForDeclined(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('DECLINED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('DECLINED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertFalse($notification->isAuthorized());
     }
 
     public function testIsExecutedReturnsTrueForExecuted(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('EXECUTED', 'PAYMENT')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('EXECUTED', 'PAYMENT'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertTrue($notification->isExecuted());
         $this->assertFalse($notification->isAuthorized());
@@ -116,7 +116,7 @@ class WebhookHandlerTest extends TestCase
 
     public function testIsAuthorizedReturnsFalseForExecuted(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('EXECUTED', 'PAYMENT')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('EXECUTED', 'PAYMENT'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertFalse($notification->isAuthorized());
     }
@@ -126,7 +126,7 @@ class WebhookHandlerTest extends TestCase
         $payload = json_encode([
             'securityToken' => strtoupper(self::TOKEN),
             'operation' => ['orderId' => 'ORD-001'],
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $this->expectException(WebhookSignatureException::class);
 
@@ -138,7 +138,7 @@ class WebhookHandlerTest extends TestCase
         $payload = json_encode([
             'securityToken' => '',
             'operation' => ['orderId' => 'ORD-001'],
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $this->expectException(WebhookSignatureException::class);
 
@@ -150,7 +150,7 @@ class WebhookHandlerTest extends TestCase
         $data = $this->makePayload('AUTHORIZED');
         $data['customField'] = 'extra-data';
 
-        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($data, JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertSame('extra-data', $notification->getRaw()['customField']);
     }
@@ -172,7 +172,7 @@ class WebhookHandlerTest extends TestCase
         $data['errorCode'] = null;
         $data['errorMessage'] = null;
 
-        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($data, JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertSame('PAY-001', $notification->getPaymentId());
         $this->assertSame('AUTHORIZED', $notification->getResult());
@@ -192,14 +192,17 @@ class WebhookHandlerTest extends TestCase
     public function testOperationExtendedFieldsAreParsed(): void
     {
         $data = $this->makePayload('AUTHORIZED');
-        $data['operation']['paymentInstrumentInfo'] = 'VISA ****1234';
-        $data['operation']['paymentEndToEndId'] = 'E2E-001';
-        $data['operation']['cancelledOperationId'] = null;
-        $data['operation']['warnings'] = [['code' => 'WARN01', 'description' => 'test']];
-        $data['operation']['paymentLinkId'] = 'LINK-001';
-        $data['operation']['terminalId'] = 'TERM-001';
+        $this->assertIsArray($data['operation']);
+        $data['operation'] = array_merge($data['operation'], [
+            'paymentInstrumentInfo' => 'VISA ****1234',
+            'paymentEndToEndId' => 'E2E-001',
+            'cancelledOperationId' => null,
+            'warnings' => [['code' => 'WARN01', 'description' => 'test']],
+            'paymentLinkId' => 'LINK-001',
+            'terminalId' => 'TERM-001',
+        ]);
 
-        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($data, JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertSame('VISA ****1234', $notification->getPaymentInstrumentInfo());
         $this->assertSame('E2E-001', $notification->getPaymentEndToEndId());
@@ -211,7 +214,7 @@ class WebhookHandlerTest extends TestCase
 
     public function testWarningsDefaultsToEmptyArray(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertSame([], $notification->getWarnings());
     }
@@ -227,7 +230,7 @@ class WebhookHandlerTest extends TestCase
             'schemaTID' => 'TID789',
         ];
 
-        $notification = $this->handler->handle(json_encode($data), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($data, JSON_THROW_ON_ERROR), self::TOKEN);
 
         $additional = $notification->getAdditionalData();
         $this->assertNotNull($additional);
@@ -240,14 +243,14 @@ class WebhookHandlerTest extends TestCase
 
     public function testAdditionalDataIsNullWhenAbsent(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertNull($notification->getAdditionalData());
     }
 
     public function testNewRootFieldsReturnNullWhenAbsent(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertNull($notification->getPaymentId());
         $this->assertNull($notification->getResult());
@@ -269,7 +272,7 @@ class WebhookHandlerTest extends TestCase
         $payload = json_encode([
             'securityToken' => self::TOKEN,
             'operation' => [],
-        ]);
+        ], JSON_THROW_ON_ERROR);
 
         $notification = $this->handler->handle($payload, self::TOKEN);
 
@@ -280,7 +283,7 @@ class WebhookHandlerTest extends TestCase
 
     public function testMissingOperationKeyReturnsNullFields(): void
     {
-        $payload = json_encode(['securityToken' => self::TOKEN]);
+        $payload = json_encode(['securityToken' => self::TOKEN], JSON_THROW_ON_ERROR);
 
         $notification = $this->handler->handle($payload, self::TOKEN);
 
@@ -293,7 +296,7 @@ class WebhookHandlerTest extends TestCase
 
     public function testSecurityTokenIsAccessibleOnNotification(): void
     {
-        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED')), self::TOKEN);
+        $notification = $this->handler->handle(json_encode($this->makePayload('AUTHORIZED'), JSON_THROW_ON_ERROR), self::TOKEN);
 
         $this->assertSame(self::TOKEN, $notification->getSecurityToken());
     }

@@ -6,7 +6,6 @@ use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
 use Hval\Nexi\Model\Request\RefundRequest;
@@ -43,7 +42,7 @@ class OperationServiceTest extends TestCase
     {
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->service = new OperationService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+        $this->service = new OperationService($this->httpClient, $psr17, self::API_KEY, self::BASE_URL);
     }
 
     public function testRefundCallsCorrectEndpoint(): void
@@ -167,7 +166,7 @@ class OperationServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->expectException(ApiException::class);
@@ -196,7 +195,7 @@ class OperationServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->expectException(ApiException::class);
@@ -225,7 +224,7 @@ class OperationServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'PS0001', 'description' => 'Internal server error']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->expectException(ApiException::class);
@@ -356,7 +355,7 @@ class OperationServiceTest extends TestCase
                     ['operationId' => 'OP-001', 'orderId' => 'ORD-001', 'operationResult' => 'AUTHORIZED'],
                     ['operationId' => 'OP-002', 'orderId' => 'ORD-002', 'operationResult' => 'EXECUTED'],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $result = $this->service->findAll();
@@ -382,7 +381,7 @@ class OperationServiceTest extends TestCase
                     && str_contains($uri, 'maxRecords=10') === true
                     && str_contains($uri, 'customField=promo') === true;
             }))
-            ->willReturn(new Response(200, [], json_encode(['operations' => []])))
+            ->willReturn(new Response(200, [], json_encode(['operations' => []], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll('2024-01-01', '2024-01-31', 10, 'ECOMMERCE', 'AUTHORIZATION', 'promo');
@@ -401,7 +400,7 @@ class OperationServiceTest extends TestCase
                     && str_contains($uri, 'toTime') === false
                     && str_contains($uri, 'operationType') === false;
             }))
-            ->willReturn(new Response(200, [], json_encode(['operations' => []])))
+            ->willReturn(new Response(200, [], json_encode(['operations' => []], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll(null, null, null, 'ECOMMERCE', null, null);
@@ -412,7 +411,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->assertSame([], $this->service->findAll());
@@ -442,7 +441,7 @@ class OperationServiceTest extends TestCase
                 'orderId' => 'ORD-001',
                 'operationResult' => 'AUTHORIZED',
                 'channel' => 'ECOMMERCE',
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $details = $this->service->find('OP-001');
@@ -459,7 +458,7 @@ class OperationServiceTest extends TestCase
             ->expects($this->once())
             ->method('sendRequest')
             ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/operations/OP%2F001') === true))
-            ->willReturn(new Response(200, [], json_encode(['operationId' => 'OP/001'])))
+            ->willReturn(new Response(200, [], json_encode(['operationId' => 'OP/001'], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->find('OP/001');
@@ -522,6 +521,6 @@ class OperationServiceTest extends TestCase
         return new Response(200, [], json_encode([
             'operationId' => self::OPERATION_ID,
             'operationTime' => '2024-01-01T12:00:00.001Z',
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 }

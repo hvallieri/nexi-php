@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class ContractSummary implements ResponseModelInterface
+final class ContractSummary implements ResponseModelInterface
 {
     private ?string $contractId;
     private ?string $contractType;
@@ -70,9 +70,9 @@ class ContractSummary implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             contractId: $data['contractId'] ?? null,

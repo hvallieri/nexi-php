@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class PayByLinkResponse implements ResponseModelInterface
+final class PayByLinkResponse implements ResponseModelInterface
 {
     /** @var PaymentLink|null */
     private $paymentLink;
@@ -21,8 +21,10 @@ class PayByLinkResponse implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $paymentLink = isset($data['paymentLink']) && is_array($data['paymentLink'])
             ? PaymentLink::fromArray($data['paymentLink'])

@@ -2,7 +2,6 @@
 
 namespace Hval\Nexi;
 
-use Hval\Nexi\Http\HttpFactoryInterface;
 use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
@@ -10,6 +9,8 @@ use Hval\Nexi\Service\PayByLinkService;
 use Hval\Nexi\Service\PaymentMethodService;
 use Hval\Nexi\Webhook\WebhookHandler;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 
 class NexiClient
 {
@@ -21,29 +22,18 @@ class NexiClient
         self::ENV_SANDBOX => 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1',
     ];
 
-    /** @var OrderService */
-    private $orders;
-
-    /** @var OperationService */
-    private $operations;
-
-    /** @var ContractService */
-    private $contracts;
-
-    /** @var PayByLinkService */
-    private $payByLink;
-
-    /** @var PaymentMethodService */
-    private $paymentMethods;
-
-    /** @var WebhookHandler */
-    private $webhookHandler;
+    private readonly OrderService $orders;
+    private readonly OperationService $operations;
+    private readonly ContractService $contracts;
+    private readonly PayByLinkService $payByLink;
+    private readonly PaymentMethodService $paymentMethods;
+    private readonly WebhookHandler $webhookHandler;
 
     public function __construct(
         string $apiKey,
         string $environment,
         ClientInterface $httpClient,
-        HttpFactoryInterface $factory,
+        RequestFactoryInterface&StreamFactoryInterface $factory,
     ) {
         if (isset(self::BASE_URLS[$environment]) === false) {
             throw new \InvalidArgumentException($environment . ' is not a valid Environment');

@@ -2,8 +2,8 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Service\AbstractService;
+use Hval\Nexi\Tests\Fixtures\ConcreteService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -21,23 +21,13 @@ class AbstractServiceTest extends TestCase
     private const BASE_URL = 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1';
     private const API_KEY = 'test-api-key-uuid';
 
-    /** @var ClientInterface&MockObject */
-    private $httpClient;
-
-    /** @var AbstractService */
-    private $service;
+    private ClientInterface&MockObject $httpClient;
+    private ConcreteService $service;
 
     protected function setUp(): void
     {
-        $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-
-        $this->service = new class($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL) extends AbstractService {
-            public function getPublic(string $url, array $queryParams = []): array
-            {
-                return $this->get($url, $queryParams);
-            }
-        };
+        $this->service = new ConcreteService($this->httpClient, new Psr17Factory(), self::API_KEY, self::BASE_URL);
     }
 
     public function testGetWithoutQueryParamsBuildsUrlWithoutQueryString(): void

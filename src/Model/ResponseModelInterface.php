@@ -9,5 +9,5 @@ interface ResponseModelInterface
      *
      * @return static
      */
-    public static function fromArray(array $data);
+    public static function fromArray(array $data): static;
 }

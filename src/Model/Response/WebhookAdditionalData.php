@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class WebhookAdditionalData implements ResponseModelInterface
+final class WebhookAdditionalData implements ResponseModelInterface
 {
     /** @var string|null */
     private $status;
@@ -108,8 +108,10 @@ class WebhookAdditionalData implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $instance = new self();
         $instance->status = $data['status'] ?? null;

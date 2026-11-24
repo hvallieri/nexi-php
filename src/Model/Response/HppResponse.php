@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class HppResponse implements ResponseModelInterface
+final class HppResponse implements ResponseModelInterface
 {
     private ?string $hostedPage;
     private ?string $securityToken;
@@ -28,9 +28,9 @@ class HppResponse implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             hostedPage: $data['hostedPage'] ?? null,

@@ -3,7 +3,6 @@
 namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\AuthenticationException;
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Response\ContractsByCustomerResponse;
 use Hval\Nexi\Service\ContractService;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -33,7 +32,7 @@ class ContractServiceTest extends TestCase
     {
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->service = new ContractService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+        $this->service = new ContractService($this->httpClient, $psr17, self::API_KEY, self::BASE_URL);
     }
 
     public function testFindByCustomerReturnsContractsByCustomerResponse(): void
@@ -47,7 +46,7 @@ class ContractServiceTest extends TestCase
                     ['contractId' => 'CONTR-001', 'contractType' => 'MIT_UNSCHEDULED'],
                     ['contractId' => 'CONTR-002', 'contractType' => 'MIT_SCHEDULED'],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $response = $this->service->findByCustomer('CUST-001');
@@ -67,7 +66,7 @@ class ContractServiceTest extends TestCase
                 fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/customers/CUST-001') === true
                     && $request->getMethod() === 'GET',
             ))
-            ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST-001', 'contracts' => []])))
+            ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST-001', 'contracts' => []], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findByCustomer('CUST-001');
@@ -79,7 +78,7 @@ class ContractServiceTest extends TestCase
             ->expects($this->once())
             ->method('sendRequest')
             ->with($this->callback(fn (RequestInterface $request): bool => str_contains((string) $request->getUri(), '/contracts/customers/CUST%2F001') === true))
-            ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST/001', 'contracts' => []])))
+            ->willReturn(new Response(200, [], json_encode(['customerId' => 'CUST/001', 'contracts' => []], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findByCustomer('CUST/001');

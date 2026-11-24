@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class OrderResponse implements ResponseModelInterface
+final class OrderResponse implements ResponseModelInterface
 {
     public const OPERATION_RESULT_PENDING = 'PENDING';
     public const OPERATION_RESULT_AUTHORIZED = 'AUTHORIZED';
@@ -124,8 +124,10 @@ class OrderResponse implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $orderStatus = isset($data['orderStatus']) && is_array($data['orderStatus']) ? $data['orderStatus'] : [];
         $order = isset($orderStatus['order']) && is_array($orderStatus['order']) ? $orderStatus['order'] : [];

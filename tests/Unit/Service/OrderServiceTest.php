@@ -6,7 +6,6 @@ use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
 use Hval\Nexi\Exception\NexiException;
-use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Response\HppResponse;
@@ -44,7 +43,7 @@ class OrderServiceTest extends TestCase
     {
         $psr17 = new Psr17Factory();
         $this->httpClient = $this->createMock(ClientInterface::class);
-        $this->service = new OrderService($this->httpClient, new HttpFactory($psr17, $psr17), self::API_KEY, self::BASE_URL);
+        $this->service = new OrderService($this->httpClient, $psr17, self::API_KEY, self::BASE_URL);
     }
 
     private function makeMitSuccessResponse(): Response
@@ -61,7 +60,7 @@ class OrderServiceTest extends TestCase
                 'operationCurrency' => 'EUR',
                 'additionalData' => ['authorizationCode' => 'ABC123'],
             ],
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 
     public function testCreateMitReturnsOperationDetails(): void
@@ -181,7 +180,7 @@ class OrderServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode([
                 'hostedPage' => 'https://gateway.example.com/pay/abc123',
                 'securityToken' => 'tok_abc123',
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
@@ -212,7 +211,7 @@ class OrderServiceTest extends TestCase
             ))
             ->willReturn(new Response(200, [], json_encode([
                 'hostedPage' => 'https://x.com', 'securityToken' => 'tok',
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
@@ -237,7 +236,7 @@ class OrderServiceTest extends TestCase
             }))
             ->willReturn(new Response(200, [], json_encode([
                 'hostedPage' => 'https://x.com', 'securityToken' => 'tok',
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
@@ -269,7 +268,7 @@ class OrderServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(400, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Invalid merchant URL']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->expectException(InvalidRequestException::class);
@@ -288,7 +287,7 @@ class OrderServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(400, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Invalid merchant URL']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
@@ -332,7 +331,7 @@ class OrderServiceTest extends TestCase
                         'operationTime' => '2024-01-01T12:00:00.000Z',
                     ],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $response = $this->service->find('ORD-001');
@@ -394,7 +393,7 @@ class OrderServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(500, [], json_encode([
                 'errors' => [['code' => 'GW0001', 'description' => 'Internal server error']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->expectException(ApiException::class);
@@ -413,7 +412,7 @@ class OrderServiceTest extends TestCase
                     ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
                     ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
                 ],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $result = $this->service->findAll();
@@ -437,7 +436,7 @@ class OrderServiceTest extends TestCase
                     && str_contains($uri, 'maxRecords=10') === true
                     && str_contains($uri, 'customField=promo') === true;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll('2024-01-01', '2024-01-31', 10, 'promo');
@@ -456,7 +455,7 @@ class OrderServiceTest extends TestCase
                     && str_contains($uri, 'toTime') === false
                     && str_contains($uri, 'customField') === false;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll(null, null, 5, null);
@@ -476,7 +475,7 @@ class OrderServiceTest extends TestCase
                     && str_contains($uri, 'maxAmount=2000') === true
                     && str_contains($uri, 'orderState=TO_CAPTURE') === true;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll(
@@ -506,7 +505,7 @@ class OrderServiceTest extends TestCase
                     && str_contains($uri, 'maxAmount') === false
                     && str_contains($uri, 'orderState') === false;
             }))
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->findAll('2024-01-01', '2024-01-31');
@@ -527,7 +526,7 @@ class OrderServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn(new Response(200, [], json_encode([])))
+            ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
         $this->assertSame([], $this->service->findAll());
@@ -555,7 +554,7 @@ class OrderServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode([
                 'orderStatus' => ['order' => ['orderId' => 'ORD/001']],
                 'operations' => [],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $this->service->find('ORD/001');

@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class OrderSummary implements ResponseModelInterface
+final class OrderSummary implements ResponseModelInterface
 {
     /** @var string|null */
     private $orderId;
@@ -125,8 +125,10 @@ class OrderSummary implements ResponseModelInterface
 
     /**
      * @param array<string, mixed> $data
+     *
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         $amount = isset($data['amount']) ? (string) $data['amount'] : null;
 

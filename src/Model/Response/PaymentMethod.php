@@ -4,7 +4,7 @@ namespace Hval\Nexi\Model\Response;
 
 use Hval\Nexi\Model\ResponseModelInterface;
 
-class PaymentMethod implements ResponseModelInterface
+final class PaymentMethod implements ResponseModelInterface
 {
     private ?string $methodType;
     private ?string $circuit;
@@ -54,9 +54,9 @@ class PaymentMethod implements ResponseModelInterface
     /**
      * @param array<string, mixed> $data
      *
-     * @return self
+     * @return static
      */
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data): static
     {
         return new self(
             methodType: $data['methodType'] ?? null,
