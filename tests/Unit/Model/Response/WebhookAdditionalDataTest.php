@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers WebhookAdditionalData
+ * @covers \Hval\Nexi\Model\Response\WebhookAdditionalData
  */
 class WebhookAdditionalDataTest extends TestCase
 {

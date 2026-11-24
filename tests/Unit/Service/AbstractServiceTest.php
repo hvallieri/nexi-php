@@ -13,7 +13,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers AbstractService
+ * @covers \Hval\Nexi\Service\AbstractService
  */
 class AbstractServiceTest extends TestCase
 {
