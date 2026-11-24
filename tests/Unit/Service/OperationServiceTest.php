@@ -4,6 +4,7 @@ namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
+use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
@@ -20,7 +21,8 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers OperationService
+ * @covers \Hval\Nexi\Service\AbstractService
+ * @covers \Hval\Nexi\Service\OperationService
  */
 class OperationServiceTest extends TestCase
 {
@@ -476,6 +478,45 @@ class OperationServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->service->find('OP-001');
+    }
+
+    public function testRefundThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode refund request body.');
+
+        $this->service->refund(self::OPERATION_ID, new RefundRequest('500', 'EUR', "Reso \xB1"));
+    }
+
+    public function testCaptureThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode capture request body.');
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest('3545', 'EUR', "Incasso \xB1"));
+    }
+
+    public function testCancelThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode cancel request body.');
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest("Annullo \xB1"));
     }
 
     private function makeSuccessResponse(): Response

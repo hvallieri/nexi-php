@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers OrderSummary
+ * @covers \Hval\Nexi\Model\Response\OrderSummary
  */
 class OrderSummaryTest extends TestCase
 {

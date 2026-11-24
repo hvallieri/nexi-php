@@ -15,7 +15,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers ContractService
+ * @covers \Hval\Nexi\Service\ContractService
  */
 class ContractServiceTest extends TestCase
 {

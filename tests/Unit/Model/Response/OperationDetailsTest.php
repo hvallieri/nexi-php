@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers OperationDetails
+ * @covers \Hval\Nexi\Model\Response\OperationDetails
  */
 class OperationDetailsTest extends TestCase
 {

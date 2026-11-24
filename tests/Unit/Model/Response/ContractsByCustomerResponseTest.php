@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers ContractsByCustomerResponse
- * @covers ContractSummary
+ * @covers \Hval\Nexi\Model\Response\ContractsByCustomerResponse
+ * @covers \Hval\Nexi\Model\Response\ContractSummary
  */
 class ContractsByCustomerResponseTest extends TestCase
 {
