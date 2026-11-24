@@ -192,12 +192,15 @@ class WebhookHandlerTest extends TestCase
     public function testOperationExtendedFieldsAreParsed(): void
     {
         $data = $this->makePayload('AUTHORIZED');
-        $data['operation']['paymentInstrumentInfo'] = 'VISA ****1234';
-        $data['operation']['paymentEndToEndId'] = 'E2E-001';
-        $data['operation']['cancelledOperationId'] = null;
-        $data['operation']['warnings'] = [['code' => 'WARN01', 'description' => 'test']];
-        $data['operation']['paymentLinkId'] = 'LINK-001';
-        $data['operation']['terminalId'] = 'TERM-001';
+        $this->assertIsArray($data['operation']);
+        $data['operation'] = array_merge($data['operation'], [
+            'paymentInstrumentInfo' => 'VISA ****1234',
+            'paymentEndToEndId' => 'E2E-001',
+            'cancelledOperationId' => null,
+            'warnings' => [['code' => 'WARN01', 'description' => 'test']],
+            'paymentLinkId' => 'LINK-001',
+            'terminalId' => 'TERM-001',
+        ]);
 
         $notification = $this->handler->handle(json_encode($data, JSON_THROW_ON_ERROR), self::TOKEN);
 
