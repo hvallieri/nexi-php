@@ -3,6 +3,7 @@
 namespace Hval\Nexi\Tests\Unit\Service;
 
 use Hval\Nexi\Exception\AuthenticationException;
+use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Http\HttpFactory;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
@@ -18,7 +19,7 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * @internal
- * @covers PayByLinkService
+ * @covers \Hval\Nexi\Service\PayByLinkService
  */
 class PayByLinkServiceTest extends TestCase
 {
@@ -397,5 +398,31 @@ class PayByLinkServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $this->service->cancel('LINK-001');
+    }
+
+    public function testCreateThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode Pay-by-Link request body.');
+
+        $this->service->create($this->makeOrder(), $this->makeSession(), "2026-12-31\xB1");
+    }
+
+    public function testRenewThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode Pay-by-Link renewal request body.');
+
+        $this->service->renew('LINK-001', "2026-12-31\xB1");
     }
 }

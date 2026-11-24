@@ -10,11 +10,15 @@ return (new PhpCsFixer\Config())
         '@PSR2' => true,
         '@PhpCsFixer' => true,
         '@Symfony' => true,
+        '@PHP71Migration:risky' => true,
+        '@PHPUnit75Migration:risky' => true,
+        '@DoctrineAnnotation' => true,
 
         // Declare strict_types on the same line as <?php
         'declare_strict_types' => true,
         'blank_line_after_opening_tag' => false,
         'linebreak_after_opening_tag' => false,
+        'blank_line_before_statement' => ['statements' => ['case', 'continue', 'do', 'exit', 'for', 'foreach', 'goto', 'if', 'return', 'switch', 'throw', 'try', 'while', 'yield', 'yield_from']],
 
         // Short array syntax
         'array_syntax' => ['syntax' => 'short'],
@@ -30,6 +34,7 @@ return (new PhpCsFixer\Config())
         'phpdoc_order' => true,
         'phpdoc_separation' => true,
         'phpdoc_summary' => false,
+        'no_superfluous_phpdoc_tags' => false,
 
         // Misc
         'concat_space' => ['spacing' => 'one'],
@@ -37,6 +42,8 @@ return (new PhpCsFixer\Config())
         'no_unused_imports' => true,
         'single_quote' => true,
         'trailing_comma_in_multiline_array' => true,
+        'multiline_whitespace_before_semicolons' => ['strategy' => 'new_line_for_chained_calls'],
+        'nullable_type_declaration_for_default_null_value' => true,
     ])
     ->setFinder($finder)
 ;

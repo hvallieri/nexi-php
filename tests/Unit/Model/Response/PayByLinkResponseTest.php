@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers PayByLinkResponse
- * @covers PaymentLink
+ * @covers \Hval\Nexi\Model\Response\PayByLinkResponse
+ * @covers \Hval\Nexi\Model\Response\PaymentLink
  */
 class PayByLinkResponseTest extends TestCase
 {
