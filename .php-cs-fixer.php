@@ -7,17 +7,21 @@ $finder = PhpCsFixer\Finder::create()
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
-        '@PSR2' => true,
+        '@PSR12' => true,
         '@PhpCsFixer' => true,
         '@Symfony' => true,
-        '@PHP71Migration:risky' => true,
-        '@PHPUnit75Migration:risky' => true,
-        '@DoctrineAnnotation' => true,
+        '@PHP8x2Migration:risky' => true,
+        '@PHP8x4Migration' => true,
+        '@PHPUnit10x0Migration:risky' => true,
+
+        // PHPUnit
+        'php_unit_attributes' => true,
 
         // Declare strict_types on the same line as <?php
         'declare_strict_types' => true,
         'blank_line_after_opening_tag' => false,
         'linebreak_after_opening_tag' => false,
+        'fully_qualified_strict_types' => ['import_symbols' => true],
         'blank_line_before_statement' => ['statements' => ['case', 'continue', 'do', 'exit', 'for', 'foreach', 'goto', 'if', 'return', 'switch', 'throw', 'try', 'while', 'yield', 'yield_from']],
 
         // Short array syntax
@@ -41,9 +45,10 @@ return (new PhpCsFixer\Config())
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
         'no_unused_imports' => true,
         'single_quote' => true,
-        'trailing_comma_in_multiline_array' => true,
+        'trailing_comma_in_multiline' => ['elements' => ['arguments', 'array_destructuring', 'arrays', 'match', 'parameters']],
         'multiline_whitespace_before_semicolons' => ['strategy' => 'new_line_for_chained_calls'],
         'nullable_type_declaration_for_default_null_value' => true,
+        'new_expression_parentheses' => ['use_parentheses' => true],
     ])
     ->setFinder($finder)
 ;
