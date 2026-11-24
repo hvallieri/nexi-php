@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers RefundRequest
+ * @covers \Hval\Nexi\Model\Request\RefundRequest
  */
 class RefundRequestTest extends TestCase
 {

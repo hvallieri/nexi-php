@@ -14,7 +14,7 @@ use Psr\Http\Client\ClientInterface;
 
 /**
  * @internal
- * @covers NexiClient
+ * @covers \Hval\Nexi\NexiClient
  */
 class NexiClientTest extends TestCase
 {
