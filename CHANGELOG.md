@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-11-24
+
+### Changed
+
+- Development files (`tests/`, `.github/`, `phpunit.xml`, `.php-cs-fixer.php`, `.gitignore`, `.gitattributes`) are no longer included in the distribution archive (`export-ignore` in `.gitattributes`)
+- Test suite: `@covers` annotations now use fully qualified class names, so code coverage is measured correctly; added the missing tests to reach 100% line coverage
+
 ## [1.1.2] - 2026-05-14
 
 ### Fixed
@@ -25,6 +32,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Order`: added `termsAndConditionsIds` (list of accepted T&C UUIDs) and `transactionSummary`
 - `RefundRequest`: `amount` and `currency` are now optional — omitting both triggers a full refund on the Nexi side
 - `CaptureRequest`: `amount` and `currency` are now optional — omitting both triggers a full capture on the Nexi side
+
+## [1.0.4] - 2026-11-24
+
+### Changed
+
+- Development files (`tests/`, `.github/`, `phpunit.xml`, `.php-cs-fixer.php`, `.gitignore`, `.gitattributes`) are no longer included in the distribution archive (`export-ignore` in `.gitattributes`)
+- Test suite: `@covers` annotations now use fully qualified class names, so code coverage is measured correctly; added the missing tests to reach 100% line coverage
+
+## [1.0.3] - 2026-05-14
+
+### Fixed
+
+- `OperationService`: added mandatory `Idempotency-Key` header (UUID v4) to `POST /operations/{id}/refunds` and `POST /operations/{id}/captures`, required by the Nexi API (error PS0074); an optional `$idempotencyKey` parameter allows callers to supply their own key for safe retries
+
+## [1.0.2] - 2026-05-05
+
+### Fixed
+
+- `OrderResponse`: corrected parsing of the `GET /orders/{orderId}` response — `authorizedAmount`, `capturedAmount`, `lastOperationType` and `lastOperationTime` are direct properties of `orderStatus`, not nested under `orderStatus.order`; `operations` is a top-level key of the response, not nested inside `orderStatus`
 
 ## [1.0.1] - 2026-05-05
 
