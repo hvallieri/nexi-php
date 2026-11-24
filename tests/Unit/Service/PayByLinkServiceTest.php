@@ -412,4 +412,17 @@ class PayByLinkServiceTest extends TestCase
 
         $this->service->create($this->makeOrder(), $this->makeSession(), "2026-12-31\xB1");
     }
+
+    public function testRenewThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode Pay-by-Link renewal request body.');
+
+        $this->service->renew('LINK-001', "2026-12-31\xB1");
+    }
 }

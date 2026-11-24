@@ -566,4 +566,17 @@ class OrderServiceTest extends TestCase
 
         $this->service->createHpp($order, $session);
     }
+
+    public function testCreateMitThrowsNexiExceptionWhenBodyCannotBeEncoded(): void
+    {
+        $this->httpClient
+            ->expects($this->never())
+            ->method('sendRequest')
+        ;
+
+        $this->expectException(NexiException::class);
+        $this->expectExceptionMessage('Failed to encode MIT request body.');
+
+        $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), "CONTRACT-\xB1");
+    }
 }
