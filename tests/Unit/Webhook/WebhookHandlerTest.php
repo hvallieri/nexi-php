@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers WebhookHandler
- * @covers WebhookNotification
+ * @covers \Hval\Nexi\Webhook\WebhookHandler
+ * @covers \Hval\Nexi\Webhook\WebhookNotification
  */
 class WebhookHandlerTest extends TestCase
 {
@@ -37,7 +37,7 @@ class WebhookHandlerTest extends TestCase
                 'channel' => 'ECOMMERCE',
                 'operationType' => $operationType,
                 'operationResult' => $operationResult,
-                'operationTime' => '2024-01-01T12:00:00.000Z',
+                'operationTime' => '2024-01-01T12:00:05.000Z',
                 'paymentMethod' => 'CARD',
                 'paymentCircuit' => 'VISA',
                 'operationAmount' => '1000',
@@ -52,10 +52,12 @@ class WebhookHandlerTest extends TestCase
 
         $this->assertInstanceOf(WebhookNotification::class, $notification);
         $this->assertSame('EVT-001', $notification->getEventId());
+        $this->assertSame('2024-01-01T12:00:00.000Z', $notification->getEventTime());
         $this->assertSame('ORD-001', $notification->getOrderId());
         $this->assertSame('OP-999', $notification->getOperationId());
         $this->assertSame('AUTHORIZATION', $notification->getOperationType());
         $this->assertSame('AUTHORIZED', $notification->getOperationResult());
+        $this->assertSame('2024-01-01T12:00:05.000Z', $notification->getOperationTime());
         $this->assertSame('ECOMMERCE', $notification->getChannel());
         $this->assertSame('CARD', $notification->getPaymentMethod());
         $this->assertSame('VISA', $notification->getPaymentCircuit());

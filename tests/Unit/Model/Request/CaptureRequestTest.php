@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers CaptureRequest
+ * @covers \Hval\Nexi\Model\Request\CaptureRequest
  */
 class CaptureRequestTest extends TestCase
 {

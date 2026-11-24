@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers CancelRequest
+ * @covers \Hval\Nexi\Model\Request\CancelRequest
  */
 class CancelRequestTest extends TestCase
 {

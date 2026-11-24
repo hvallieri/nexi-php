@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers CustomerInfo
+ * @covers \Hval\Nexi\Model\Request\CustomerInfo
  */
 class CustomerInfoTest extends TestCase
 {
