@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers Address
+ * @covers \Hval\Nexi\Model\Request\Address
  */
 class AddressTest extends TestCase
 {

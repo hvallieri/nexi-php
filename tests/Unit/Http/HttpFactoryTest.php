@@ -11,7 +11,7 @@ use Psr\Http\Message\StreamInterface;
 
 /**
  * @internal
- * @covers HttpFactory
+ * @covers \Hval\Nexi\Http\HttpFactory
  */
 class HttpFactoryTest extends TestCase
 {
