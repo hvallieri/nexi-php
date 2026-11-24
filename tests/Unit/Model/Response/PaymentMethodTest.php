@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers PaymentMethod
+ * @covers \Hval\Nexi\Model\Response\PaymentMethod
  */
 class PaymentMethodTest extends TestCase
 {
