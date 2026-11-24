@@ -11,10 +11,10 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers ApiException
- * @covers AuthenticationException
- * @covers InvalidRequestException
- * @covers WebhookSignatureException
+ * @covers \Hval\Nexi\Exception\ApiException
+ * @covers \Hval\Nexi\Exception\AuthenticationException
+ * @covers \Hval\Nexi\Exception\InvalidRequestException
+ * @covers \Hval\Nexi\Exception\WebhookSignatureException
  */
 class ExceptionTest extends TestCase
 {

@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- * @covers HppResponse
+ * @covers \Hval\Nexi\Model\Response\HppResponse
  */
 class HppResponseTest extends TestCase
 {
