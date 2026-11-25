@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-11-25
+
+### Fixed
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; empty `RefundRequest`, `CaptureRequest` and `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- `RefundRequest`: Nexi rejects a refund without `amount` (HTTP 500, `GW0001`); documentation no longer states that omitting it triggers a full refund — pass the captured amount instead
+- Documentation links in PHPDoc (`@see`) pointing to non-existent pages
+- README: the webhook example now also accepts `EXECUTED` (terminals with implicit capture); `OrderResponse` table documents the order of `operations[]`
+
 ## [1.1.3] - 2026-11-24
 
 ### Changed
@@ -32,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Order`: added `termsAndConditionsIds` (list of accepted T&C UUIDs) and `transactionSummary`
 - `RefundRequest`: `amount` and `currency` are now optional — omitting both triggers a full refund on the Nexi side
 - `CaptureRequest`: `amount` and `currency` are now optional — omitting both triggers a full capture on the Nexi side
+
+## [1.0.5] - 2026-11-25
+
+### Fixed
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; `cancel()` with an empty `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- Documentation links in PHPDoc (`@see`) may point to non-existent pages
 
 ## [1.0.4] - 2026-11-24
 
