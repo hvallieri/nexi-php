@@ -27,18 +27,18 @@ Reference for all response models returned by [hval/nexi-php](../README.md). Eac
 
 ## `OrderResponse` — `orders()->find()`
 
-| Method                     | Returns                                        |
-|----------------------------|------------------------------------------------|
-| `getOrderId()`             | `?string`                                      |
-| `getLastOperationResult()` | `?string`                                      |
-| `getAuthorizedAmount()`    | `?string`                                      |
-| `getCapturedAmount()`      | `?string`                                      |
-| `getLastOperationType()`   | `?string`                                      |
-| `getLastOperationTime()`   | `?string`                                      |
-| `getOperations()`          | `array` — raw operation list from the API      |
-| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED` |
-| `isExecuted()`             | `bool` — last operation result is `EXECUTED`   |
-| `getRaw()`                 | `array`                                        |
+| Method                     | Returns                                         |
+|----------------------------|-------------------------------------------------|
+| `getOrderId()`             | `?string`                                       |
+| `getLastOperationResult()` | `?string` — result of the most recent operation |
+| `getAuthorizedAmount()`    | `?string`                                       |
+| `getCapturedAmount()`      | `?string`                                       |
+| `getLastOperationType()`   | `?string`                                       |
+| `getLastOperationTime()`   | `?string`                                       |
+| `getOperations()`          | `array` — raw operation list, oldest first      |
+| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED`  |
+| `isExecuted()`             | `bool` — last operation result is `EXECUTED`    |
+| `getRaw()`                 | `array`                                         |
 
 Available `operationResult` constants on `OrderResponse`:
 
@@ -90,18 +90,19 @@ OPERATION_TYPE_CARD_VERIFICATION · NOSHOW · INCREMENTAL · DELAY_CHARGE
 
 ## `PaymentMethod` — `paymentMethods()->listAll()`
 
-| Method                   | Returns                     |
-|--------------------------|-----------------------------|
-| `getMethodType()`        | `?string` — `CARD` or `APM` |
-| `getCircuit()`           | `?string`                   |
-| `getImageLink()`         | `?string`                   |
-| `isRecurringSupported()` | `?bool`                     |
-| `isOneClickSupported()`  | `?bool`                     |
+| Method                   | Returns                      |
+|--------------------------|------------------------------|
+| `getMethodType()`        | `?string` — `CARDS` or `APM` |
+| `getCircuit()`           | `?string`                    |
+| `getImageLink()`         | `?string`                    |
+| `isRecurringSupported()` | `?bool`                      |
+| `isOneClickSupported()`  | `?bool`                      |
 
 ## `PayByLinkResponse` / `PaymentLink` — `payByLink()->create()` / `find()` / `findAll()` / `renew()`
 
 `PayByLinkResponse::getPaymentLink()` returns a `PaymentLink` object (`findAll()` returns an
-array of `PaymentLink` directly; list items do not carry a `securityToken`):
+array of `PaymentLink` directly). Nexi returns the `securityToken` only when the link is created:
+`getSecurityToken()` is `null` for `find()`, `findAll()` and `renew()`.
 
 | Method                   | Returns                                                |
 |--------------------------|--------------------------------------------------------|

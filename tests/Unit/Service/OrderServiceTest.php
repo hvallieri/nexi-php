@@ -81,6 +81,30 @@ class OrderServiceTest extends TestCase
         $this->assertSame('ABC123', $result->getAdditionalData()['authorizationCode']);
     }
 
+    public function testCreateMitReadsWarningsAndTerminalIdOutsideOperation(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Response(200, [], json_encode([
+                'operation' => [
+                    'additionalData' => ['authCode' => '824664', 'terminalId' => '10000105'],
+                    'channel' => 'BACKOFFICE',
+                    'operationId' => '369509020703363299',
+                    'operationResult' => 'EXECUTED',
+                    'operationType' => 'AUTHORIZATION',
+                    'orderId' => 'ORD-001',
+                ],
+                'warnings' => [['code' => 'TRA001', 'description' => '3DS warning']],
+            ], JSON_THROW_ON_ERROR)))
+        ;
+
+        $result = $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
+
+        $this->assertSame([['code' => 'TRA001', 'description' => '3DS warning']], $result->getWarnings());
+        $this->assertSame('10000105', $result->getTerminalId());
+    }
+
     public function testCreateMitCallsCorrectEndpoint(): void
     {
         $this->httpClient
@@ -409,8 +433,8 @@ class OrderServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([
                 'orders' => [
-                    ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
-                    ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
+                    ['authorizedAmount' => '1000', 'order' => ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR']],
+                    ['authorizedAmount' => '2000', 'order' => ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR']],
                 ],
             ], JSON_THROW_ON_ERROR)))
         ;

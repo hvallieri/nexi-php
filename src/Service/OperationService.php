@@ -84,7 +84,7 @@ class OperationService extends AbstractService
     /**
      * Retrieves the details of a single operation by its operationId.
      *
-     * @see https://developer.nexi.it/en/api/get-operations-operationid
+     * @see https://developer.nexi.it/en/api/get-operations-operationId
      *
      * @param string $operationId
      *
@@ -105,7 +105,7 @@ class OperationService extends AbstractService
     /**
      * Refunds a completed operation, either fully or partially.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-refunds
      *
      * @param string $operationId
      * @param RefundRequest $request
@@ -117,7 +117,7 @@ class OperationService extends AbstractService
      */
     public function refund(string $operationId, RefundRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = $this->encodeBody($request->toArray(), 'Failed to encode refund request body.');
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode refund request body.', JSON_FORCE_OBJECT);
 
         $data = $this->parseResponse(
             $this->post(
@@ -133,7 +133,7 @@ class OperationService extends AbstractService
     /**
      * Captures a previously created pre-authorisation.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-captures
      *
      * @param string $operationId
      * @param CaptureRequest $request
@@ -145,7 +145,7 @@ class OperationService extends AbstractService
      */
     public function capture(string $operationId, CaptureRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = $this->encodeBody($request->toArray(), 'Failed to encode capture request body.');
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode capture request body.', JSON_FORCE_OBJECT);
 
         $data = $this->parseResponse(
             $this->post(
@@ -161,7 +161,7 @@ class OperationService extends AbstractService
     /**
      * Cancels a pre-authorisation that has not yet been captured.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-cancels
      *
      * @param string $operationId
      * @param CancelRequest $request
@@ -172,7 +172,7 @@ class OperationService extends AbstractService
      */
     public function cancel(string $operationId, CancelRequest $request): OperationResponse
     {
-        $body = $this->encodeBody($request->toArray(), 'Failed to encode cancel request body.');
+        $body = $this->encodeBody($request->toArray(), 'Failed to encode cancel request body.', JSON_FORCE_OBJECT);
 
         $data = $this->parseResponse(
             $this->post($this->baseUrl . '/operations/' . rawurlencode($operationId) . '/cancels', $body),

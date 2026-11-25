@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-11-25
+
+### Fixed
+- `PayByLinkService::create()`: `expirationDate` is now sent at the root of the request body; inside `paymentSession` Nexi rejected the request (`PS0010`)
+- `PayByLinkResponse`: `securityToken` is read from the root of the response (where Nexi returns it, only when the link is created), so `PaymentLink::getSecurityToken()` no longer returns `null` after `create()`
+- `PayByLinkService::renew()`: documented that Nexi requires the expiration date (without it the request is rejected with `PS0010`)
+- `OrderSummary`: order fields (`orderId`, `amount`, `currency`, `customerId`, `description`, `customField`, `termsAndConditionsIds`) are read from the nested `order` object returned by `GET /orders`
+- `PaymentMethod`: the type is read from `paymentMethodType` (the key returned by Nexi; real values are `CARDS` and `APM`)
+- `OperationDetails`: `terminalId` is read from `additionalData` when absent at the root
+- `OrderService::createMit()`: `warnings` are read from the root of the response, where Nexi returns them
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; empty `RefundRequest`, `CaptureRequest` and `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- `RefundRequest`: Nexi rejects a refund without `amount` (HTTP 500, `GW0001`); documentation no longer states that omitting it triggers a full refund — pass the captured amount instead
+- Documentation links in PHPDoc (`@see`) pointing to non-existent pages
+- README and `docs/`: webhook example also accepts `EXECUTED` (implicit capture); `operations[]` order documented; `getMethodType()` values corrected; `securityToken` availability on Pay-by-Link responses clarified
+
 ## [1.3.1] - 2026-11-24
 
 ### Changed
@@ -29,6 +45,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - README: replaced PHP 8 named-arguments syntax with positional arguments in the operations example (the library supports PHP >= 7.2)
 
+## [1.2.2] - 2026-11-25
+
+### Fixed
+- `PayByLinkService::create()`: `expirationDate` is now sent at the root of the request body; inside `paymentSession` Nexi rejected the request (`PS0010`)
+- `PayByLinkResponse`: `securityToken` is read from the root of the response (where Nexi returns it), so `PaymentLink::getSecurityToken()` no longer returns `null`
+- `OrderSummary`: order fields (`orderId`, `amount`, `currency`, `customerId`, `description`, `customField`, `termsAndConditionsIds`) are read from the nested `order` object returned by `GET /orders`
+- `PaymentMethod`: the type is read from `paymentMethodType` (the key returned by Nexi; real values are `CARDS` and `APM`)
+- `OperationDetails`: `terminalId` is read from `additionalData` when absent at the root
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; empty `RefundRequest`, `CaptureRequest` and `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- `RefundRequest`: Nexi rejects a refund without `amount` (HTTP 500, `GW0001`); documentation no longer states that omitting it triggers a full refund — pass the captured amount instead
+- Documentation links in PHPDoc (`@see`) pointing to non-existent pages
+- README and `docs/`: webhook example also accepts `EXECUTED` (implicit capture); `operations[]` order documented; `getMethodType()` values corrected
+
 ## [1.2.1] - 2026-11-24
 
 ### Changed
@@ -49,6 +79,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New response models: `OrderSummary`, `OperationDetails`, `PaymentMethod`, `PayByLinkResponse`, `PaymentLink`, `ContractsByCustomerResponse`, `ContractSummary`, `WebhookAdditionalData`
 - `Order`: added `installments` and `installmentQty` optional fields
 - `WebhookNotification`: added 13 root-level getters (`getPaymentId()`, `getResult()`, `getRootPaymentMethod()`, `getRootPaymentInstrumentInfo()`, `getOrderAmount()`, `getCurrency()`, `getCustomerId()`, `getDescription()`, `getCustomField()`, `getOrderTime()`, `getEventType()`, `getErrorCode()`, `getErrorMessage()`), 6 operation-level getters (`getPaymentInstrumentInfo()`, `getPaymentEndToEndId()`, `getCancelledOperationId()`, `getWarnings()`, `getPaymentLinkId()`, `getTerminalId()`), and `getAdditionalData()` returning a `WebhookAdditionalData` object
+
+## [1.1.4] - 2026-11-25
+
+### Fixed
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; empty `RefundRequest`, `CaptureRequest` and `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- `RefundRequest`: Nexi rejects a refund without `amount` (HTTP 500, `GW0001`); documentation no longer states that omitting it triggers a full refund — pass the captured amount instead
+- Documentation links in PHPDoc (`@see`) pointing to non-existent pages
+- README: the webhook example now also accepts `EXECUTED` (terminals with implicit capture); `OrderResponse` table documents the order of `operations[]`
 
 ## [1.1.3] - 2026-11-24
 
@@ -77,6 +116,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Order`: added `termsAndConditionsIds` (list of accepted T&C UUIDs) and `transactionSummary`
 - `RefundRequest`: `amount` and `currency` are now optional — omitting both triggers a full refund on the Nexi side
 - `CaptureRequest`: `amount` and `currency` are now optional — omitting both triggers a full capture on the Nexi side
+
+## [1.0.5] - 2026-11-25
+
+### Fixed
+- `OrderResponse::getLastOperationResult()`, `isAuthorized()` and `isExecuted()` now use the last operation of `operations[]` (Nexi returns them in chronological order); previously the first one was used
+- `OperationService`: request bodies are always sent as JSON objects; `cancel()` with an empty `CancelRequest` sent `[]`, rejected by Nexi with `GW00402`
+- Documentation links in PHPDoc (`@see`) may point to non-existent pages
 
 ## [1.0.4] - 2026-11-24
 

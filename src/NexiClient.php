@@ -51,7 +51,7 @@ class NexiClient
      * Order creation (HPP) and retrieval.
      *
      * @see https://developer.nexi.it/en/api/post-orders-hpp
-     * @see https://developer.nexi.it/en/api/get-orders-orderid
+     * @see https://developer.nexi.it/en/api/get-orders-orderId
      */
     public function orders(): OrderService
     {
@@ -61,9 +61,9 @@ class NexiClient
     /**
      * Post-payment operations: refund, capture, cancel.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-refunds
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-captures
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-cancels
      */
     public function operations(): OperationService
     {
@@ -73,7 +73,7 @@ class NexiClient
     /**
      * Recurring contract retrieval and deactivation.
      *
-     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerid
+     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerId
      */
     public function contracts(): ContractService
     {

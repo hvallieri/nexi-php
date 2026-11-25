@@ -20,15 +20,20 @@ final class PayByLinkResponse implements ResponseModelInterface
     }
 
     /**
+     * Nexi returns the securityToken at the root of the response, next to paymentLink:
+     * it is passed to the PaymentLink so that PaymentLink::getSecurityToken() returns it.
+     *
      * @param array<string, mixed> $data
      *
      * @return static
      */
     public static function fromArray(array $data): static
     {
-        $paymentLink = isset($data['paymentLink']) && is_array($data['paymentLink'])
-            ? PaymentLink::fromArray($data['paymentLink'])
-            : null;
+        $paymentLink = null;
+
+        if (isset($data['paymentLink']) && is_array($data['paymentLink'])) {
+            $paymentLink = PaymentLink::fromArray($data['paymentLink'] + ['securityToken' => $data['securityToken'] ?? null]);
+        }
 
         return new self($paymentLink);
     }

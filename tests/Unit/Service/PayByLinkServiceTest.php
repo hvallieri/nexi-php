@@ -55,11 +55,29 @@ class PayByLinkServiceTest extends TestCase
             'paymentLink' => [
                 'linkId' => 'LINK-001',
                 'amount' => '1000',
-                'expirationDate' => '2024-12-31',
+                'expirationDate' => '2024-12-31T23:59:59Z',
                 'link' => 'https://pay.example.com/link/abc',
                 'status' => 'ACTIVE',
-                'securityToken' => 'tok_abc123',
             ],
+            'securityToken' => 'tok_abc123',
+            'warnings' => [],
+        ], JSON_THROW_ON_ERROR));
+    }
+
+    private function makeLinkDetailResponse(): Response
+    {
+        return new Response(200, [], json_encode([
+            'paymentLink' => [
+                'linkId' => 'LINK-001',
+                'amount' => '1000',
+                'expirationDate' => '2024-12-31T23:59:59Z',
+                'link' => 'https://pay.example.com/link/abc',
+                'status' => 'ACTIVE',
+                'creationDate' => '2024-12-01T10:00:00.000Z',
+                'currency' => 'EUR',
+                'lastUpdatedDate' => '2024-12-01T10:00:00.000Z',
+            ],
+            'warnings' => [],
         ], JSON_THROW_ON_ERROR));
     }
 
@@ -93,7 +111,7 @@ class PayByLinkServiceTest extends TestCase
         $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
     }
 
-    public function testCreateInjectsExpirationDateIntoSession(): void
+    public function testCreateSendsExpirationDateAtRoot(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -101,8 +119,9 @@ class PayByLinkServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $data = json_decode((string) $request->getBody(), true);
 
-                return isset($data['paymentSession']['expirationDate'])
-                    && $data['paymentSession']['expirationDate'] === '2024-12-31';
+                return isset($data['expirationDate'])
+                    && $data['expirationDate'] === '2024-12-31'
+                    && isset($data['paymentSession']['expirationDate']) === false;
             }))
             ->willReturn($this->makeSuccessResponse())
         ;
@@ -227,14 +246,14 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn($this->makeSuccessResponse())
+            ->willReturn($this->makeLinkDetailResponse())
         ;
 
         $response = $this->service->find('LINK-001');
 
         $this->assertInstanceOf(PayByLinkResponse::class, $response);
         $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
-        $this->assertSame('tok_abc123', $response->getPaymentLink()->getSecurityToken());
+        $this->assertNull($response->getPaymentLink()->getSecurityToken());
     }
 
     public function testFindCallsCorrectEndpoint(): void
@@ -282,14 +301,14 @@ class PayByLinkServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->willReturn($this->makeSuccessResponse())
+            ->willReturn($this->makeLinkDetailResponse())
         ;
 
         $response = $this->service->renew('LINK-001', '2024-12-31');
 
         $this->assertInstanceOf(PayByLinkResponse::class, $response);
         $this->assertSame('LINK-001', $response->getPaymentLink()->getLinkId());
-        $this->assertSame('tok_abc123', $response->getPaymentLink()->getSecurityToken());
+        $this->assertNull($response->getPaymentLink()->getSecurityToken());
     }
 
     public function testRenewCallsCorrectEndpoint(): void

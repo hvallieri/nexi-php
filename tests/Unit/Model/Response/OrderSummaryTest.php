@@ -41,6 +41,39 @@ class OrderSummaryTest extends TestCase
         $this->assertSame(['uuid-1111', 'uuid-2222'], $summary->getTermsAndConditionsIds());
     }
 
+    public function testFromArrayReadsOrderFieldsFromNestedOrder(): void
+    {
+        $summary = OrderSummary::fromArray([
+            'authorizedAmount' => '1000',
+            'capturedAmount' => '1000',
+            'lastOperationTime' => '2026-11-25 16:29:06.739',
+            'lastOperationType' => 'AUTHORIZATION',
+            'order' => [
+                'amount' => '1000',
+                'currency' => 'EUR',
+                'customField' => 'promo2024',
+                'customerId' => 'CUST-001',
+                'description' => 'Ordine test',
+                'installments' => [],
+                'orderId' => 'ORD-001',
+                'termsAndConditionsIds' => ['uuid-1111'],
+                'transactionSummary' => [],
+            ],
+        ]);
+
+        $this->assertSame('ORD-001', $summary->getOrderId());
+        $this->assertSame('1000', $summary->getAmount());
+        $this->assertSame('EUR', $summary->getCurrency());
+        $this->assertSame('CUST-001', $summary->getCustomerId());
+        $this->assertSame('Ordine test', $summary->getDescription());
+        $this->assertSame('promo2024', $summary->getCustomField());
+        $this->assertSame('1000', $summary->getAuthorizedAmount());
+        $this->assertSame('1000', $summary->getCapturedAmount());
+        $this->assertSame('AUTHORIZATION', $summary->getLastOperationType());
+        $this->assertSame('2026-11-25 16:29:06.739', $summary->getLastOperationTime());
+        $this->assertSame(['uuid-1111'], $summary->getTermsAndConditionsIds());
+    }
+
     public function testFromArrayWithMissingFieldsReturnsNulls(): void
     {
         $summary = OrderSummary::fromArray([]);

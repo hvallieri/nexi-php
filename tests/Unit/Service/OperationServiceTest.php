@@ -146,6 +146,42 @@ class OperationServiceTest extends TestCase
         $this->service->cancel(self::OPERATION_ID, new CancelRequest('Annullato dal cliente'));
     }
 
+    public function testRefundWithoutFieldsSendsEmptyJsonObject(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->refund(self::OPERATION_ID, new RefundRequest());
+    }
+
+    public function testCaptureWithoutFieldsSendsEmptyJsonObject(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->capture(self::OPERATION_ID, new CaptureRequest());
+    }
+
+    public function testCancelWithoutDescriptionSendsEmptyJsonObject(): void
+    {
+        $this->httpClient
+            ->expects($this->once())
+            ->method('sendRequest')
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
+            ->willReturn($this->makeSuccessResponse())
+        ;
+
+        $this->service->cancel(self::OPERATION_ID, new CancelRequest());
+    }
+
     public function testRefundThrowsAuthenticationExceptionOn401(): void
     {
         $this->httpClient

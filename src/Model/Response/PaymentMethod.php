@@ -52,6 +52,8 @@ final class PaymentMethod implements ResponseModelInterface
     }
 
     /**
+     * Nexi sends the type as "paymentMethodType"; "methodType" is still accepted.
+     *
      * @param array<string, mixed> $data
      *
      * @return static
@@ -59,7 +61,7 @@ final class PaymentMethod implements ResponseModelInterface
     public static function fromArray(array $data): static
     {
         return new self(
-            methodType: $data['methodType'] ?? null,
+            methodType: $data['paymentMethodType'] ?? $data['methodType'] ?? null,
             circuit: $data['circuit'] ?? null,
             imageLink: $data['imageLink'] ?? null,
             recurringSupported: isset($data['recurringSupported']) ? (bool) $data['recurringSupported'] : null,

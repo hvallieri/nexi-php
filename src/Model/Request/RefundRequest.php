@@ -11,7 +11,8 @@ class RefundRequest implements RequestModelInterface
     private ?string $description;
 
     /**
-     * Omitting both amount and currency triggers a full refund on the Nexi side.
+     * Nexi requires the amount: a request without it is rejected (HTTP 500, GW0001).
+     * To refund the whole captured amount, pass it explicitly.
      * If amount is provided, currency must be provided as well.
      *
      * @see https://developer.nexi.it/en/api/post-operations-operationId-refunds
