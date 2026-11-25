@@ -54,15 +54,16 @@ abstract class AbstractService
     /**
      * @param array<string, mixed> $data
      * @param string $errorMessage
+     * @param int $flags additional json_encode() flags, e.g. JSON_FORCE_OBJECT to send {} for an empty body
      *
      * @throws NexiException
      *
      * @return string
      */
-    protected function encodeBody(array $data, string $errorMessage): string
+    protected function encodeBody(array $data, string $errorMessage, int $flags = 0): string
     {
         try {
-            return json_encode($data, JSON_THROW_ON_ERROR);
+            return json_encode($data, JSON_THROW_ON_ERROR | $flags);
         } catch (\JsonException $e) {
             throw new NexiException($errorMessage, 0, $e);
         }

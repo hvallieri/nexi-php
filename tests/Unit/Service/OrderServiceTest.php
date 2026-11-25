@@ -84,6 +84,7 @@ class OrderServiceTest extends TestCase
     public function testCreateMitReadsWarningsAndTerminalIdOutsideOperation(): void
     {
         $this->httpClient
+            ->expects($this->once())
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([
                 'operation' => [
@@ -95,7 +96,7 @@ class OrderServiceTest extends TestCase
                     'orderId' => 'ORD-001',
                 ],
                 'warnings' => [['code' => 'TRA001', 'description' => '3DS warning']],
-            ])))
+            ], JSON_THROW_ON_ERROR)))
         ;
 
         $result = $this->service->createMit(new Order('ORD-001', '1000', 'EUR'), 'CONTRACT-001');
