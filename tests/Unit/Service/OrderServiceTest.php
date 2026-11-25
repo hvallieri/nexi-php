@@ -272,8 +272,8 @@ class OrderServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([
                 'orders' => [
-                    ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR'],
-                    ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR'],
+                    ['authorizedAmount' => '1000', 'order' => ['orderId' => 'ORD-001', 'amount' => '1000', 'currency' => 'EUR']],
+                    ['authorizedAmount' => '2000', 'order' => ['orderId' => 'ORD-002', 'amount' => '2000', 'currency' => 'EUR']],
                 ],
             ])))
         ;

@@ -112,11 +112,12 @@ $savedToken = '...'; // retrieved from your DB
 try {
     $notification = $nexi->webhooks()->handle($payload, $savedToken);
 
-    if ($notification->isAuthorized()) {
+    // AUTHORIZED with explicit capture, EXECUTED with implicit capture
+    if ($notification->isAuthorized() || $notification->isExecuted()) {
         // Fetch the full order to confirm server-side
         $order = $nexi->orders()->find($notification->getOrderId());
 
-        if ($order->isAuthorized()) {
+        if ($order->isAuthorized() || $order->isExecuted()) {
             // Order confirmed — use $notification->getOperationId() for
             // subsequent refund / capture operations
         }
@@ -138,13 +139,15 @@ use Hval\Nexi\Model\Request\RefundRequest;
 
 $operationId = $notification->getOperationId();
 
-// Partial refund / capture — amount in cents as string, currency required
+// Refund / capture — amount in cents as string, currency required
 $result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'));
 $result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'));
 
-// Full refund / capture — omit amount and currency
-$result = $nexi->operations()->refund($operationId, new RefundRequest());
+// Full capture — omit amount and currency
 $result = $nexi->operations()->capture($operationId, new CaptureRequest());
+
+// Refunds always need the amount: to refund everything, pass the captured amount
+// (a RefundRequest without amount is rejected by Nexi)
 
 $result = $nexi->operations()->cancel($operationId, new CancelRequest());
 
@@ -172,11 +175,11 @@ foreach ($orders as $order) {       // array<int, OrderSummary>
 
 // List operations — filter by channel or type
 $operations = $nexi->operations()->findAll(
-    fromTime: null,
-    toTime: null,
-    maxRecords: null,
-    channel: 'ECOMMERCE',           // ECOMMERCE, POS, BACKOFFICE
-    operationType: 'AUTHORIZATION'
+    null,                        // fromTime
+    null,                        // toTime
+    null,                        // maxRecords
+    'ECOMMERCE',                 // channel — ECOMMERCE, POS, BACKOFFICE
+    'AUTHORIZATION'              // operationType
 );
 
 // Retrieve a single operation
@@ -191,7 +194,7 @@ $operation->getWarnings();        // array
 $methods = $nexi->paymentMethods()->listAll();
 
 foreach ($methods as $method) {       // array<int, PaymentMethod>
-    $method->getMethodType();         // 'CARD' or 'APM'
+    $method->getMethodType();         // 'CARDS' or 'APM'
     $method->getCircuit();            // 'VISA', 'MC', 'PAYPAL', ...
     $method->getImageLink();          // SVG logo URL
     $method->isRecurringSupported();  // ?bool

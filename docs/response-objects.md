@@ -27,18 +27,18 @@ Reference for all response models returned by [hval/nexi-php](../README.md). Eac
 
 ## `OrderResponse` — `orders()->find()`
 
-| Method                     | Returns                                        |
-|----------------------------|------------------------------------------------|
-| `getOrderId()`             | `?string`                                      |
-| `getLastOperationResult()` | `?string`                                      |
-| `getAuthorizedAmount()`    | `?string`                                      |
-| `getCapturedAmount()`      | `?string`                                      |
-| `getLastOperationType()`   | `?string`                                      |
-| `getLastOperationTime()`   | `?string`                                      |
-| `getOperations()`          | `array` — raw operation list from the API      |
-| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED` |
-| `isExecuted()`             | `bool` — last operation result is `EXECUTED`   |
-| `getRaw()`                 | `array`                                        |
+| Method                     | Returns                                         |
+|----------------------------|-------------------------------------------------|
+| `getOrderId()`             | `?string`                                       |
+| `getLastOperationResult()` | `?string` — result of the most recent operation |
+| `getAuthorizedAmount()`    | `?string`                                       |
+| `getCapturedAmount()`      | `?string`                                       |
+| `getLastOperationType()`   | `?string`                                       |
+| `getLastOperationTime()`   | `?string`                                       |
+| `getOperations()`          | `array` — raw operation list, oldest first      |
+| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED`  |
+| `isExecuted()`             | `bool` — last operation result is `EXECUTED`    |
+| `getRaw()`                 | `array`                                         |
 
 Available `operationResult` constants on `OrderResponse`:
 
@@ -87,13 +87,13 @@ OPERATION_TYPE_AUTHORIZATION · CAPTURE · VOID · REFUND · CANCEL
 
 ## `PaymentMethod` — `paymentMethods()->listAll()`
 
-| Method                   | Returns                     |
-|--------------------------|-----------------------------|
-| `getMethodType()`        | `?string` — `CARD` or `APM` |
-| `getCircuit()`           | `?string`                   |
-| `getImageLink()`         | `?string`                   |
-| `isRecurringSupported()` | `?bool`                     |
-| `isOneClickSupported()`  | `?bool`                     |
+| Method                   | Returns                      |
+|--------------------------|------------------------------|
+| `getMethodType()`        | `?string` — `CARDS` or `APM` |
+| `getCircuit()`           | `?string`                    |
+| `getImageLink()`         | `?string`                    |
+| `isRecurringSupported()` | `?bool`                      |
+| `isOneClickSupported()`  | `?bool`                      |
 
 ## `PayByLinkResponse` / `PaymentLink` — `payByLink()->create()`
 

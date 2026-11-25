@@ -54,11 +54,12 @@ class PayByLinkServiceTest extends TestCase
             'paymentLink' => [
                 'linkId' => 'LINK-001',
                 'amount' => '1000',
-                'expirationDate' => '2024-12-31',
+                'expirationDate' => '2024-12-31T23:59:59Z',
                 'link' => 'https://pay.example.com/link/abc',
                 'status' => 'ACTIVE',
-                'securityToken' => 'tok_abc123',
             ],
+            'securityToken' => 'tok_abc123',
+            'warnings' => [],
         ]));
     }
 
@@ -91,7 +92,7 @@ class PayByLinkServiceTest extends TestCase
         $this->service->create($this->makeOrder(), $this->makeSession(), '2024-12-31');
     }
 
-    public function testCreateInjectsExpirationDateIntoSession(): void
+    public function testCreateSendsExpirationDateAtRoot(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -99,8 +100,9 @@ class PayByLinkServiceTest extends TestCase
             ->with($this->callback(function (RequestInterface $request): bool {
                 $data = json_decode((string) $request->getBody(), true);
 
-                return isset($data['paymentSession']['expirationDate'])
-                    && $data['paymentSession']['expirationDate'] === '2024-12-31';
+                return isset($data['expirationDate'])
+                    && $data['expirationDate'] === '2024-12-31'
+                    && isset($data['paymentSession']['expirationDate']) === false;
             }))
             ->willReturn($this->makeSuccessResponse())
         ;
