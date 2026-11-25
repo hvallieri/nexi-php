@@ -94,7 +94,7 @@ class OrderService extends AbstractService
     /**
      * Retrieves the status of an order by its orderId.
      *
-     * @see https://developer.nexi.it/en/api/get-orders-orderid
+     * @see https://developer.nexi.it/en/api/get-orders-orderId
      *
      * @throws NexiException
      * @throws ClientExceptionInterface

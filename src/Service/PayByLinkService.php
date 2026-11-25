@@ -20,12 +20,10 @@ class PayByLinkService extends AbstractService
      */
     public function create(Order $order, PaymentSession $session, string $expirationDate): PayByLinkResponse
     {
-        $sessionData = $session->toArray();
-        $sessionData['expirationDate'] = $expirationDate;
-
         $body = json_encode([
+            'expirationDate' => $expirationDate,
             'order' => $order->toArray(),
-            'paymentSession' => $sessionData,
+            'paymentSession' => $session->toArray(),
         ]);
 
         if ($body === false) {
@@ -42,7 +40,7 @@ class PayByLinkService extends AbstractService
     /**
      * Cancels an active Pay-by-Link payment link.
      *
-     * @see https://developer.nexi.it/en/api/post-paybylink-linkid-cancels
+     * @see https://developer.nexi.it/en/api/post-paybylink-linkId-cancels
      *
      * @throws NexiException
      * @throws ClientExceptionInterface
