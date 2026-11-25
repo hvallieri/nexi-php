@@ -124,24 +124,27 @@ class OrderSummary implements ResponseModelInterface
     }
 
     /**
+     * Nexi nests the order fields under "order"; an item without it is read from its root.
+     *
      * @param array<string, mixed> $data
      */
     public static function fromArray(array $data): self
     {
-        $amount = isset($data['amount']) ? (string) $data['amount'] : null;
+        $order = isset($data['order']) && is_array($data['order']) ? $data['order'] : $data;
+        $amount = isset($order['amount']) ? (string) $order['amount'] : null;
 
         return new self(
-            $data['orderId'] ?? null,
+            $order['orderId'] ?? null,
             $amount,
-            $data['currency'] ?? null,
-            $data['customerId'] ?? null,
-            $data['description'] ?? null,
-            $data['customField'] ?? null,
+            $order['currency'] ?? null,
+            $order['customerId'] ?? null,
+            $order['description'] ?? null,
+            $order['customField'] ?? null,
             $data['authorizedAmount'] ?? null,
             $data['capturedAmount'] ?? null,
             $data['lastOperationType'] ?? null,
             $data['lastOperationTime'] ?? null,
-            isset($data['termsAndConditionsIds']) && is_array($data['termsAndConditionsIds']) ? $data['termsAndConditionsIds'] : null
+            isset($order['termsAndConditionsIds']) && is_array($order['termsAndConditionsIds']) ? $order['termsAndConditionsIds'] : null
         );
     }
 }

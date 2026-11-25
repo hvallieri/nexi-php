@@ -21,12 +21,10 @@ class PayByLinkService extends AbstractService
      */
     public function create(Order $order, PaymentSession $session, string $expirationDate): PayByLinkResponse
     {
-        $sessionData = $session->toArray();
-        $sessionData['expirationDate'] = $expirationDate;
-
         $body = json_encode([
+            'expirationDate' => $expirationDate,
             'order' => $order->toArray(),
-            'paymentSession' => $sessionData,
+            'paymentSession' => $session->toArray(),
         ]);
 
         if ($body === false) {
@@ -98,6 +96,7 @@ class PayByLinkService extends AbstractService
 
     /**
      * Retrieves a Pay-by-Link payment link by its linkId.
+     * Nexi does not return the securityToken here: it is only in the create() response.
      *
      * @see https://developer.nexi.it/en/api/get-orders-paybylink-linkid
      *
@@ -114,8 +113,10 @@ class PayByLinkService extends AbstractService
     }
 
     /**
-     * Renews an existing Pay-by-Link payment link, optionally with a new expiration date
+     * Renews an existing Pay-by-Link payment link with a new expiration date
      * (maximum 90 days after the creation of the original link).
+     * Nexi requires the expiration date: without it the request is rejected (PS0010).
+     * The response does not carry the securityToken.
      *
      * @see https://developer.nexi.it/en/api/post-orders-paybylink-linkid-renewals
      *
@@ -144,7 +145,7 @@ class PayByLinkService extends AbstractService
     /**
      * Cancels an active Pay-by-Link payment link.
      *
-     * @see https://developer.nexi.it/en/api/post-paybylink-linkid-cancels
+     * @see https://developer.nexi.it/en/api/post-paybylink-linkId-cancels
      *
      * @throws NexiException
      * @throws ClientExceptionInterface
