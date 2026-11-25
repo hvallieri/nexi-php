@@ -151,9 +151,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return (string) $request->getBody() === '{}';
-            }))
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -165,9 +163,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return (string) $request->getBody() === '{}';
-            }))
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
             ->willReturn($this->makeSuccessResponse())
         ;
 
@@ -179,9 +175,7 @@ class OperationServiceTest extends TestCase
         $this->httpClient
             ->expects($this->once())
             ->method('sendRequest')
-            ->with($this->callback(function (RequestInterface $request): bool {
-                return (string) $request->getBody() === '{}';
-            }))
+            ->with($this->callback(static fn (RequestInterface $request): bool => (string) $request->getBody() === '{}'))
             ->willReturn($this->makeSuccessResponse())
         ;
 
