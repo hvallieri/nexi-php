@@ -39,6 +39,34 @@ class PayByLinkResponseTest extends TestCase
         $this->assertSame('tok_abc123', $link->getSecurityToken());
     }
 
+    public function testFromArrayReadsSecurityTokenFromRoot(): void
+    {
+        $response = PayByLinkResponse::fromArray([
+            'paymentLink' => [
+                'linkId' => 'LINK-001',
+                'status' => 'ACTIVE',
+            ],
+            'securityToken' => 'tok_root',
+            'warnings' => [],
+        ]);
+
+        $link = $response->getPaymentLink();
+        $this->assertInstanceOf(PaymentLink::class, $link);
+        $this->assertSame('LINK-001', $link->getLinkId());
+        $this->assertSame('tok_root', $link->getSecurityToken());
+    }
+
+    public function testFromArrayWithoutSecurityTokenReturnsNullToken(): void
+    {
+        $response = PayByLinkResponse::fromArray([
+            'paymentLink' => ['linkId' => 'LINK-001'],
+        ]);
+
+        $link = $response->getPaymentLink();
+        $this->assertInstanceOf(PaymentLink::class, $link);
+        $this->assertNull($link->getSecurityToken());
+    }
+
     public function testFromArrayWithMissingPaymentLinkReturnsNull(): void
     {
         $response = PayByLinkResponse::fromArray([]);

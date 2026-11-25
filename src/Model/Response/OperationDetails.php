@@ -214,6 +214,9 @@ final class OperationDetails implements ResponseModelInterface
     }
 
     /**
+     * Nexi sends terminalId inside additionalData (e.g. on MIT operations): it is read from there
+     * when it is not at the root.
+     *
      * @param array<string, mixed> $data
      *
      * @return static
@@ -236,7 +239,7 @@ final class OperationDetails implements ResponseModelInterface
             operationAmount: $data['operationAmount'] ?? null,
             operationCurrency: $data['operationCurrency'] ?? null,
             paymentLinkId: $data['paymentLinkId'] ?? null,
-            terminalId: $data['terminalId'] ?? null,
+            terminalId: $data['terminalId'] ?? $data['additionalData']['terminalId'] ?? null,
             warnings: isset($data['warnings']) && is_array($data['warnings']) ? $data['warnings'] : [],
             customerInfo: isset($data['customerInfo']) && is_array($data['customerInfo']) ? $data['customerInfo'] : [],
             additionalData: isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : [],

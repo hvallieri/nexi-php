@@ -132,7 +132,8 @@ final class OrderResponse implements ResponseModelInterface
         $orderStatus = isset($data['orderStatus']) && is_array($data['orderStatus']) ? $data['orderStatus'] : [];
         $order = isset($orderStatus['order']) && is_array($orderStatus['order']) ? $orderStatus['order'] : [];
         $operations = isset($data['operations']) && is_array($data['operations']) ? $data['operations'] : [];
-        $lastOperation = isset($operations[0]) && is_array($operations[0]) ? $operations[0] : [];
+        $lastOperation = end($operations);
+        $lastOperation = is_array($lastOperation) === true ? $lastOperation : [];
 
         return new self(
             $order['orderId'] ?? null,
