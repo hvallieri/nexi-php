@@ -145,7 +145,7 @@ class OrderResponseTest extends TestCase
         $this->assertFalse($response->isExecuted());
     }
 
-    public function testFirstOperationDeterminesLastOperationResult(): void
+    public function testLastOperationDeterminesLastOperationResult(): void
     {
         $data = [
             'orderStatus' => [
@@ -154,15 +154,17 @@ class OrderResponseTest extends TestCase
                 ],
             ],
             'operations' => [
-                ['operationResult' => 'AUTHORIZED'],
-                ['operationResult' => 'PENDING'],
+                ['operationType' => 'AUTHORIZATION', 'operationResult' => 'EXECUTED'],
+                ['operationType' => 'REFUND', 'operationResult' => 'EXECUTED'],
+                ['operationType' => 'REFUND', 'operationResult' => 'REFUNDED'],
             ],
         ];
 
         $response = OrderResponse::fromArray($data);
 
-        $this->assertSame('AUTHORIZED', $response->getLastOperationResult());
-        $this->assertCount(2, $response->getOperations());
+        $this->assertSame('REFUNDED', $response->getLastOperationResult());
+        $this->assertFalse($response->isExecuted());
+        $this->assertCount(3, $response->getOperations());
     }
 
     public function testOrderStatusPresentButOrderKeyMissingReturnsNulls(): void
