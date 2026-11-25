@@ -14,7 +14,7 @@ class OperationService extends AbstractService
     /**
      * Refunds a completed operation, either fully or partially.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-refunds
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-refunds
      *
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
@@ -23,7 +23,7 @@ class OperationService extends AbstractService
      */
     public function refund(string $operationId, RefundRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = json_encode($request->toArray());
+        $body = json_encode($request->toArray(), JSON_FORCE_OBJECT);
 
         if ($body === false) {
             throw new NexiException('Failed to encode refund request body.');
@@ -43,7 +43,7 @@ class OperationService extends AbstractService
     /**
      * Captures a previously created pre-authorisation.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-captures
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-captures
      *
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
@@ -52,7 +52,7 @@ class OperationService extends AbstractService
      */
     public function capture(string $operationId, CaptureRequest $request, ?string $idempotencyKey = null): OperationResponse
     {
-        $body = json_encode($request->toArray());
+        $body = json_encode($request->toArray(), JSON_FORCE_OBJECT);
 
         if ($body === false) {
             throw new NexiException('Failed to encode capture request body.');
@@ -72,14 +72,14 @@ class OperationService extends AbstractService
     /**
      * Cancels a pre-authorisation that has not yet been captured.
      *
-     * @see https://developer.nexi.it/en/api/post-operations-operationid-cancels
+     * @see https://developer.nexi.it/en/api/post-operations-operationId-cancels
      *
      * @throws NexiException
      * @throws ClientExceptionInterface
      */
     public function cancel(string $operationId, CancelRequest $request): OperationResponse
     {
-        $body = json_encode($request->toArray());
+        $body = json_encode($request->toArray(), JSON_FORCE_OBJECT);
 
         if ($body === false) {
             throw new NexiException('Failed to encode cancel request body.');
