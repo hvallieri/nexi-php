@@ -112,12 +112,13 @@ $savedToken = '...'; // retrieved from your DB
 try {
     $notification = $nexi->webhooks()->handle($payload, $savedToken);
 
-    // Quick check directly on the notification
-    if ($notification->isAuthorized()) {
+    // Quick check directly on the notification:
+    // AUTHORIZED with explicit capture, EXECUTED with implicit capture
+    if ($notification->isAuthorized() || $notification->isExecuted()) {
         // Fetch the full order to confirm server-side
         $order = $nexi->orders()->find($notification->getOrderId());
 
-        if ($order->isAuthorized()) {
+        if ($order->isAuthorized() || $order->isExecuted()) {
             // Order confirmed — use $notification->getOperationId() for
             // subsequent refund / capture operations
         }
@@ -139,13 +140,15 @@ use Hval\Nexi\Model\Request\RefundRequest;
 
 $operationId = $notification->getOperationId();
 
-// Partial refund / capture — amount in cents as string, currency required
+// Refund / capture — amount in cents as string, currency required
 $result = $nexi->operations()->refund($operationId, new RefundRequest('1000', 'EUR'));
 $result = $nexi->operations()->capture($operationId, new CaptureRequest('1000', 'EUR'));
 
-// Full refund / capture — omit amount and currency
-$result = $nexi->operations()->refund($operationId, new RefundRequest());
+// Full capture — omit amount and currency
 $result = $nexi->operations()->capture($operationId, new CaptureRequest());
+
+// Refunds always need the amount: to refund everything, pass the captured amount
+// (a RefundRequest without amount is rejected by Nexi)
 
 $result = $nexi->operations()->cancel($operationId, new CancelRequest());
 
@@ -223,18 +226,18 @@ Available contract types: `CONTRACT_TYPE_MIT_UNSCHEDULED`, `CONTRACT_TYPE_MIT_SC
 
 ### `OrderResponse` — `orders()->find()`
 
-| Method                     | Returns                                        |
-|----------------------------|------------------------------------------------|
-| `getOrderId()`             | `?string`                                      |
-| `getLastOperationResult()` | `?string`                                      |
-| `getAuthorizedAmount()`    | `?string`                                      |
-| `getCapturedAmount()`      | `?string`                                      |
-| `getLastOperationType()`   | `?string`                                      |
-| `getLastOperationTime()`   | `?string`                                      |
-| `getOperations()`          | `array` — raw operation list from the API      |
-| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED` |
-| `isExecuted()`             | `bool` — last operation result is `EXECUTED`   |
-| `getRaw()`                 | `array`                                        |
+| Method                     | Returns                                         |
+|----------------------------|-------------------------------------------------|
+| `getOrderId()`             | `?string`                                       |
+| `getLastOperationResult()` | `?string` — result of the most recent operation |
+| `getAuthorizedAmount()`    | `?string`                                       |
+| `getCapturedAmount()`      | `?string`                                       |
+| `getLastOperationType()`   | `?string`                                       |
+| `getLastOperationTime()`   | `?string`                                       |
+| `getOperations()`          | `array` — raw operation list, oldest first      |
+| `isAuthorized()`           | `bool` — last operation result is `AUTHORIZED`  |
+| `isExecuted()`             | `bool` — last operation result is `EXECUTED`    |
+| `getRaw()`                 | `array`                                         |
 
 Available `operationResult` values as constants on `OrderResponse`:
 
