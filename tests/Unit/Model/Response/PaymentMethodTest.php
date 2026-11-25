@@ -28,6 +28,30 @@ class PaymentMethodTest extends TestCase
         $this->assertFalse($method->isOneClickSupported());
     }
 
+    public function testFromArrayReadsPaymentMethodType(): void
+    {
+        $method = PaymentMethod::fromArray([
+            'circuit' => 'VISA',
+            'imageLink' => 'https://example.com/visa.png',
+            'oneClickSupported' => true,
+            'paymentMethodType' => 'CARDS',
+            'recurringSupported' => true,
+        ]);
+
+        $this->assertSame('CARDS', $method->getMethodType());
+        $this->assertSame('VISA', $method->getCircuit());
+    }
+
+    public function testFromArrayPrefersPaymentMethodTypeOverMethodType(): void
+    {
+        $method = PaymentMethod::fromArray([
+            'methodType' => 'CARD',
+            'paymentMethodType' => 'APM',
+        ]);
+
+        $this->assertSame('APM', $method->getMethodType());
+    }
+
     public function testFromArrayWithMissingFieldsReturnsNulls(): void
     {
         $method = PaymentMethod::fromArray([]);

@@ -56,6 +56,29 @@ class OperationDetailsTest extends TestCase
         $this->assertSame('ABC123', $details->getAdditionalData()['authorizationCode']);
     }
 
+    public function testFromArrayReadsTerminalIdFromAdditionalData(): void
+    {
+        $details = OperationDetails::fromArray([
+            'operationId' => '369509020703363299',
+            'additionalData' => [
+                'authCode' => '824664',
+                'terminalId' => '10000105',
+            ],
+        ]);
+
+        $this->assertSame('10000105', $details->getTerminalId());
+    }
+
+    public function testFromArrayPrefersRootTerminalId(): void
+    {
+        $details = OperationDetails::fromArray([
+            'terminalId' => 'TERM-ROOT',
+            'additionalData' => ['terminalId' => 'TERM-NESTED'],
+        ]);
+
+        $this->assertSame('TERM-ROOT', $details->getTerminalId());
+    }
+
     public function testFromArrayWithMissingFieldsReturnsNulls(): void
     {
         $details = OperationDetails::fromArray([]);
