@@ -11,7 +11,7 @@ class ContractService extends AbstractService
     /**
      * Retrieves all recurring contracts associated with a customer.
      *
-     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerid
+     * @see https://developer.nexi.it/en/api/get-contracts-customers-customerId
      *
      * @throws NexiException
      * @throws ClientExceptionInterface
@@ -28,7 +28,7 @@ class ContractService extends AbstractService
     /**
      * Deactivates a recurring contract.
      *
-     * @see https://developer.nexi.it/en/api/post-contracts-contractid-deactivation
+     * @see https://developer.nexi.it/en/api/post-contracts-contractId-deactivation
      *
      * @throws NexiException
      * @throws ClientExceptionInterface

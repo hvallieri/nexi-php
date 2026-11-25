@@ -89,6 +89,10 @@ class OrderService extends AbstractService
 
         $operation = isset($data['operation']) && is_array($data['operation']) ? $data['operation'] : [];
 
+        if (isset($operation['warnings']) === false && isset($data['warnings']) === true) {
+            $operation['warnings'] = $data['warnings'];
+        }
+
         return OperationDetails::fromArray($operation);
     }
 
@@ -179,7 +183,7 @@ class OrderService extends AbstractService
     /**
      * Retrieves the status of an order by its orderId.
      *
-     * @see https://developer.nexi.it/en/api/get-orders-orderid
+     * @see https://developer.nexi.it/en/api/get-orders-orderId
      *
      * @throws NexiException
      * @throws ClientExceptionInterface

@@ -42,8 +42,8 @@ class PaymentMethodServiceTest extends TestCase
             ->method('sendRequest')
             ->willReturn(new Response(200, [], json_encode([
                 'paymentMethods' => [
-                    ['methodType' => 'CARD', 'circuit' => 'VISA', 'imageLink' => 'https://example.com/visa.svg', 'recurringSupported' => true, 'oneClickSupported' => true],
-                    ['methodType' => 'CARD', 'circuit' => 'MC', 'imageLink' => 'https://example.com/mc.svg', 'recurringSupported' => false, 'oneClickSupported' => false],
+                    ['paymentMethodType' => 'CARDS', 'circuit' => 'VISA', 'imageLink' => 'https://example.com/visa.svg', 'recurringSupported' => true, 'oneClickSupported' => true],
+                    ['paymentMethodType' => 'CARDS', 'circuit' => 'MC', 'imageLink' => 'https://example.com/mc.svg', 'recurringSupported' => false, 'oneClickSupported' => false],
                 ],
             ])))
         ;
