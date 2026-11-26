@@ -2,6 +2,9 @@
 
 namespace Hval\Nexi\Service;
 
+use Hval\Nexi\Enum\AmountType;
+use Hval\Nexi\Enum\CaptureType;
+use Hval\Nexi\Enum\OrderState;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
@@ -13,13 +16,6 @@ use Psr\Http\Client\ClientExceptionInterface;
 
 class OrderService extends AbstractService
 {
-    public const string AMOUNT_TYPE_ORDER_AMOUNT = 'ORDER_AMOUNT';
-    public const string AMOUNT_TYPE_AUTHORIZED_AMOUNT = 'AUTHORIZED_AMOUNT';
-    public const string AMOUNT_TYPE_CAPTURED_AMOUNT = 'CAPTURED_AMOUNT';
-
-    public const string ORDER_STATE_TO_CAPTURE = 'TO_CAPTURE';
-    public const string ORDER_STATE_CAPTURED = 'CAPTURED';
-
     /**
      * Creates an order and returns the Hosted Payment Page URL.
      *
@@ -54,7 +50,7 @@ class OrderService extends AbstractService
      *
      * @param Order $order
      * @param string $contractId
-     * @param string|null $captureType one of the PaymentSession::CAPTURE_* constants; overwrites the terminal default
+     * @param CaptureType|null $captureType overwrites the terminal default
      * @param string|null $idempotencyKey UUID v4 — supply your own key to make retries safe; auto-generated if omitted
      *
      * @throws ClientExceptionInterface
@@ -64,7 +60,7 @@ class OrderService extends AbstractService
     public function createMit(
         Order $order,
         string $contractId,
-        ?string $captureType = null,
+        ?CaptureType $captureType = null,
         ?string $idempotencyKey = null,
     ): OperationDetails {
         $payload = [
@@ -73,7 +69,7 @@ class OrderService extends AbstractService
         ];
 
         if ($captureType !== null) {
-            $payload['captureType'] = $captureType;
+            $payload['captureType'] = $captureType->value;
         }
 
         $body = $this->encodeBody($payload, 'Failed to encode MIT request body.');
@@ -100,8 +96,7 @@ class OrderService extends AbstractService
      * orderId, amount range and order state.
      * Date parameters must be in ISO 8601 format (e.g. 2022-01-01T13:10:00.000Z).
      * The API enforces a maximum interval of one month between fromTime and toTime.
-     * When amountType is specified (see the AMOUNT_TYPE_* constants), the API requires
-     * both minAmount and maxAmount.
+     * When amountType is specified, the API requires both minAmount and maxAmount.
      *
      * @see https://developer.nexi.it/en/api/get-orders
      *
@@ -110,10 +105,10 @@ class OrderService extends AbstractService
      * @param int|null $maxRecords
      * @param string|null $customField
      * @param string|null $orderId
-     * @param string|null $amountType one of the AMOUNT_TYPE_* constants
+     * @param AmountType|null $amountType
      * @param string|null $minAmount
      * @param string|null $maxAmount
-     * @param string|null $orderState one of the ORDER_STATE_* constants
+     * @param OrderState|null $orderState
      *
      * @throws ClientExceptionInterface
      *
@@ -125,10 +120,10 @@ class OrderService extends AbstractService
         ?int $maxRecords = null,
         ?string $customField = null,
         ?string $orderId = null,
-        ?string $amountType = null,
+        ?AmountType $amountType = null,
         ?string $minAmount = null,
         ?string $maxAmount = null,
-        ?string $orderState = null,
+        ?OrderState $orderState = null,
     ): array {
         $params = [];
 
@@ -153,7 +148,7 @@ class OrderService extends AbstractService
         }
 
         if ($amountType !== null) {
-            $params['amountType'] = $amountType;
+            $params['amountType'] = $amountType->value;
         }
 
         if ($minAmount !== null) {
@@ -165,7 +160,7 @@ class OrderService extends AbstractService
         }
 
         if ($orderState !== null) {
-            $params['orderState'] = $orderState;
+            $params['orderState'] = $orderState->value;
         }
 
         $data = $this->parseResponse(

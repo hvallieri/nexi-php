@@ -2,6 +2,8 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
+use Hval\Nexi\Enum\Channel;
+use Hval\Nexi\Enum\OperationType;
 use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
@@ -420,7 +422,7 @@ class OperationServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode(['operations' => []], JSON_THROW_ON_ERROR)))
         ;
 
-        $this->service->findAll('2024-01-01', '2024-01-31', 10, 'ECOMMERCE', 'AUTHORIZATION', 'promo');
+        $this->service->findAll('2024-01-01', '2024-01-31', 10, Channel::Ecommerce, OperationType::Authorization, 'promo');
     }
 
     public function testFindAllOmitsNullParams(): void
@@ -439,7 +441,7 @@ class OperationServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode(['operations' => []], JSON_THROW_ON_ERROR)))
         ;
 
-        $this->service->findAll(null, null, null, 'ECOMMERCE', null, null);
+        $this->service->findAll(null, null, null, Channel::Ecommerce, null, null);
     }
 
     public function testFindAllReturnsEmptyArrayWhenOperationsKeyMissing(): void

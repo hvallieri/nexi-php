@@ -2,40 +2,33 @@
 
 namespace Hval\Nexi\Model\Request;
 
+use Hval\Nexi\Enum\ActionType;
+use Hval\Nexi\Enum\CaptureType;
+use Hval\Nexi\Enum\Exemption;
 use Hval\Nexi\Model\RequestModelInterface;
 
 class PaymentSession implements RequestModelInterface
 {
-    public const string ACTION_PAY = 'PAY';
-    public const string ACTION_VERIFY = 'VERIFY';
-    public const string ACTION_PREAUTH = 'PREAUTH';
-
-    public const string CAPTURE_EXPLICIT = 'EXPLICIT';
-    public const string CAPTURE_IMPLICIT = 'IMPLICIT';
-
-    public const string EXEMPTION_NO_PREFERENCE = 'NO_PREFERENCE';
-    public const string EXEMPTION_CHALLENGE_REQUESTED = 'CHALLENGE_REQUESTED';
-
-    private string $actionType;
+    private ActionType $actionType;
     private string $amount;
     private string $language;
     private string $resultUrl;
     private string $cancelUrl;
     private ?string $notificationUrl;
-    private ?string $captureType;
-    private ?string $exemptions;
+    private ?CaptureType $captureType;
+    private ?Exemption $exemptions;
     private ?string $paymentService;
     private ?Recurrence $recurrence;
 
     public function __construct(
-        string $actionType,
+        ActionType $actionType,
         string $amount,
         string $language,
         string $resultUrl,
         string $cancelUrl,
         ?string $notificationUrl = null,
-        ?string $captureType = null,
-        ?string $exemptions = null,
+        ?CaptureType $captureType = null,
+        ?Exemption $exemptions = null,
         ?string $paymentService = null,
         ?Recurrence $recurrence = null,
     ) {
@@ -57,7 +50,7 @@ class PaymentSession implements RequestModelInterface
     public function toArray(): array
     {
         $data = [
-            'actionType' => $this->actionType,
+            'actionType' => $this->actionType->value,
             'amount' => $this->amount,
             'language' => $this->language,
             'resultUrl' => $this->resultUrl,
@@ -69,11 +62,11 @@ class PaymentSession implements RequestModelInterface
         }
 
         if ($this->captureType !== null) {
-            $data['captureType'] = $this->captureType;
+            $data['captureType'] = $this->captureType->value;
         }
 
         if ($this->exemptions !== null) {
-            $data['exemptions'] = $this->exemptions;
+            $data['exemptions'] = $this->exemptions->value;
         }
 
         if ($this->paymentService !== null) {

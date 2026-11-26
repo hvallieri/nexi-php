@@ -2,6 +2,11 @@
 
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
+use Hval\Nexi\Enum\ActionType;
+use Hval\Nexi\Enum\CaptureType;
+use Hval\Nexi\Enum\ContractType;
+use Hval\Nexi\Enum\Exemption;
+use Hval\Nexi\Enum\RecurrenceAction;
 use Hval\Nexi\Model\Request\PaymentSession;
 use Hval\Nexi\Model\Request\Recurrence;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -16,7 +21,7 @@ class PaymentSessionTest extends TestCase
     public function testToArrayWithRequiredFieldsOnly(): void
     {
         $session = new PaymentSession(
-            PaymentSession::ACTION_PAY,
+            ActionType::Pay,
             '1000',
             'ita',
             'https://example.com/result',
@@ -35,7 +40,7 @@ class PaymentSessionTest extends TestCase
     public function testToArrayIncludesNotificationUrl(): void
     {
         $session = new PaymentSession(
-            PaymentSession::ACTION_PAY,
+            ActionType::Pay,
             '1000',
             'ita',
             'https://example.com/result',
@@ -51,7 +56,7 @@ class PaymentSessionTest extends TestCase
     public function testToArrayOmitsNullOptionalFields(): void
     {
         $session = new PaymentSession(
-            PaymentSession::ACTION_PAY,
+            ActionType::Pay,
             '1000',
             'ita',
             'https://example.com/result',
@@ -69,9 +74,9 @@ class PaymentSessionTest extends TestCase
 
     public function testToArrayIncludesRecurrence(): void
     {
-        $recurrence = new Recurrence(Recurrence::ACTION_CONTRACT_CREATION, 'C123', Recurrence::CONTRACT_TYPE_MIT_SCHEDULED);
+        $recurrence = new Recurrence(RecurrenceAction::ContractCreation, 'C123', ContractType::MitScheduled);
         $session = new PaymentSession(
-            PaymentSession::ACTION_PAY,
+            ActionType::Pay,
             '1000',
             'ita',
             'https://example.com/result',
@@ -92,14 +97,14 @@ class PaymentSessionTest extends TestCase
     public function testToArrayWithCaptureTypeExemptionsAndPaymentService(): void
     {
         $session = new PaymentSession(
-            PaymentSession::ACTION_PREAUTH,
+            ActionType::Preauth,
             '1000',
             'ita',
             'https://example.com/result',
             'https://example.com/cancel',
             null,
-            PaymentSession::CAPTURE_EXPLICIT,
-            PaymentSession::EXEMPTION_CHALLENGE_REQUESTED,
+            CaptureType::Explicit,
+            Exemption::ChallengeRequested,
             'PAYPAL',
         );
 
@@ -113,12 +118,5 @@ class PaymentSessionTest extends TestCase
             'exemptions' => 'CHALLENGE_REQUESTED',
             'paymentService' => 'PAYPAL',
         ], $session->toArray());
-    }
-
-    public function testActionTypeConstants(): void
-    {
-        $this->assertSame('PAY', PaymentSession::ACTION_PAY);
-        $this->assertSame('VERIFY', PaymentSession::ACTION_VERIFY);
-        $this->assertSame('PREAUTH', PaymentSession::ACTION_PREAUTH);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Hval\Nexi\Service;
 
+use Hval\Nexi\Enum\PaymentLinkStatus;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\Order;
 use Hval\Nexi\Model\Request\PaymentSession;
@@ -50,7 +51,7 @@ class PayByLinkService extends AbstractService
      * @param ?string $fromTime
      * @param string|null $toTime
      * @param int|null $maxRecords
-     * @param string|null $status one of the PaymentLink::STATUS_* constants
+     * @param PaymentLinkStatus|null $status
      *
      * @throws ClientExceptionInterface
      *
@@ -60,7 +61,7 @@ class PayByLinkService extends AbstractService
         ?string $fromTime = null,
         ?string $toTime = null,
         ?int $maxRecords = null,
-        ?string $status = null,
+        ?PaymentLinkStatus $status = null,
     ): array {
         $params = [];
 
@@ -77,7 +78,7 @@ class PayByLinkService extends AbstractService
         }
 
         if ($status !== null) {
-            $params['status'] = $status;
+            $params['status'] = $status->value;
         }
 
         $data = $this->parseResponse(

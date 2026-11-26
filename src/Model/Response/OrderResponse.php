@@ -2,22 +2,11 @@
 
 namespace Hval\Nexi\Model\Response;
 
+use Hval\Nexi\Enum\OperationResult;
 use Hval\Nexi\Model\ResponseModelInterface;
 
 final class OrderResponse implements ResponseModelInterface
 {
-    public const OPERATION_RESULT_PENDING = 'PENDING';
-    public const OPERATION_RESULT_AUTHORIZED = 'AUTHORIZED';
-    public const OPERATION_RESULT_EXECUTED = 'EXECUTED';
-    public const OPERATION_RESULT_DECLINED = 'DECLINED';
-    public const OPERATION_RESULT_DENIED_BY_RISK = 'DENIED_BY_RISK';
-    public const OPERATION_RESULT_THREEDS_VALIDATED = 'THREEDS_VALIDATED';
-    public const OPERATION_RESULT_THREEDS_FAILED = 'THREEDS_FAILED';
-    public const OPERATION_RESULT_CANCELED = 'CANCELED';
-    public const OPERATION_RESULT_VOIDED = 'VOIDED';
-    public const OPERATION_RESULT_REFUNDED = 'REFUNDED';
-    public const OPERATION_RESULT_FAILED = 'FAILED';
-
     /** @var string|null */
     private $orderId;
 
@@ -106,12 +95,12 @@ final class OrderResponse implements ResponseModelInterface
 
     public function isAuthorized(): bool
     {
-        return $this->lastOperationResult === self::OPERATION_RESULT_AUTHORIZED;
+        return $this->lastOperationResult === OperationResult::Authorized->value;
     }
 
     public function isExecuted(): bool
     {
-        return $this->lastOperationResult === self::OPERATION_RESULT_EXECUTED;
+        return $this->lastOperationResult === OperationResult::Executed->value;
     }
 
     /**

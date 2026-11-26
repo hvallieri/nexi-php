@@ -2,6 +2,7 @@
 
 namespace Hval\Nexi\Tests\Unit;
 
+use Hval\Nexi\Enum\Environment;
 use Hval\Nexi\NexiClient;
 use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
@@ -28,7 +29,7 @@ class NexiClientTest extends TestCase
         $psr17 = new Psr17Factory();
         $this->client = new NexiClient(
             'test-api-key',
-            NexiClient::ENV_SANDBOX,
+            Environment::Sandbox,
             $this->createStub(ClientInterface::class),
             $psr17,
         );
@@ -62,26 +63,5 @@ class NexiClientTest extends TestCase
     public function testWebhooksReturnsWebhookHandler(): void
     {
         $this->assertInstanceOf(WebhookHandler::class, $this->client->webhooks());
-    }
-
-    public function testUnknownEnvironmentThrowsInvalidArgumentException(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-
-        $psr17 = new Psr17Factory();
-        new NexiClient(
-            'test-api-key',
-            'unknown-env',
-            $this->createStub(ClientInterface::class),
-            $psr17,
-        );
-    }
-
-    public function testSandboxAndProductionAreDistinctEnvironments(): void
-    {
-        $this->assertNotSame(
-            NexiClient::BASE_URLS[NexiClient::ENV_SANDBOX],
-            NexiClient::BASE_URLS[NexiClient::ENV_PRODUCTION],
-        );
     }
 }

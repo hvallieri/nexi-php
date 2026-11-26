@@ -6,11 +6,6 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 final class PaymentLink implements ResponseModelInterface
 {
-    public const string STATUS_ACTIVE = 'ACTIVE';
-    public const string STATUS_DELETED = 'DELETED';
-    public const string STATUS_EXPIRED = 'EXPIRED';
-    public const string STATUS_INACTIVE = 'INACTIVE';
-
     private ?string $linkId;
     private ?string $amount;
     private ?string $expirationDate;

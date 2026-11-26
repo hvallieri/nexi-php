@@ -2,6 +2,7 @@
 
 namespace Hval\Nexi;
 
+use Hval\Nexi\Enum\Environment;
 use Hval\Nexi\Service\ContractService;
 use Hval\Nexi\Service\OperationService;
 use Hval\Nexi\Service\OrderService;
@@ -14,14 +15,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 
 class NexiClient
 {
-    public const ENV_PRODUCTION = 'production';
-    public const ENV_SANDBOX = 'sandbox';
-
-    public const BASE_URLS = [
-        self::ENV_PRODUCTION => 'https://xpay.nexigroup.com/api/phoenix-0.0/psp/api/v1',
-        self::ENV_SANDBOX => 'https://xpaysandbox.nexigroup.com/api/phoenix-0.0/psp/api/v1',
-    ];
-
     private readonly OrderService $orders;
     private readonly OperationService $operations;
     private readonly ContractService $contracts;
@@ -31,19 +24,17 @@ class NexiClient
 
     public function __construct(
         string $apiKey,
-        string $environment,
+        Environment $environment,
         ClientInterface $httpClient,
         RequestFactoryInterface&StreamFactoryInterface $factory,
     ) {
-        if (isset(self::BASE_URLS[$environment]) === false) {
-            throw new \InvalidArgumentException($environment . ' is not a valid Environment');
-        }
+        $baseUrl = $environment->baseUrl();
 
-        $this->orders = new OrderService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
-        $this->operations = new OperationService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
-        $this->contracts = new ContractService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
-        $this->payByLink = new PayByLinkService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
-        $this->paymentMethods = new PaymentMethodService($httpClient, $factory, $apiKey, self::BASE_URLS[$environment]);
+        $this->orders = new OrderService($httpClient, $factory, $apiKey, $baseUrl);
+        $this->operations = new OperationService($httpClient, $factory, $apiKey, $baseUrl);
+        $this->contracts = new ContractService($httpClient, $factory, $apiKey, $baseUrl);
+        $this->payByLink = new PayByLinkService($httpClient, $factory, $apiKey, $baseUrl);
+        $this->paymentMethods = new PaymentMethodService($httpClient, $factory, $apiKey, $baseUrl);
         $this->webhookHandler = new WebhookHandler();
     }
 
