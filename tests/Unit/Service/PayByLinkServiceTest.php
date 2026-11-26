@@ -2,6 +2,8 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
+use Hval\Nexi\Enum\ActionType;
+use Hval\Nexi\Enum\PaymentLinkStatus;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\Order;
@@ -46,7 +48,7 @@ class PayByLinkServiceTest extends TestCase
 
     private function makeSession(): PaymentSession
     {
-        return new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        return new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
     }
 
     private function makeSuccessResponse(): Response
@@ -195,7 +197,7 @@ class PayByLinkServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
-        $this->service->findAll('2024-01-01', '2024-01-31', 10, PaymentLink::STATUS_ACTIVE);
+        $this->service->findAll('2024-01-01', '2024-01-31', 10, PaymentLinkStatus::Active);
     }
 
     public function testFindAllOmitsNullParams(): void
@@ -214,7 +216,7 @@ class PayByLinkServiceTest extends TestCase
             ->willReturn(new Response(200, [], json_encode([], JSON_THROW_ON_ERROR)))
         ;
 
-        $this->service->findAll(null, null, null, PaymentLink::STATUS_EXPIRED);
+        $this->service->findAll(null, null, null, PaymentLinkStatus::Expired);
     }
 
     public function testFindAllReturnsEmptyArrayWhenPaymentLinksKeyMissing(): void

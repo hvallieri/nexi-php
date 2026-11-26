@@ -6,20 +6,6 @@ use Hval\Nexi\Model\ResponseModelInterface;
 
 final class OperationDetails implements ResponseModelInterface
 {
-    public const string CHANNEL_ECOMMERCE = 'ECOMMERCE';
-    public const string CHANNEL_POS = 'POS';
-    public const string CHANNEL_BACKOFFICE = 'BACKOFFICE';
-
-    public const string OPERATION_TYPE_AUTHORIZATION = 'AUTHORIZATION';
-    public const string OPERATION_TYPE_CAPTURE = 'CAPTURE';
-    public const string OPERATION_TYPE_VOID = 'VOID';
-    public const string OPERATION_TYPE_REFUND = 'REFUND';
-    public const string OPERATION_TYPE_CANCEL = 'CANCEL';
-    public const string OPERATION_TYPE_CARD_VERIFICATION = 'CARD_VERIFICATION';
-    public const string OPERATION_TYPE_NOSHOW = 'NOSHOW';
-    public const string OPERATION_TYPE_INCREMENTAL = 'INCREMENTAL';
-    public const string OPERATION_TYPE_DELAY_CHARGE = 'DELAY_CHARGE';
-
     private ?string $orderId;
     private ?string $operationId;
     private ?string $channel;

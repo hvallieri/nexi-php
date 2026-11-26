@@ -2,29 +2,22 @@
 
 namespace Hval\Nexi\Model\Request;
 
+use Hval\Nexi\Enum\ContractType;
+use Hval\Nexi\Enum\RecurrenceAction;
 use Hval\Nexi\Model\RequestModelInterface;
 
 class Recurrence implements RequestModelInterface
 {
-    public const string ACTION_NO_RECURRING = 'NO_RECURRING';
-    public const string ACTION_SUBSEQUENT_PAYMENT = 'SUBSEQUENT_PAYMENT';
-    public const string ACTION_CONTRACT_CREATION = 'CONTRACT_CREATION';
-    public const string ACTION_CARD_SUBSTITUTION = 'CARD_SUBSTITUTION';
-
-    public const string CONTRACT_TYPE_MIT_UNSCHEDULED = 'MIT_UNSCHEDULED';
-    public const string CONTRACT_TYPE_MIT_SCHEDULED = 'MIT_SCHEDULED';
-    public const string CONTRACT_TYPE_CIT = 'CIT';
-
-    private string $action;
+    private RecurrenceAction $action;
     private ?string $contractId;
-    private ?string $contractType;
+    private ?ContractType $contractType;
     private ?string $contractExpiryDate;
     private ?string $contractFrequency;
 
     public function __construct(
-        string $action,
+        RecurrenceAction $action,
         ?string $contractId = null,
-        ?string $contractType = null,
+        ?ContractType $contractType = null,
         ?string $contractExpiryDate = null,
         ?string $contractFrequency = null,
     ) {
@@ -40,14 +33,14 @@ class Recurrence implements RequestModelInterface
      */
     public function toArray(): array
     {
-        $data = ['action' => $this->action];
+        $data = ['action' => $this->action->value];
 
         if ($this->contractId !== null) {
             $data['contractId'] = $this->contractId;
         }
 
         if ($this->contractType !== null) {
-            $data['contractType'] = $this->contractType;
+            $data['contractType'] = $this->contractType->value;
         }
 
         if ($this->contractExpiryDate !== null) {

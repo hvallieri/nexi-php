@@ -2,6 +2,10 @@
 
 namespace Hval\Nexi\Tests\Unit\Service;
 
+use Hval\Nexi\Enum\ActionType;
+use Hval\Nexi\Enum\AmountType;
+use Hval\Nexi\Enum\CaptureType;
+use Hval\Nexi\Enum\OrderState;
 use Hval\Nexi\Exception\ApiException;
 use Hval\Nexi\Exception\AuthenticationException;
 use Hval\Nexi\Exception\InvalidRequestException;
@@ -16,7 +20,6 @@ use Hval\Nexi\Service\AbstractService;
 use Hval\Nexi\Service\OrderService;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
-use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -155,7 +158,7 @@ class OrderServiceTest extends TestCase
         $this->service->createMit(
             new Order('ORD-001', '1000', 'EUR'),
             'CONTRACT-001',
-            PaymentSession::CAPTURE_EXPLICIT,
+            CaptureType::Explicit,
         );
     }
 
@@ -209,7 +212,7 @@ class OrderServiceTest extends TestCase
 
         $order = new Order('ORD-001', '1000', 'EUR');
         $session = new PaymentSession(
-            PaymentSession::ACTION_PAY,
+            ActionType::Pay,
             '1000',
             'ita',
             'https://example.com/result',
@@ -239,7 +242,7 @@ class OrderServiceTest extends TestCase
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -264,7 +267,7 @@ class OrderServiceTest extends TestCase
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -280,7 +283,7 @@ class OrderServiceTest extends TestCase
         $this->expectException(AuthenticationException::class);
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -299,7 +302,7 @@ class OrderServiceTest extends TestCase
         $this->expectExceptionCode(400);
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -315,7 +318,7 @@ class OrderServiceTest extends TestCase
         ;
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         try {
             $this->service->createHpp($order, $session);
@@ -376,7 +379,7 @@ class OrderServiceTest extends TestCase
         $this->expectException(ApiException::class);
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -392,7 +395,7 @@ class OrderServiceTest extends TestCase
         $this->expectException(InvalidRequestException::class);
 
         $order = new Order('ORD-001', '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }
@@ -508,10 +511,10 @@ class OrderServiceTest extends TestCase
             null,
             null,
             'ORD-001',
-            OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT,
+            AmountType::AuthorizedAmount,
             '500',
             '2000',
-            OrderService::ORDER_STATE_TO_CAPTURE,
+            OrderState::ToCapture,
         );
     }
 
@@ -533,16 +536,6 @@ class OrderServiceTest extends TestCase
         ;
 
         $this->service->findAll('2024-01-01', '2024-01-31');
-    }
-
-    #[AllowMockObjectsWithoutExpectations]
-    public function testConstants(): void
-    {
-        $this->assertSame('ORDER_AMOUNT', OrderService::AMOUNT_TYPE_ORDER_AMOUNT);
-        $this->assertSame('AUTHORIZED_AMOUNT', OrderService::AMOUNT_TYPE_AUTHORIZED_AMOUNT);
-        $this->assertSame('CAPTURED_AMOUNT', OrderService::AMOUNT_TYPE_CAPTURED_AMOUNT);
-        $this->assertSame('TO_CAPTURE', OrderService::ORDER_STATE_TO_CAPTURE);
-        $this->assertSame('CAPTURED', OrderService::ORDER_STATE_CAPTURED);
     }
 
     public function testFindAllReturnsEmptyArrayWhenOrdersKeyMissing(): void
@@ -595,7 +588,7 @@ class OrderServiceTest extends TestCase
         $this->expectExceptionMessage('Failed to encode request body.');
 
         $order = new Order("ORD-\xB1", '1000', 'EUR');
-        $session = new PaymentSession(PaymentSession::ACTION_PAY, '1000', 'ita', 'https://r.com', 'https://c.com');
+        $session = new PaymentSession(ActionType::Pay, '1000', 'ita', 'https://r.com', 'https://c.com');
 
         $this->service->createHpp($order, $session);
     }

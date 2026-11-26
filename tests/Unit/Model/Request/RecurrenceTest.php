@@ -2,6 +2,8 @@
 
 namespace Hval\Nexi\Tests\Unit\Model\Request;
 
+use Hval\Nexi\Enum\ContractType;
+use Hval\Nexi\Enum\RecurrenceAction;
 use Hval\Nexi\Model\Request\Recurrence;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -14,7 +16,7 @@ class RecurrenceTest extends TestCase
 {
     public function testToArrayWithActionOnly(): void
     {
-        $recurrence = new Recurrence(Recurrence::ACTION_NO_RECURRING);
+        $recurrence = new Recurrence(RecurrenceAction::NoRecurring);
 
         $this->assertSame(['action' => 'NO_RECURRING'], $recurrence->toArray());
     }
@@ -22,9 +24,9 @@ class RecurrenceTest extends TestCase
     public function testToArrayWithAllFields(): void
     {
         $recurrence = new Recurrence(
-            Recurrence::ACTION_CONTRACT_CREATION,
+            RecurrenceAction::ContractCreation,
             'C-9876',
-            Recurrence::CONTRACT_TYPE_MIT_SCHEDULED,
+            ContractType::MitScheduled,
             '2025-12-31',
             '30',
         );
@@ -40,7 +42,7 @@ class RecurrenceTest extends TestCase
 
     public function testToArrayOmitsNullFields(): void
     {
-        $recurrence = new Recurrence(Recurrence::ACTION_SUBSEQUENT_PAYMENT, 'C-9876');
+        $recurrence = new Recurrence(RecurrenceAction::SubsequentPayment, 'C-9876');
 
         $result = $recurrence->toArray();
 

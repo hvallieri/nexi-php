@@ -104,20 +104,4 @@ class OperationDetailsTest extends TestCase
         $this->assertSame([], $details->getCustomerInfo());
         $this->assertSame([], $details->getAdditionalData());
     }
-
-    public function testConstants(): void
-    {
-        $this->assertSame('ECOMMERCE', OperationDetails::CHANNEL_ECOMMERCE);
-        $this->assertSame('POS', OperationDetails::CHANNEL_POS);
-        $this->assertSame('BACKOFFICE', OperationDetails::CHANNEL_BACKOFFICE);
-        $this->assertSame('AUTHORIZATION', OperationDetails::OPERATION_TYPE_AUTHORIZATION);
-        $this->assertSame('CAPTURE', OperationDetails::OPERATION_TYPE_CAPTURE);
-        $this->assertSame('VOID', OperationDetails::OPERATION_TYPE_VOID);
-        $this->assertSame('REFUND', OperationDetails::OPERATION_TYPE_REFUND);
-        $this->assertSame('CANCEL', OperationDetails::OPERATION_TYPE_CANCEL);
-        $this->assertSame('CARD_VERIFICATION', OperationDetails::OPERATION_TYPE_CARD_VERIFICATION);
-        $this->assertSame('NOSHOW', OperationDetails::OPERATION_TYPE_NOSHOW);
-        $this->assertSame('INCREMENTAL', OperationDetails::OPERATION_TYPE_INCREMENTAL);
-        $this->assertSame('DELAY_CHARGE', OperationDetails::OPERATION_TYPE_DELAY_CHARGE);
-    }
 }

@@ -2,6 +2,8 @@
 
 namespace Hval\Nexi\Service;
 
+use Hval\Nexi\Enum\Channel;
+use Hval\Nexi\Enum\OperationType;
 use Hval\Nexi\Exception\NexiException;
 use Hval\Nexi\Model\Request\CancelRequest;
 use Hval\Nexi\Model\Request\CaptureRequest;
@@ -22,8 +24,8 @@ class OperationService extends AbstractService
      * @param string|null $fromTime
      * @param string|null $toTime
      * @param int|null $maxRecords
-     * @param string|null $channel
-     * @param string|null $operationType
+     * @param Channel|null $channel
+     * @param OperationType|null $operationType
      * @param string|null $customField
      *
      * @throws ClientExceptionInterface
@@ -34,8 +36,8 @@ class OperationService extends AbstractService
         ?string $fromTime = null,
         ?string $toTime = null,
         ?int $maxRecords = null,
-        ?string $channel = null,
-        ?string $operationType = null,
+        ?Channel $channel = null,
+        ?OperationType $operationType = null,
         ?string $customField = null,
     ): array {
         $params = [];
@@ -53,11 +55,11 @@ class OperationService extends AbstractService
         }
 
         if ($channel !== null) {
-            $params['channel'] = $channel;
+            $params['channel'] = $channel->value;
         }
 
         if ($operationType !== null) {
-            $params['operationType'] = $operationType;
+            $params['operationType'] = $operationType->value;
         }
 
         if ($customField !== null) {
